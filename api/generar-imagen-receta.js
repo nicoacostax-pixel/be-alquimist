@@ -15,6 +15,8 @@ module.exports = async function handler(req, res) {
   const ingredientesTexto = (ingredientes || []).slice(0, 4).join(', ');
   const prompt = `Professional product photography of a natural organic cosmetic ${tipo || 'skincare product'}, artisan handmade, botanical ingredients including ${ingredientesTexto || 'natural oils and plant extracts'}, minimalist spa aesthetic, soft natural lighting, cream beige and terracotta color palette, clean white background, high-end beauty brand style, no text, no labels`;
 
+  const errors = [];
+
   for (const model of IMAGE_MODELS) {
     try {
       const response = await fetch(
@@ -29,21 +31,29 @@ module.exports = async function handler(req, res) {
         }
       );
 
-      if (!response.ok) continue;
-
       const data = await response.json();
+
+      if (!response.ok) {
+        errors.push(`${model}: ${response.status} — ${data?.error?.message || JSON.stringify(data)}`);
+        continue;
+      }
+
       const parts = data.candidates?.[0]?.content?.parts || [];
       const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
-      if (!imagePart) continue;
+
+      if (!imagePart) {
+        errors.push(`${model}: respuesta OK pero sin imagen. Parts: ${JSON.stringify(parts).slice(0, 200)}`);
+        continue;
+      }
 
       return res.status(200).json({
         imageBase64: imagePart.inlineData.data,
         mimeType: imagePart.inlineData.mimeType,
       });
-    } catch (_) {
-      continue;
+    } catch (err) {
+      errors.push(`${model}: ${err.message}`);
     }
   }
 
-  return res.status(500).json({ error: 'No se pudo generar la imagen con ningún modelo disponible' });
+  return res.status(500).json({ error: errors.join(' | ') });
 };
