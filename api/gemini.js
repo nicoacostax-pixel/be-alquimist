@@ -43,7 +43,7 @@ async function streamModel(modelName, contents, apiKey, onChunk) {
     system_instruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
     contents,
     generationConfig: {
-      maxOutputTokens: 2000,
+      maxOutputTokens: 5000,
       ...(modelName.includes('2.5') ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
     },
   };
