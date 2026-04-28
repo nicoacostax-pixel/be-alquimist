@@ -363,11 +363,13 @@ function ChatIA() {
       {isLoggedIn && (
         <>
           <button className="elementos-banner" onClick={() => setShowElementosModal(true)}>
-            <span className="elementos-banner-icon">⚗️</span>
-            <span className="elementos-banner-text">
-              {esPro ? '∞ Elementos ilimitados — Alquimista PRO' : `${elementos} Elemento${elementos !== 1 ? 's' : ''} disponible${elementos !== 1 ? 's' : ''} para formular`}
-            </span>
-            <span className="elementos-banner-arrow">›</span>
+            <div className="elementos-banner-inner">
+              <span className="elementos-banner-icon">⚗️</span>
+              <span className="elementos-banner-text">
+                {esPro ? '∞ Elementos ilimitados — Alquimista PRO' : `${elementos} Elemento${elementos !== 1 ? 's' : ''} disponible${elementos !== 1 ? 's' : ''} para formular`}
+              </span>
+              <span className="elementos-banner-arrow">›</span>
+            </div>
           </button>
           <div className="elementos-banner-spacer" />
         </>

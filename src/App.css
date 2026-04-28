@@ -6081,21 +6081,29 @@ a.post-author-name.post-author-link:hover {
    ═══════════════════════════════════════════ */
 .elementos-banner {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  justify-content: center;
   width: 100%;
   background: #B08968;
   border: none;
-  padding: 9px 20px;
+  padding: 0;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  text-align: left;
   transition: background 0.2s;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 200;
+}
+.elementos-banner:hover { background: #9A7458; }
+.elementos-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 850px;
+  padding: 9px 20px;
+  text-align: left;
 }
 .elementos-banner-spacer {
   height: 38px;
