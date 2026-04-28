@@ -5484,8 +5484,12 @@ body, #root {
   overflow: hidden;
 }
 
+.perfil-card-activity{
+  background: #fff;
+}
+
 @media (max-width: 768px) {.perfil-card-activity{
-  width: 45%;
+  width: 39%;
   background: #fff;
 }
 }
