@@ -69,7 +69,7 @@ function parseSections(text) {
 
 function RecipeCard({ text }) {
   const sections = parseSections(text);
-  if (sections.length < 2) return <MarkdownText text={text} />;
+  if (sections.length === 0) return <MarkdownText text={text} />;
 
   return (
     <div className="recipe-card-response">
@@ -121,11 +121,6 @@ function ChatIA() {
     () => parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
   );
   const [showLoginModal, setShowLoginModal] = useState(false);
-
-  // Progressive recipe reveal
-  const recipeStepsRef = useRef(null); // stores the 6 parsed sections
-  const [confirmLabel, setConfirmLabel]   = useState(null); // current question to show
-  const [confirmIndex, setConfirmIndex]   = useState(0);    // which step to reveal next
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -237,68 +232,26 @@ function ChatIA() {
     return full;
   };
 
-  const CONFIRM_LABELS = [
-    '¿Quieres ver la fórmula completa?',
-    '¿Quieres ver la receta en gramos?',
-    '¿Quieres ver las instrucciones paso a paso?',
-    '¿Quieres calcular el costo y precio de venta?',
-  ];
+  // Detect confirm question from last AI message
+  const lastAiMsg = useMemo(
+    () => [...mensajes].filter(m => m.rol === 'ai' && !m.streaming).pop(),
+    [mensajes]
+  );
+  const confirmQuestion = useMemo(() => {
+    if (!lastAiMsg?.texto) return null;
+    const m = lastAiMsg.texto.match(/¿[Qq]uieres[^?]+\?/);
+    return m ? m[0] : null;
+  }, [lastAiMsg]);
+  const isCalculadoraConfirm = !!(confirmQuestion && /calculadora/i.test(confirmQuestion));
 
-  // Reveal the next step when user confirms
-  function handleConfirm() {
-    const steps = recipeStepsRef.current;
-    if (!steps) return;
+  const enviar = async (text) => {
+    if (!text.trim() || isLoading) return;
 
-    const next = confirmIndex + 1; // 1=formula, 2=recipe, 3=instructions+where, 4=cost
-
-    let toReveal = [];
-    if (next === 1) toReveal = [steps[1]];
-    else if (next === 2) toReveal = [steps[2]];
-    else if (next === 3) toReveal = [steps[3], steps[4]].filter(Boolean);
-    else if (next === 4) toReveal = [steps[5]].filter(Boolean);
-
-    toReveal.forEach(text => {
-      setMensajes(prev => [...prev, { rol: 'ai', texto: text }]);
-    });
-
-    if (next < 4) {
-      setConfirmLabel(CONFIRM_LABELS[next]);
-      setConfirmIndex(next);
-    } else {
-      // Cost step revealed — increment counter
-      setConfirmLabel(null);
-      setConfirmIndex(0);
-      recipeStepsRef.current = null;
-      if (!isLoggedIn) {
-        const nuevo = recipeCount + 1;
-        setRecipeCount(nuevo);
-        localStorage.setItem(STORAGE_KEY, String(nuevo));
-        if (nuevo >= RECIPE_LIMIT) setShowLoginModal(true);
-      }
-    }
-  }
-
-  function handleSkip() {
-    setConfirmLabel(null);
-    setConfirmIndex(0);
-    recipeStepsRef.current = null;
-  }
-
-  const handleEnviar = async (e) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    setConfirmLabel(null);
-    setConfirmIndex(0);
-    recipeStepsRef.current = null;
-
-    const promptText     = input;
-    const historialActual = [...mensajes];
-    setMensajes(prev => [...prev,
-      { rol: 'user', texto: promptText },
+    const historialActual = [...mensajes].filter(m => !m.streaming);
+    setMensajes(prev => [...prev.filter(m => !m.streaming),
+      { rol: 'user', texto: text },
       { rol: 'ai',   texto: '', streaming: true },
     ]);
-    setInput('');
     setIsLoading(true);
 
     const historial = historialActual.map(m => ({
@@ -308,7 +261,7 @@ function ChatIA() {
 
     let respuestaIA = '';
     try {
-      respuestaIA = await streamGemini(promptText, historial, (accumulated) => {
+      respuestaIA = await streamGemini(text, historial, (accumulated) => {
         setIsLoading(false);
         setMensajes(prev => {
           const copy = [...prev];
@@ -322,26 +275,38 @@ function ChatIA() {
     }
 
     setIsLoading(false);
-    // Remove streaming placeholder
-    setMensajes(prev => prev.filter(m => !m.streaming));
+    setMensajes(prev => [
+      ...prev.filter(m => !m.streaming),
+      { rol: 'ai', texto: respuestaIA },
+    ]);
+  };
 
-    let partes = respuestaIA.split('[[split]]').map(s => s.trim()).filter(Boolean);
-    if (partes.length < 5) {
-      const bySections = respuestaIA.split(/\n(?=## )/).map(s => s.trim()).filter(Boolean);
-      if (bySections.length >= 5) partes = bySections;
+  function handleConfirm() {
+    if (isCalculadoraConfirm && !isLoggedIn) {
+      const nuevo = recipeCount + 1;
+      setRecipeCount(nuevo);
+      localStorage.setItem(STORAGE_KEY, String(nuevo));
+      setShowLoginModal(true);
+      return;
     }
+    if (isCalculadoraConfirm) {
+      const nuevo = recipeCount + 1;
+      setRecipeCount(nuevo);
+      localStorage.setItem(STORAGE_KEY, String(nuevo));
+    }
+    enviar('Sí');
+  }
 
-    if (partes.length >= 5) {
-      recipeStepsRef.current = partes;
-      setMensajes(prev => [...prev, { rol: 'ai', texto: partes[0] }]);
-      setConfirmLabel(CONFIRM_LABELS[0]);
-      setConfirmIndex(0);
-    } else {
-      for (const parte of partes) {
-        await new Promise(r => setTimeout(r, 120));
-        setMensajes(prev => [...prev, { rol: 'ai', texto: parte }]);
-      }
-    }
+  function handleSkip() {
+    enviar('No, gracias');
+  }
+
+  const handleEnviar = (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    const text = input;
+    setInput('');
+    enviar(text);
   };
 
   return (
@@ -373,7 +338,7 @@ function ChatIA() {
               {m.rol === 'ai'
                 ? m.streaming
                   ? m.texto
-                    ? <MarkdownText text={m.texto.replace(/\[\[split\]\]/g, '')} />
+                    ? <MarkdownText text={m.texto} />
                     : <span className="typing-dots">Analizando activos<span>.</span><span>.</span><span>.</span></span>
                   : <RecipeCard text={m.texto} />
                 : m.texto
@@ -383,9 +348,9 @@ function ChatIA() {
           <div ref={scrollRef} />
         </div>
 
-        {confirmLabel && (
+        {confirmQuestion && !isLoading && (
           <div className="chat-confirm-bar">
-            <span className="chat-confirm-label">{confirmLabel}</span>
+            <span className="chat-confirm-label">{confirmQuestion}</span>
             <div className="chat-confirm-actions">
               <button onClick={handleConfirm} className="chat-confirm-yes">Sí ✓</button>
               <button onClick={handleSkip} className="chat-confirm-no">No, gracias</button>
