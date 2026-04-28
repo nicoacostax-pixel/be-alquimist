@@ -197,23 +197,42 @@ function ChatIA() {
     return () => clearTimeout(timeout);
   }, [subIndex, index, reversa, palabras]);
 
-  const enviarAGemini = async (promptUsuario, historial) => {
-    try {
-      const res = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: promptUsuario, history: historial }),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        console.error('API error:', json);
-        throw new Error(json.details?.message || json.error || 'Error del servidor');
+  const streamGemini = async (promptUsuario, historial, onChunk) => {
+    const res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: promptUsuario, history: historial }),
+    });
+
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let full   = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const parsed = JSON.parse(line.slice(6));
+          if (parsed.error) throw new Error(parsed.error);
+          if (parsed.text) {
+            full += parsed.text;
+            onChunk(full);
+          }
+        } catch (err) {
+          if (err.message && !err.message.startsWith('JSON')) throw err;
+        }
       }
-      return json.text || '';
-    } catch (error) {
-      console.error("Error técnico detallado:", error.message);
-      return "Hubo un problema al conectar con el laboratorio: " + error.message;
     }
+
+    return full;
   };
 
   const CONFIRM_LABELS = [
@@ -265,16 +284,18 @@ function ChatIA() {
 
   const handleEnviar = async (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
-    // Clear any active recipe flow when new message is sent
     setConfirmLabel(null);
     setConfirmIndex(0);
     recipeStepsRef.current = null;
 
-    const userMsg = { rol: 'user', texto: input };
+    const promptText     = input;
     const historialActual = [...mensajes];
-    setMensajes(prev => [...prev, userMsg]);
+    setMensajes(prev => [...prev,
+      { rol: 'user', texto: promptText },
+      { rol: 'ai',   texto: '', streaming: true },
+    ]);
     setInput('');
     setIsLoading(true);
 
@@ -283,27 +304,39 @@ function ChatIA() {
       text: m.texto,
     }));
 
-    const respuestaIA = await enviarAGemini(input, historial);
+    let respuestaIA = '';
+    try {
+      respuestaIA = await streamGemini(promptText, historial, (accumulated) => {
+        setIsLoading(false);
+        setMensajes(prev => {
+          const copy = [...prev];
+          const last = copy[copy.length - 1];
+          if (last?.streaming) copy[copy.length - 1] = { ...last, texto: accumulated };
+          return copy;
+        });
+      });
+    } catch (err) {
+      respuestaIA = 'Hubo un problema al conectar con el laboratorio: ' + err.message;
+    }
 
-    // Try [[split]] first; fall back to splitting by ## section headers
+    setIsLoading(false);
+    // Remove streaming placeholder
+    setMensajes(prev => prev.filter(m => !m.streaming));
+
     let partes = respuestaIA.split('[[split]]').map(s => s.trim()).filter(Boolean);
     if (partes.length < 5) {
       const bySections = respuestaIA.split(/\n(?=## )/).map(s => s.trim()).filter(Boolean);
       if (bySections.length >= 5) partes = bySections;
     }
 
-    setIsLoading(false);
-
     if (partes.length >= 5) {
-      // Recipe response — show only description, enable step flow
       recipeStepsRef.current = partes;
       setMensajes(prev => [...prev, { rol: 'ai', texto: partes[0] }]);
       setConfirmLabel(CONFIRM_LABELS[0]);
       setConfirmIndex(0);
     } else {
-      // General response — show all at once
       for (const parte of partes) {
-        await new Promise(r => setTimeout(r, 150));
+        await new Promise(r => setTimeout(r, 120));
         setMensajes(prev => [...prev, { rol: 'ai', texto: parte }]);
       }
     }
@@ -335,10 +368,16 @@ function ChatIA() {
         <div className="chat-window">
           {mensajes.map((m, i) => (
             <div key={i} className={`msg-bubble ${m.rol}`}>
-              {m.rol === 'ai' ? <RecipeCard text={m.texto} /> : m.texto}
+              {m.rol === 'ai'
+                ? m.streaming
+                  ? m.texto
+                    ? <MarkdownText text={m.texto.replace(/\[\[split\]\]/g, '')} />
+                    : <span className="typing-dots">Analizando activos<span>.</span><span>.</span><span>.</span></span>
+                  : <RecipeCard text={m.texto} />
+                : m.texto
+              }
             </div>
           ))}
-          {isLoading && <div className="msg-bubble ai typing">Analizando activos...</div>}
           <div ref={scrollRef} />
         </div>
 

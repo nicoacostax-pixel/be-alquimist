@@ -17,7 +17,7 @@ Lista cada ingrediente con su porcentaje. El total debe sumar 100%. maximo 10 in
 [[split]]
 ## Receta en gramos (100g)
 Lista cada ingrediente con su cantidad exacta en gramos para una batch de 100g. maximo 10 ingredientes.
-- Ingrediente A: XXg 
+- Ingrediente A: XXg
 - Ingrediente B: XXg
 [[split]]
 ## Instrucciones paso a paso
@@ -56,16 +56,15 @@ const isNotFound = (e) => {
   return e?.status === 404 || msg.includes('not found') || msg.includes('404');
 };
 
+const sse = (res, data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   if (!GEMINI_API_KEY) {
-    return res.status(500).json({
-      error: 'Server not configured',
-      details: { message: 'GEMINI_API_KEY environment variable is missing' },
-    });
+    return res.status(500).json({ error: 'GEMINI_API_KEY missing' });
   }
 
   const prompt  = (req.body?.prompt  || '').toString().trim();
@@ -73,9 +72,14 @@ module.exports = async function handler(req, res) {
 
   if (!prompt) return res.status(400).json({ error: 'Missing prompt.' });
 
+  // SSE headers — must be set before any write
+  res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-  // Build Gemini conversation history format
   const contents = [
     ...history.map(m => ({
       role: m.role === 'model' ? 'model' : 'user',
@@ -84,36 +88,49 @@ module.exports = async function handler(req, res) {
     { role: 'user', parts: [{ text: prompt }] },
   ];
 
-  let lastErr = null;
   const candidates = [process.env.GEMINI_MODEL, ...MODEL_CANDIDATES].filter(Boolean);
+  let lastErr  = null;
+  let dataSent = false;
 
   for (const modelName of candidates) {
-    // Each model gets up to 2 attempts on transient errors
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const model = genAI.getGenerativeModel({
           model: modelName,
           systemInstruction: SYSTEM_INSTRUCTION,
         });
-        const result = await model.generateContent({ contents });
-        const text = result?.response?.text?.() || '';
-        return res.status(200).json({ text, model: modelName });
+
+        const streamResult = await model.generateContentStream({ contents });
+
+        for await (const chunk of streamResult.stream) {
+          const text = chunk.text();
+          if (text) {
+            sse(res, { text });
+            dataSent = true;
+          }
+        }
+
+        sse(res, { done: true, model: modelName });
+        return res.end();
+
       } catch (e) {
         lastErr = e;
-        if (isNotFound(e)) break; // skip to next model immediately
-        if (isTransient(e)) {
-          if (attempt === 0) { await sleep(1200); continue; } // retry once after delay
-          break; // second attempt also failed → next model
+
+        if (dataSent) {
+          sse(res, { error: e.message });
+          return res.end();
         }
-        // non-retryable error
+
+        if (isNotFound(e)) break;
+        if (isTransient(e)) {
+          if (attempt === 0) { await sleep(1200); continue; }
+          break;
+        }
         break;
       }
     }
   }
 
-  const err = lastErr || new Error('No compatible model found');
-  return res.status(500).json({
-    error: 'Gemini request failed.',
-    details: { name: err.name, message: err.message },
-  });
+  sse(res, { error: lastErr?.message || 'No compatible model found' });
+  res.end();
 };
