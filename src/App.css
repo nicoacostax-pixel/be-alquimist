@@ -5484,15 +5484,18 @@ body, #root {
   overflow: hidden;
 }
 
-.perfil-card-activity{
+@media (max-width: 768px) {.perfil-card-activity{
   width: 45%;
   background: #fff;
+}
+}
+.perfil-card-activity{
+ 
   border: 1px solid #E5E5E5;
   border-radius: 12px;
   padding: 22px 24px;
   overflow: hidden;
 }
-
 .perfil-card-title {
   font-size: 15px;
   font-weight: 700;
@@ -5634,11 +5637,17 @@ body, #root {
 .perfil-post-item {
   border: 1px solid #E5E5E5;
   border-radius: 10px;
-  background-color: #fff;
-  width: 45%;
+ 
   padding: 16px;
   transition: border-color 0.15s;
 }
+ @media (max-width: 768px) { 
+  .perfil-post-item {
+    width: 100%;
+    background-color: #fff;
+  }
+}
+
 .perfil-post-item:hover { border-color: #B08968; }
 
 .perfil-post-top {
