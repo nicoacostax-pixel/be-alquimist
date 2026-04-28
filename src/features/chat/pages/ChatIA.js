@@ -361,13 +361,16 @@ function ChatIA() {
   return (
     <>
       {isLoggedIn && (
-        <button className="elementos-banner" onClick={() => setShowElementosModal(true)}>
-          <span className="elementos-banner-icon">⚗️</span>
-          <span className="elementos-banner-text">
-            {esPro ? '∞ Elementos ilimitados — Alquimista PRO' : `${elementos} Elemento${elementos !== 1 ? 's' : ''} disponible${elementos !== 1 ? 's' : ''} para formular`}
-          </span>
-          <span className="elementos-banner-arrow">›</span>
-        </button>
+        <>
+          <button className="elementos-banner" onClick={() => setShowElementosModal(true)}>
+            <span className="elementos-banner-icon">⚗️</span>
+            <span className="elementos-banner-text">
+              {esPro ? '∞ Elementos ilimitados — Alquimista PRO' : `${elementos} Elemento${elementos !== 1 ? 's' : ''} disponible${elementos !== 1 ? 's' : ''} para formular`}
+            </span>
+            <span className="elementos-banner-arrow">›</span>
+          </button>
+          <div className="elementos-banner-spacer" />
+        </>
       )}
     <div className={`app-container ${isMenuOpen ? 'menu-visible' : ''}`}>
       {showLoginModal    && <LoginModal    onClose={() => { setShowLoginModal(false);    setMensajes([]); }} />}
