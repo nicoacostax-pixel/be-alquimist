@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import '../../../App.css';
 import SidebarMenu from '../../catalog/components/SidebarMenu';
-import { supabase } from '../../../shared/lib/supabaseClient';
+import { useElementos } from '../../../shared/context/ElementosContext';
+import ElementosModal from '../../../shared/components/ElementosModal';
 
 const STORAGE_KEY = 'ba_free_recipes';
 
@@ -99,8 +100,8 @@ function LoginModal({ onClose }) {
       <div className="chat-modal">
         <span className="chat-modal-icon">🔒</span>
         <h3 className="chat-modal-title">Función exclusiva</h3>
-        <p className="chat-modal-sub">La <strong>calculadora de costos</strong> es exclusiva para usuarios registrados.<br/>Inicia sesión para desbloquearla.</p>
-        <Link to="/login" className="chat-login-btn">Iniciar sesión</Link>
+        <p className="chat-modal-sub">La <strong>calculadora de costos</strong> es exclusiva de <strong>Alquimista PRO</strong>.<br/>Conviértete en PRO para desbloquearla.</p>
+        <button className="chat-login-btn" onClick={onClose} style={{background:'#B08968'}}>Ver planes</button>
         <button className="chat-modal-skip" onClick={onClose}>Crear otra receta</button>
       </div>
     </div>
@@ -129,22 +130,14 @@ function ChatIA() {
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const [isLoggedIn, setIsLoggedIn]   = useState(false);
+  const { elementos, esPro, isLoggedIn, deducir } = useElementos();
+
   const [recipeCount, setRecipeCount] = useState(
     () => parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
   );
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showLimitModal, setShowLimitModal] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setIsLoggedIn(!!session);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
+  const [showLoginModal,    setShowLoginModal]    = useState(false);
+  const [showLimitModal,    setShowLimitModal]    = useState(false);
+  const [showElementosModal,setShowElementosModal]= useState(false);
 
   const palabras = useMemo(() => ["Crea", "Formula", "Produce", "Vende"], []);
   const [index, setIndex] = useState(0);
@@ -290,19 +283,27 @@ function ChatIA() {
 
     setIsLoading(false);
 
-    // Detecta si la IA acaba de iniciar una receta (primer paso: descripción)
     const esInicioReceta = /¿Quieres ver la fórmula completa\?/i.test(respuestaIA);
-    if (esInicioReceta && !isLoggedIn) {
-      if (recipeCount >= 1) {
-        // Ya usó su receta gratuita — bloquear y mostrar modal
-        setMensajes(prev => prev.filter(m => !m.streaming));
-        setShowLimitModal(true);
-        return;
+
+    if (esInicioReceta) {
+      if (!isLoggedIn) {
+        // Usuario no logueado: 1 receta gratuita
+        if (recipeCount >= 1) {
+          setMensajes(prev => prev.filter(m => !m.streaming));
+          setShowLimitModal(true);
+          return;
+        }
+        setRecipeCount(1);
+        localStorage.setItem(STORAGE_KEY, '1');
+      } else {
+        // Usuario logueado: descontar 1 elemento
+        const ok = await deducir();
+        if (!ok) {
+          setMensajes(prev => prev.filter(m => !m.streaming));
+          setShowElementosModal(true);
+          return;
+        }
       }
-      // Primera receta gratuita — contabilizar
-      const nuevo = recipeCount + 1;
-      setRecipeCount(nuevo);
-      localStorage.setItem(STORAGE_KEY, String(nuevo));
     }
 
     setMensajes(prev => [
@@ -312,7 +313,7 @@ function ChatIA() {
   };
 
   function handleConfirm() {
-    if (isCalculadoraConfirm && !isLoggedIn) {
+    if (isCalculadoraConfirm && !esPro) {
       setShowLoginModal(true);
       return;
     }
@@ -333,8 +334,9 @@ function ChatIA() {
 
   return (
     <div className={`app-container ${isMenuOpen ? 'menu-visible' : ''}`}>
-      {showLoginModal && <LoginModal onClose={() => { setShowLoginModal(false); setMensajes([]); }} />}
-      {showLimitModal && <LimitModal onClose={() => { setShowLimitModal(false); setMensajes([]); }} />}
+      {showLoginModal    && <LoginModal    onClose={() => { setShowLoginModal(false);    setMensajes([]); }} />}
+      {showLimitModal    && <LimitModal    onClose={() => { setShowLimitModal(false);    setMensajes([]); }} />}
+      {showElementosModal && <ElementosModal onClose={() => setShowElementosModal(false)} />}
       <SidebarMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
       <header className="app-header-final">
@@ -346,6 +348,13 @@ function ChatIA() {
           </div>
           <p className="app-subtitle-final">Cosmética natural con IA</p>
         </div>
+        {isLoggedIn && (
+          <button className="elementos-counter-btn" onClick={() => setShowElementosModal(true)}>
+            <span className="elementos-icon">⚗️</span>
+            <span className="elementos-qty">{esPro ? '∞' : elementos}</span>
+            {esPro && <span className="elementos-pro-tag">PRO</span>}
+          </button>
+        )}
         <button className="menu-hamburguesa-btn" onClick={() => setIsMenuOpen(true)}>
           <div className="barras-menu"></div><div className="barras-menu"></div><div className="barras-menu"></div>
         </button>

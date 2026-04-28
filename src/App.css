@@ -6076,6 +6076,164 @@ a.post-author-name.post-author-link:hover {
 }
 
 /* --- CHAT: LOGIN MODAL --- */
+/* ═══════════════════════════════════════════
+   CONTADOR DE ELEMENTOS (header)
+   ═══════════════════════════════════════════ */
+.elementos-counter-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #FFF8F2;
+  border: 1.5px solid #E8D5C0;
+  border-radius: 20px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4A3F35;
+  transition: all 0.2s;
+  margin-right: 10px;
+}
+.elementos-counter-btn:hover { background: #F5EDE2; border-color: #B08968; }
+.elementos-icon { font-size: 15px; }
+.elementos-qty  { color: #B08968; }
+.elementos-pro-tag {
+  background: linear-gradient(135deg, #B08968, #8B6347);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+}
+
+/* ═══════════════════════════════════════════
+   MODAL DE ELEMENTOS
+   ═══════════════════════════════════════════ */
+.el-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(74, 63, 53, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4000;
+  padding: 20px;
+}
+.el-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  font-family: 'Poppins', sans-serif;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.el-close-btn {
+  position: absolute;
+  top: 16px; right: 18px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #7A6A5A;
+}
+.el-header { text-align: center; margin-bottom: 24px; }
+.el-header-icon { font-size: 36px; display: block; margin-bottom: 8px; }
+.el-header-title { font-size: 18px; font-weight: 700; color: #4A3F35; margin: 0 0 8px; }
+.el-balance {
+  font-size: 48px;
+  font-weight: 800;
+  color: #B08968;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.el-balance.pro { color: #26A69A; }
+.el-header-sub  { font-size: 12px; color: #7A6A5A; margin: 0; }
+
+.el-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #9A8A7A;
+  margin: 0 0 10px;
+}
+.el-packages {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.el-pkg-card {
+  background: #FFF8F2;
+  border: 1.5px solid #E8D5C0;
+  border-radius: 12px;
+  padding: 14px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+  font-family: 'Poppins', sans-serif;
+}
+.el-pkg-card:hover  { border-color: #B08968; background: #F5EDE2; }
+.el-pkg-qty   { font-size: 13px; font-weight: 700; color: #4A3F35; }
+.el-pkg-price { font-size: 14px; font-weight: 800; color: #B08968; }
+
+.el-pro-card {
+  width: 100%;
+  background: linear-gradient(135deg, #4A3F35, #6B5544);
+  border: none;
+  border-radius: 14px;
+  padding: 16px 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: 8px;
+  transition: opacity 0.2s;
+}
+.el-pro-card:hover { opacity: 0.92; }
+.el-pro-left  { display: flex; align-items: center; gap: 10px; }
+.el-pro-left strong { color: #fff; font-size: 14px; display: block; }
+.el-pro-left p      { color: #D4B896; font-size: 11px; margin: 0; }
+.el-pro-badge {
+  background: #B08968;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.el-pro-price { color: #fff; font-size: 15px; font-weight: 800; white-space: nowrap; }
+
+.el-pago-wrap  { padding: 8px 0; }
+.el-back       { background: none; border: none; color: #B08968; cursor: pointer; font-size: 13px; margin-bottom: 16px; padding: 0; font-family: 'Poppins', sans-serif; }
+.el-pago-title { font-size: 16px; font-weight: 700; color: #4A3F35; margin: 0 0 20px; }
+.el-pago-error { color: #E53E3E; font-size: 12px; margin-top: 8px; }
+.el-pago-btn {
+  width: 100%;
+  margin-top: 16px;
+  background: #B08968;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+}
+.el-pago-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
 .chat-modal-overlay {
   position: fixed;
   inset: 0;
