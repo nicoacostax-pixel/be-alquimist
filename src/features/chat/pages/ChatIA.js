@@ -372,17 +372,20 @@ function ChatIA() {
           </div>
           <p className="app-subtitle-final">Cosmética natural con IA</p>
         </div>
-        {isLoggedIn && (
-          <button className="elementos-counter-btn" onClick={() => setShowElementosModal(true)}>
-            <span className="elementos-icon">⚗️</span>
-            <span className="elementos-qty">{esPro ? '∞' : elementos}</span>
-            {esPro && <span className="elementos-pro-tag">PRO</span>}
-          </button>
-        )}
         <button className="menu-hamburguesa-btn" onClick={() => setIsMenuOpen(true)}>
           <div className="barras-menu"></div><div className="barras-menu"></div><div className="barras-menu"></div>
         </button>
       </header>
+
+      {isLoggedIn && (
+        <button className="elementos-banner" onClick={() => setShowElementosModal(true)}>
+          <span className="elementos-banner-icon">⚗️</span>
+          <span className="elementos-banner-text">
+            {esPro ? '∞ Elementos ilimitados — Alquimista PRO' : `${elementos} Elemento${elementos !== 1 ? 's' : ''} disponible${elementos !== 1 ? 's' : ''} para formular`}
+          </span>
+          <span className="elementos-banner-arrow">›</span>
+        </button>
+      )}
 
       <main className="content">
         <p className="welcome-text">{saludoAleatorio}</p>

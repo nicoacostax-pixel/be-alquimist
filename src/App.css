@@ -6079,25 +6079,24 @@ a.post-author-name.post-author-link:hover {
 /* ═══════════════════════════════════════════
    CONTADOR DE ELEMENTOS (header)
    ═══════════════════════════════════════════ */
-.elementos-counter-btn {
+.elementos-banner {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  width: 100%;
   background: #FFF8F2;
-  border: 1.5px solid #E8D5C0;
-  border-radius: 20px;
-  padding: 5px 12px;
+  border: none;
+  border-bottom: 1.5px solid #E8D5C0;
+  padding: 10px 20px;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: #4A3F35;
-  transition: all 0.2s;
-  margin-right: 10px;
+  text-align: left;
+  transition: background 0.2s;
 }
-.elementos-counter-btn:hover { background: #F5EDE2; border-color: #B08968; }
-.elementos-icon { font-size: 15px; }
-.elementos-qty  { color: #B08968; }
+.elementos-banner:hover { background: #F5EDE2; }
+.elementos-banner-icon { font-size: 16px; flex-shrink: 0; }
+.elementos-banner-text { flex: 1; font-size: 13px; font-weight: 600; color: #4A3F35; }
+.elementos-banner-arrow { font-size: 18px; color: #B08968; font-weight: 700; }
 .elementos-pro-tag {
   background: linear-gradient(135deg, #B08968, #8B6347);
   color: #fff;
