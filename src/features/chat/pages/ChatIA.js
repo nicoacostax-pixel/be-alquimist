@@ -4,6 +4,7 @@ import '../../../App.css';
 import SidebarMenu from '../../catalog/components/SidebarMenu';
 import { useElementos } from '../../../shared/context/ElementosContext';
 import ElementosModal from '../../../shared/components/ElementosModal';
+import ShareRecetaBtn from '../components/ShareRecetaBtn';
 
 const STORAGE_KEY = 'ba_free_recipes';
 
@@ -277,6 +278,14 @@ function ChatIA() {
   }, [lastAiMsg]);
   const isCalculadoraConfirm = !!(confirmQuestion && /calculadora/i.test(confirmQuestion));
 
+  // Compila toda la receta de la conversación (todos los mensajes AI con secciones ##)
+  const recetaCompleta = useMemo(() => {
+    return mensajes
+      .filter(m => m.rol === 'ai' && !m.streaming && parseSections(m.texto).length > 0)
+      .map(m => m.texto)
+      .join('\n\n');
+  }, [mensajes]);
+
   const enviar = async (text) => {
     if (!text.trim() || isLoading) return;
 
@@ -399,18 +408,25 @@ function ChatIA() {
         <hr className="divider" />
 
         <div className="chat-window">
-          {mensajes.map((m, i) => (
-            <div key={i} className={`msg-bubble ${m.rol}`}>
-              {m.rol === 'ai'
-                ? m.streaming
-                  ? m.texto
-                    ? <MarkdownText text={m.texto} />
-                    : <span className="typing-dots">Analizando activos<span>.</span><span>.</span><span>.</span></span>
-                  : <RecipeCard text={m.texto} />
-                : m.texto
-              }
-            </div>
-          ))}
+          {mensajes.map((m, i) => {
+            const isLast = i === mensajes.length - 1;
+            const esRecetaCompleta = m.rol === 'ai' && !m.streaming && parseSections(m.texto).length >= 2;
+            return (
+              <div key={i} className={`msg-bubble ${m.rol}`}>
+                {m.rol === 'ai'
+                  ? m.streaming
+                    ? m.texto
+                      ? <MarkdownText text={m.texto} />
+                      : <span className="typing-dots">Analizando activos<span>.</span><span>.</span><span>.</span></span>
+                    : <RecipeCard text={m.texto} />
+                  : m.texto
+                }
+                {isLast && esRecetaCompleta && recetaCompleta && (
+                  <ShareRecetaBtn recetaCompleta={recetaCompleta} />
+                )}
+              </div>
+            );
+          })}
           <div ref={scrollRef} />
         </div>
 

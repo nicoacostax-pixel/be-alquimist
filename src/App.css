@@ -6679,3 +6679,59 @@ a.post-author-name.post-author-link:hover {
   border-radius: 6px;
   border: 1px solid #fed7d7;
 }
+
+/* --- COMPARTIR RECETA EN FORO --- */
+.share-receta-wrap {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #E8D5C0;
+}
+.share-receta-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F3EFE8;
+  border: 1.5px solid #B08968;
+  color: #4A3F35;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.share-receta-btn:hover:not(:disabled) { background: #B08968; color: #fff; }
+.share-receta-btn:disabled { opacity: 0.7; cursor: wait; }
+.share-receta-spinner {
+  width: 14px; height: 14px;
+  border: 2px solid #B08968;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.share-receta-success {
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: #F2FFF5;
+  border: 1.5px solid #4CAF50;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2E7D32;
+}
+.share-receta-link {
+  color: #B08968;
+  text-decoration: none;
+  font-weight: 700;
+}
+.share-receta-error {
+  font-size: 12px;
+  color: #e53e3e;
+  margin-bottom: 6px;
+}
