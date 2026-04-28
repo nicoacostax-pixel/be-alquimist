@@ -4216,7 +4216,7 @@ width: 143%;
   text-decoration: none;
   color: #666;
   font-size: 16px;
-  font-family: serif; /* Manteniendo tu estilo */
+  font-family: 'poppins'; /* Manteniendo tu estilo */
   padding: 18px 25px;
   border-bottom: 3px solid transparent;
   transition: all 0.3s ease;
