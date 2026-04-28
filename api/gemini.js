@@ -31,9 +31,9 @@ REGLAS:
 - Si no tienes suficiente información para la receta, haz máximo 2 preguntas antes de empezar.`;
 
 const MODEL_CANDIDATES = [
-  'gemini-2.5-flash',
   'gemini-2.0-flash-001',
   'gemini-2.0-flash-lite',
+  'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
 ];
 
@@ -92,6 +92,9 @@ module.exports = async function handler(req, res) {
         const model = genAI.getGenerativeModel({
           model: modelName,
           systemInstruction: SYSTEM_INSTRUCTION,
+          generationConfig: modelName.includes('2.5')
+            ? { thinkingConfig: { thinkingBudget: 0 } }
+            : {},
         });
 
         const result = await model.generateContentStream({ contents });
