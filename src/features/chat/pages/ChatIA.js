@@ -186,7 +186,6 @@ function ChatIA() {
     setInput("");
     setIsLoading(true);
 
-    // Pass conversation history so Gemini has context
     const historial = historialActual.map(m => ({
       role: m.rol === 'user' ? 'user' : 'model',
       text: m.texto,
@@ -194,8 +193,14 @@ function ChatIA() {
 
     const respuestaIA = await enviarAGemini(input, historial);
 
-    setMensajes(prev => [...prev, { rol: 'ai', texto: respuestaIA }]);
+    // Split into multiple bubbles if [[split]] is present
+    const partes = respuestaIA.split('[[split]]').map(s => s.trim()).filter(Boolean);
+
     setIsLoading(false);
+    for (const parte of partes) {
+      await new Promise(r => setTimeout(r, 180));
+      setMensajes(prev => [...prev, { rol: 'ai', texto: parte }]);
+    }
   };
 
   return (
