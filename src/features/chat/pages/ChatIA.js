@@ -78,11 +78,14 @@ function ChatIA() {
         body: JSON.stringify({ prompt: promptUsuario }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Error del servidor');
+      if (!res.ok) {
+        console.error('API error:', json);
+        throw new Error(json.details?.message || json.error || 'Error del servidor');
+      }
       return json.text || '';
     } catch (error) {
-      console.error("Error técnico detallado:", error);
-      return "Nico, hubo un problema al conectar con el laboratorio. Revisa la consola.";
+      console.error("Error técnico detallado:", error.message);
+      return "Hubo un problema al conectar con el laboratorio: " + error.message;
     }
   };
 
