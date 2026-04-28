@@ -180,7 +180,9 @@ function ChatIA() {
   const saludoAleatorio = useMemo(() => saludos[Math.floor(Math.random() * saludos.length)], [saludos]);
 
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (mensajes.length > 0) {
+      scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [mensajes]);
 
   useEffect(() => {
@@ -357,12 +359,7 @@ function ChatIA() {
   };
 
   return (
-    <div className={`app-container ${isMenuOpen ? 'menu-visible' : ''}`}>
-      {showLoginModal    && <LoginModal    onClose={() => { setShowLoginModal(false);    setMensajes([]); }} />}
-      {showLimitModal    && <LimitModal    onClose={() => { setShowLimitModal(false);    setMensajes([]); }} />}
-      {showElementosModal && <ElementosModal onClose={() => setShowElementosModal(false)} />}
-      <SidebarMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
-
+    <>
       {isLoggedIn && (
         <button className="elementos-banner" onClick={() => setShowElementosModal(true)}>
           <span className="elementos-banner-icon">⚗️</span>
@@ -372,6 +369,11 @@ function ChatIA() {
           <span className="elementos-banner-arrow">›</span>
         </button>
       )}
+    <div className={`app-container ${isMenuOpen ? 'menu-visible' : ''}`}>
+      {showLoginModal    && <LoginModal    onClose={() => { setShowLoginModal(false);    setMensajes([]); }} />}
+      {showLimitModal    && <LimitModal    onClose={() => { setShowLimitModal(false);    setMensajes([]); }} />}
+      {showElementosModal && <ElementosModal onClose={() => setShowElementosModal(false)} />}
+      <SidebarMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
       <header className="app-header-final">
         <div className="header-left-section">
@@ -443,6 +445,7 @@ function ChatIA() {
         </div>
       </main>
     </div>
+    </>
   );
 }
 
