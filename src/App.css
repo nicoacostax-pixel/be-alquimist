@@ -5624,6 +5624,7 @@ body, #root {
 .perfil-post-item {
   border: 1px solid #E5E5E5;
   border-radius: 10px;
+  background-color: #fff;
   padding: 16px;
   transition: border-color 0.15s;
 }
