@@ -12,6 +12,7 @@ import ProductoDetalle from './features/catalog/pages/ProductoDetalle';
 import SocialProofPopup from './shared/components/SocialProofPopup';
 
 import Checkout from './features/checkout/pages/Checkout';
+import CheckoutGracias from './features/checkout/pages/CheckoutGracias';
 import PerfilUsuario from './features/comunidad/pages/PerfilUsuario';
 
 // Importaciones de Comunidad
@@ -44,6 +45,7 @@ function App() {
           <Route path="/cuenta" element={<Cuenta />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout/gracias" element={<CheckoutGracias />} />
           <Route path="/perfil/:userId" element={<PerfilUsuario />} />
 
           {/* --- RUTAS DE COMUNIDAD (TIPO SKOOL) --- */}
