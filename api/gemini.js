@@ -87,9 +87,10 @@ module.exports = async function handler(req, res) {
     } catch (e) {
       lastErr = e;
       const msg = e?.message || '';
-      const skip = e?.status === 404 || e?.status === 429 ||
+      const skip = e?.status === 404 || e?.status === 429 || e?.status === 503 ||
         msg.includes('not found') || msg.includes('404') ||
-        msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests');
+        msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests') ||
+        msg.includes('503') || msg.includes('Service Unavailable') || msg.includes('high demand');
       if (skip) continue;
       break;
     }
