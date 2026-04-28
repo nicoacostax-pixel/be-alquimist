@@ -39,8 +39,24 @@ const MODEL_CANDIDATES = [
   'gemini-2.5-flash',
   'gemini-2.0-flash',
   'gemini-2.0-flash-lite',
+  'gemini-1.5-flash-latest',
+  'gemini-1.5-flash',
   'gemini-flash-latest',
 ];
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+const isTransient = (e) => {
+  const msg = e?.message || '';
+  return e?.status === 429 || e?.status === 503 ||
+    msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests') ||
+    msg.includes('503') || msg.includes('Service Unavailable') || msg.includes('high demand');
+};
+
+const isNotFound = (e) => {
+  const msg = e?.message || '';
+  return e?.status === 404 || msg.includes('not found') || msg.includes('404');
+};
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -74,23 +90,26 @@ module.exports = async function handler(req, res) {
   const candidates = [process.env.GEMINI_MODEL, ...MODEL_CANDIDATES].filter(Boolean);
 
   for (const modelName of candidates) {
-    try {
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        systemInstruction: SYSTEM_INSTRUCTION,
-      });
-      const result = await model.generateContent({ contents });
-      const text = result?.response?.text?.() || '';
-      return res.status(200).json({ text, model: modelName });
-    } catch (e) {
-      lastErr = e;
-      const msg = e?.message || '';
-      const skip = e?.status === 404 || e?.status === 429 || e?.status === 503 ||
-        msg.includes('not found') || msg.includes('404') ||
-        msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests') ||
-        msg.includes('503') || msg.includes('Service Unavailable') || msg.includes('high demand');
-      if (skip) continue;
-      break;
+    // Each model gets up to 2 attempts on transient errors
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          systemInstruction: SYSTEM_INSTRUCTION,
+        });
+        const result = await model.generateContent({ contents });
+        const text = result?.response?.text?.() || '';
+        return res.status(200).json({ text, model: modelName });
+      } catch (e) {
+        lastErr = e;
+        if (isNotFound(e)) break; // skip to next model immediately
+        if (isTransient(e)) {
+          if (attempt === 0) { await sleep(1200); continue; } // retry once after delay
+          break; // second attempt also failed → next model
+        }
+        // non-retryable error
+        break;
+      }
     }
   }
 
