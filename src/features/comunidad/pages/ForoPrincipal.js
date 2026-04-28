@@ -35,6 +35,7 @@ export default function ForoPrincipal() {
   const [posts, setPosts]       = useState([]);
   const [cargando, setCargando] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
+  const [lightboxImg, setLightboxImg] = useState(null);
 
   // ── Estado form nuevo post
   const [nuevoPost, setNuevoPost]       = useState({ titulo: '', contenido: '' });
@@ -271,6 +272,13 @@ export default function ForoPrincipal() {
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
+      {lightboxImg && (
+        <div className="lightbox-overlay" onClick={() => setLightboxImg(null)}>
+          <img src={lightboxImg} alt="vista ampliada" className="lightbox-img" onClick={e => e.stopPropagation()} />
+          <button className="lightbox-close" onClick={() => setLightboxImg(null)}>✕</button>
+        </div>
+      )}
+
       {/* Categorías */}
       <nav className="foro-categorias-nav">
         {CATEGORIAS.map(cat => (
@@ -352,10 +360,10 @@ export default function ForoPrincipal() {
                   <h3 className="post-titulo">{post.titulo}</h3>
                   <p className="post-contenido">{post.contenido}</p>
                 </div>
-                {post.imagen_url && !meta.video_id && (
-                  <img src={post.imagen_url} alt="imagen" className="post-thumbnail" />
-                )}
               </div>
+              {post.imagen_url && !meta.video_id && (
+                <img src={post.imagen_url} alt="imagen" className="post-full-img" onClick={() => setLightboxImg(post.imagen_url)} />
+              )}
 
               {meta.video_id && (
                 <div style={{ marginTop: 12 }}>

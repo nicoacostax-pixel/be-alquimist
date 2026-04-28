@@ -465,13 +465,13 @@ export default function PerfilUsuario() {
           <div className="perfil-left">
 
             {/* Activity Heatmap */}
-            <div className="perfil-card">
+            <div className="perfil-card-activity">
               <h3 className="perfil-card-title">Actividad</h3>
               <Heatmap posts={posts} />
             </div>
 
             {/* Posts list */}
-            <div className="perfil-card" style={{ marginTop: '16px' }}>
+            <div className="perfil-card-posts" style={{ marginTop: '16px' }}>
               <h3 className="perfil-card-title">{posts.length} publicaciones</h3>
 
               {posts.length === 0 ? (

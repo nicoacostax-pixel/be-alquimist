@@ -94,13 +94,16 @@ function RecipeCard({ text }) {
   );
 }
 
-function LoginRequired() {
+function LoginModal({ onClose }) {
   return (
-    <div className="chat-login-wall">
-      <span className="chat-login-icon">🔒</span>
-      <p className="chat-login-title">Has usado tus 3 recetas gratuitas</p>
-      <p className="chat-login-sub">Inicia sesión para seguir usando el laboratorio de formulación sin límites.</p>
-      <Link to="/login" className="chat-login-btn">Iniciar sesión</Link>
+    <div className="chat-modal-overlay">
+      <div className="chat-modal">
+        <span className="chat-modal-icon">🔒</span>
+        <h3 className="chat-modal-title">Laboratorio gratuito agotado</h3>
+        <p className="chat-modal-sub">Has usado tus <strong>3 recetas gratuitas</strong>.<br/>Inicia sesión para seguir formulando sin límites.</p>
+        <Link to="/login" className="chat-login-btn">Iniciar sesión</Link>
+        <button className="chat-modal-skip" onClick={onClose}>Ahora no</button>
+      </div>
     </div>
   );
 }
@@ -117,6 +120,12 @@ function ChatIA() {
   const [recipeCount, setRecipeCount] = useState(
     () => parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
   );
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  // Progressive recipe reveal
+  const recipeStepsRef = useRef(null); // stores the 6 parsed sections
+  const [confirmLabel, setConfirmLabel]   = useState(null); // current question to show
+  const [confirmIndex, setConfirmIndex]   = useState(0);    // which step to reveal next
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -207,19 +216,61 @@ function ChatIA() {
     }
   };
 
+  const CONFIRM_LABELS = [
+    '¿Quieres ver la fórmula completa?',
+    '¿Quieres ver la receta en gramos?',
+    '¿Quieres ver las instrucciones paso a paso?',
+    '¿Quieres calcular el costo y precio de venta?',
+  ];
+
+  // Reveal the next step when user confirms
+  function handleConfirm() {
+    const steps = recipeStepsRef.current;
+    if (!steps) return;
+
+    const next = confirmIndex + 1; // 1=formula, 2=recipe, 3=instructions+where, 4=cost
+
+    let toReveal = [];
+    if (next === 1) toReveal = [steps[1]];
+    else if (next === 2) toReveal = [steps[2]];
+    else if (next === 3) toReveal = [steps[3], steps[4]].filter(Boolean);
+    else if (next === 4) toReveal = [steps[5]].filter(Boolean);
+
+    toReveal.forEach(text => {
+      setMensajes(prev => [...prev, { rol: 'ai', texto: text }]);
+    });
+
+    if (next < 4) {
+      setConfirmLabel(CONFIRM_LABELS[next]);
+      setConfirmIndex(next);
+    } else {
+      // Cost step revealed — increment counter
+      setConfirmLabel(null);
+      setConfirmIndex(0);
+      recipeStepsRef.current = null;
+      if (!isLoggedIn) {
+        const nuevo = recipeCount + 1;
+        setRecipeCount(nuevo);
+        localStorage.setItem(STORAGE_KEY, String(nuevo));
+        if (nuevo >= RECIPE_LIMIT) setShowLoginModal(true);
+      }
+    }
+  }
+
+  function handleSkip() {
+    setConfirmLabel(null);
+    setConfirmIndex(0);
+    recipeStepsRef.current = null;
+  }
+
   const handleEnviar = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
 
-    // Block non-logged-in users after RECIPE_LIMIT recipes
-    if (!isLoggedIn && recipeCount >= RECIPE_LIMIT) {
-      setMensajes(prev => [...prev,
-        { rol: 'user', texto: input },
-        { rol: 'ai',   texto: '[[login_required]]' },
-      ]);
-      setInput('');
-      return;
-    }
+    // Clear any active recipe flow when new message is sent
+    setConfirmLabel(null);
+    setConfirmIndex(0);
+    recipeStepsRef.current = null;
 
     const userMsg = { rol: 'user', texto: input };
     const historialActual = [...mensajes];
@@ -233,25 +284,34 @@ function ChatIA() {
     }));
 
     const respuestaIA = await enviarAGemini(input, historial);
-    const partes = respuestaIA.split('[[split]]').map(s => s.trim()).filter(Boolean);
 
-    // Count recipe if cost calculator section was included
-    const tieneCalculadora = partes.some(p => p.toLowerCase().includes('calculadora de costos'));
-    if (!isLoggedIn && tieneCalculadora) {
-      const nuevo = recipeCount + 1;
-      setRecipeCount(nuevo);
-      localStorage.setItem(STORAGE_KEY, String(nuevo));
+    // Try [[split]] first; fall back to splitting by ## section headers
+    let partes = respuestaIA.split('[[split]]').map(s => s.trim()).filter(Boolean);
+    if (partes.length < 5) {
+      const bySections = respuestaIA.split(/\n(?=## )/).map(s => s.trim()).filter(Boolean);
+      if (bySections.length >= 5) partes = bySections;
     }
 
     setIsLoading(false);
-    for (const parte of partes) {
-      await new Promise(r => setTimeout(r, 180));
-      setMensajes(prev => [...prev, { rol: 'ai', texto: parte }]);
+
+    if (partes.length >= 5) {
+      // Recipe response — show only description, enable step flow
+      recipeStepsRef.current = partes;
+      setMensajes(prev => [...prev, { rol: 'ai', texto: partes[0] }]);
+      setConfirmLabel(CONFIRM_LABELS[0]);
+      setConfirmIndex(0);
+    } else {
+      // General response — show all at once
+      for (const parte of partes) {
+        await new Promise(r => setTimeout(r, 150));
+        setMensajes(prev => [...prev, { rol: 'ai', texto: parte }]);
+      }
     }
   };
 
   return (
     <div className={`app-container ${isMenuOpen ? 'menu-visible' : ''}`}>
+      {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
       <SidebarMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
       <header className="app-header-final">
@@ -275,17 +335,22 @@ function ChatIA() {
         <div className="chat-window">
           {mensajes.map((m, i) => (
             <div key={i} className={`msg-bubble ${m.rol}`}>
-              {m.rol === 'ai'
-                ? m.texto === '[[login_required]]'
-                  ? <LoginRequired />
-                  : <RecipeCard text={m.texto} />
-                : m.texto
-              }
+              {m.rol === 'ai' ? <RecipeCard text={m.texto} /> : m.texto}
             </div>
           ))}
           {isLoading && <div className="msg-bubble ai typing">Analizando activos...</div>}
           <div ref={scrollRef} />
         </div>
+
+        {confirmLabel && (
+          <div className="chat-confirm-bar">
+            <span className="chat-confirm-label">{confirmLabel}</span>
+            <div className="chat-confirm-actions">
+              <button onClick={handleConfirm} className="chat-confirm-yes">Sí ✓</button>
+              <button onClick={handleSkip} className="chat-confirm-no">No, gracias</button>
+            </div>
+          </div>
+        )}
 
         <div className="chat-interface-wrapper">
           <form className="input-box-container" onSubmit={handleEnviar}>
