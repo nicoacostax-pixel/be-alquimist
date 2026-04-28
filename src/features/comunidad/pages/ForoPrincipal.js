@@ -5,6 +5,19 @@ import { supabase } from '../../../shared/lib/supabaseClient';
 import AttachmentToolbar from '../components/AttachmentToolbar';
 
 /* ── Helpers ─────────────────────────────── */
+function renderMd(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/^## (.+)$/gm, '<strong class="md-h2">$1</strong>')
+    .replace(/^### (.+)$/gm, '<strong class="md-h3">$1</strong>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^[\-\*] (.+)$/gm, '<span class="md-li">◆ $1</span>')
+    .replace(/^(\d+)\. (.+)$/gm, '<span class="md-li"><b>$1.</b> $2</span>')
+    .replace(/\n/g, '<br/>');
+}
+
 function timeAgo(dateStr) {
   if (!dateStr) return '';
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -358,7 +371,9 @@ export default function ForoPrincipal() {
               <div className="post-body">
                 <div className="post-text-area">
                   <h3 className="post-titulo">{post.titulo}</h3>
-                  <p className="post-contenido">{post.contenido}</p>
+                  <div className="post-contenido"
+                    dangerouslySetInnerHTML={{ __html: renderMd(post.contenido) }}
+                  />
                 </div>
               </div>
               {post.imagen_url && !meta.video_id && (

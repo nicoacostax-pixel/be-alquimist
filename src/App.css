@@ -4783,7 +4783,26 @@ width: 143%;
   color: #555;
   margin: 0;
   font-size: 0.93rem;
-  line-height: 1.5;
+  line-height: 1.7;
+}
+.post-contenido .md-h2 {
+  display: block;
+  font-size: 1rem;
+  color: #B08968;
+  margin: 14px 0 4px;
+  font-weight: 700;
+}
+.post-contenido .md-h3 {
+  display: block;
+  font-size: 0.95rem;
+  color: #4A3F35;
+  margin: 10px 0 2px;
+  font-weight: 600;
+}
+.post-contenido .md-li {
+  display: block;
+  padding-left: 6px;
+  color: #4A3F35;
 }
 
 .post-full-img {

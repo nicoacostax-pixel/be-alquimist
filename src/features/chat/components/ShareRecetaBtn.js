@@ -3,27 +3,9 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../../../shared/lib/supabaseClient';
 import { useElementos } from '../../../shared/context/ElementosContext';
 
-async function generarImagenIA(titulo, ingredientes, tipo) {
-  const res = await fetch('/api/generar-imagen-receta', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ titulo, ingredientes, tipo }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Error generando imagen');
-
-  // Convertir base64 a Blob
-  const mime = data.mimeType || 'image/png';
-  const byteChars = atob(data.imageBase64);
-  const bytes = new Uint8Array(byteChars.length);
-  for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i);
-  return new Blob([bytes], { type: mime });
-}
-
 export default function ShareRecetaBtn({ recetaCompleta }) {
   const { userId, isLoggedIn } = useElementos();
-  const [estado, setEstado] = useState('idle'); // idle | loading | done | error
-  const [postId, setPostId] = useState(null);
+  const [estado, setEstado]   = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
 
   if (!isLoggedIn) return null;
@@ -32,47 +14,27 @@ export default function ShareRecetaBtn({ recetaCompleta }) {
     setEstado('loading');
     setErrorMsg('');
     try {
-      // 1. Resumir con Gemini
+      // 1. Obtener título y tipo con Gemini (solo campos cortos)
       const res = await fetch('/api/resumir-receta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ receta: recetaCompleta }),
       });
       const resData = await res.json();
-      if (!res.ok) throw new Error(resData.error || 'Error al resumir la receta');
-      const { titulo, descripcion, ingredientes, tipo } = resData;
+      if (!res.ok) throw new Error(resData.error || 'Error al procesar la receta');
+      const { titulo } = resData;
 
-      // 2. Generar imagen con Gemini Imagen
-      const blob = await generarImagenIA(titulo, ingredientes || [], tipo || '');
-
-      // 3. Subir imagen a Supabase Storage
-      const ext = blob.type.includes('jpeg') ? 'jpg' : 'png';
-      const path = `${userId}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from('posts')
-        .upload(path, blob, { contentType: blob.type, upsert: true });
-      if (uploadError) throw new Error(uploadError.message);
-
-      const { data: urlData } = supabase.storage.from('posts').getPublicUrl(path);
-      const imagenUrl = urlData.publicUrl;
-
-      // 4. Crear post en el foro
-      const contenidoPost = `${descripcion}\n\n**Ingredientes principales:**\n${(ingredientes || []).map(i => `• ${i}`).join('\n')}\n\n*Receta generada con Be Alquimist IA*`;
-
-      const { data: post, error: postError } = await supabase
+      // 2. Crear post con la receta completa (el foro la renderiza con formato)
+      const { error: postError } = await supabase
         .from('posts')
         .insert({
-          titulo,
-          contenido: contenidoPost,
+          titulo: titulo || 'Receta natural',
+          contenido: recetaCompleta,
           categoria: 'Recetas',
           usuario_id: userId,
-          imagen_url: imagenUrl,
-        })
-        .select('id')
-        .single();
+        });
 
       if (postError) throw new Error(postError.message);
-      setPostId(post.id);
       setEstado('done');
     } catch (err) {
       setErrorMsg(err.message);
@@ -97,13 +59,10 @@ export default function ShareRecetaBtn({ recetaCompleta }) {
         onClick={compartir}
         disabled={estado === 'loading'}
       >
-        {estado === 'loading' ? (
-          <><span className="share-receta-spinner" />Generando y compartiendo…</>
-        ) : (
-          <>
-            <span>🌿</span> Compartir en el foro
-          </>
-        )}
+        {estado === 'loading'
+          ? <><span className="share-receta-spinner" />Compartiendo…</>
+          : <><span>🌿</span> Compartir en el foro</>
+        }
       </button>
     </div>
   );
