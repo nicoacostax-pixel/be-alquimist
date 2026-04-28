@@ -487,7 +487,7 @@ export default function PerfilUsuario() {
                           <img src={perfil?.avatar_url || DEFAULT_AVATAR} alt="" className="perfil-post-avatar" />
                           <div className="perfil-post-author-wrap">
                             <span className="perfil-post-author-name">
-                              {(perfil?.nombre || '') + (perfil?.apellido ? ' ' + perfil.apellido : '') || 'Alquimista'}
+                              {(perfiles.nombre || '') + (perfiles.apellido ? ' ' + perfil.apellido : '') || 'Alquimista'}
                             </span>
                             <span
                               className="perfil-level-chip"
@@ -547,7 +547,7 @@ export default function PerfilUsuario() {
                                 </Link>
                                 <div className="post-comment-body">
                                   <Link to={`/perfil/${c.usuario_id}`} className="post-author-name post-author-link">
-                                    {c._perfil?.nombre || 'Alquimista'}
+                                    {c._perfiles.nombre || 'Alquimista'}
                                   </Link>
                                   <span className="post-meta"> · {timeAgo(c.created_at)}</span>
                                   <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: '#444' }}>{c.contenido}</p>
