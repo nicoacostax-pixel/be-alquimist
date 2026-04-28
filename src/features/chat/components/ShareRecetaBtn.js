@@ -127,8 +127,9 @@ export default function ShareRecetaBtn({ recetaCompleta }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ receta: recetaCompleta }),
       });
-      if (!res.ok) throw new Error('Error al resumir la receta');
-      const { titulo, descripcion, ingredientes, tipo } = await res.json();
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error || 'Error al resumir la receta');
+      const { titulo, descripcion, ingredientes, tipo } = resData;
 
       // 2. Generar imagen en canvas
       const blob = await generarImagen(titulo, ingredientes || [], tipo || '');
