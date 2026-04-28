@@ -4,6 +4,12 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// Evita que el browser restaure el scroll al recargar
+if ('scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual';
+}
+window.scrollTo(0, 0);
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

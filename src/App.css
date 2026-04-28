@@ -6091,6 +6091,9 @@ a.post-author-name.post-author-link:hover {
   font-family: 'Poppins', sans-serif;
   text-align: left;
   transition: background 0.2s;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 .elementos-banner:hover { background: #9A7458; }
 .elementos-banner-icon { font-size: 15px; flex-shrink: 0; }
