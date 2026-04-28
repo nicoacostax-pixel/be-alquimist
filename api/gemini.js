@@ -1,7 +1,3 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
 const SYSTEM_INSTRUCTION = `Eres Be Alquimist, asistente experto en cosmética natural y formulación artesanal para el mercado mexicano.
 Responde SIEMPRE en español, de forma cálida y profesional.
 
@@ -34,26 +30,78 @@ const MODEL_CANDIDATES = [
   'gemini-2.0-flash-001',
   'gemini-2.0-flash-lite',
   'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
 ];
+
+const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-const isNotFound = (e) => {
-  const m = e?.message || '';
-  return m.includes('404') || m.includes('not found');
-};
+async function streamModel(modelName, contents, apiKey, onChunk) {
+  const url = `${GEMINI_BASE}/${modelName}:streamGenerateContent?key=${apiKey}&alt=sse`;
+
+  const body = {
+    system_instruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+    contents,
+  };
+
+  if (modelName.includes('2.5')) {
+    body.generationConfig = { thinkingConfig: { thinkingBudget: 0 } };
+  }
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const msg = err?.error?.message || `HTTP ${res.status}`;
+    throw Object.assign(new Error(msg), { status: res.status });
+  }
+
+  const reader  = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop();
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const raw = line.slice(6).trim();
+      if (!raw || raw === '[DONE]') continue;
+      try {
+        const parsed = JSON.parse(raw);
+        const text = parsed?.candidates?.[0]?.content?.parts
+          ?.map(p => p.text || '').join('');
+        if (text) onChunk(text);
+      } catch {}
+    }
+  }
+}
 
 const isTransient = (e) => {
   const m = e?.message || '';
-  return m.includes('429') || m.includes('quota') || m.includes('503') || m.includes('Too Many Requests');
+  return e?.status === 429 || e?.status === 503 ||
+    m.includes('429') || m.includes('quota') || m.includes('503');
 };
+
+const isNotFound = (e) =>
+  e?.status === 404 || (e?.message || '').includes('404');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
-  if (!GEMINI_API_KEY) {
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
     return res.status(500).json({ error: 'GEMINI_API_KEY missing' });
   }
 
@@ -61,18 +109,13 @@ module.exports = async function handler(req, res) {
   const history = Array.isArray(req.body?.history) ? req.body.history : [];
   if (!prompt) return res.status(400).json({ error: 'Missing prompt.' });
 
-  // SSE headers — flushHeaders() forces them to the client before any body
   res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
   res.setHeader('Cache-Control', 'no-cache, no-transform');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
 
-  const sse = (data) => {
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
-  };
-
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const sse = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
 
   const contents = [
     ...history.map(m => ({
@@ -89,27 +132,12 @@ module.exports = async function handler(req, res) {
   for (const modelName of candidates) {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          systemInstruction: SYSTEM_INSTRUCTION,
-          generationConfig: modelName.includes('2.5')
-            ? { thinkingConfig: { thinkingBudget: 0 } }
-            : {},
+        await streamModel(modelName, contents, apiKey, (text) => {
+          sse({ text });
+          dataSent = true;
         });
-
-        const result = await model.generateContentStream({ contents });
-
-        for await (const chunk of result.stream) {
-          const text = chunk.text();
-          if (text) {
-            sse({ text });
-            dataSent = true;
-          }
-        }
-
         sse({ done: true, model: modelName });
         return res.end();
-
       } catch (e) {
         lastErr = e;
         if (dataSent) {
@@ -117,10 +145,7 @@ module.exports = async function handler(req, res) {
           return res.end();
         }
         if (isNotFound(e)) break;
-        if (isTransient(e) && attempt === 0) {
-          await sleep(1200);
-          continue;
-        }
+        if (isTransient(e) && attempt === 0) { await sleep(1200); continue; }
         break;
       }
     }
