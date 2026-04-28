@@ -27,9 +27,9 @@ REGLAS:
 - Si no tienes suficiente información para la receta, haz máximo 2 preguntas antes de empezar.`;
 
 const MODEL_CANDIDATES = [
-  'gemini-2.0-flash-001',
-  'gemini-2.0-flash-lite',
   'gemini-2.5-flash',
+  'gemini-2.0-flash-lite',
+  'gemini-2.0-flash',
 ];
 
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
