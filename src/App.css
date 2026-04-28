@@ -5696,7 +5696,7 @@ body, #root {
 }
 .perfil-post-titulo {
   font-size: 15px; font-weight: 800; color: #1A1A1A;
-  margin: 0 0 5px; text-transform: uppercase; letter-spacing: 0.5px;
+  margin: 15px 0 5px; text-transform: uppercase; letter-spacing: 0.5px;
 }
 .perfil-post-text {
   font-size: 13px; color: #4A3F35; margin: 0;
