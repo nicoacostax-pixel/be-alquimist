@@ -22,14 +22,26 @@ export default function ShareRecetaBtn({ recetaCompleta }) {
       });
       const resData = await res.json();
       if (!res.ok) throw new Error(resData.error || 'Error al procesar la receta');
-      const { titulo } = resData;
+      const { titulo, descripcion, ingredientes } = resData;
 
-      // 2. Crear post con la receta completa (el foro la renderiza con formato)
+      const listaIngredientes = (ingredientes || [])
+        .map(i => `• ${i}`)
+        .join('\n');
+
+      const contenido =
+`${descripcion || ''}
+
+Ingredientes principales:
+${listaIngredientes}
+
+*Receta generada con Be Alquimist IA*`;
+
+      // 2. Crear post en el foro
       const { error: postError } = await supabase
         .from('posts')
         .insert({
           titulo: titulo || 'Receta natural',
-          contenido: recetaCompleta,
+          contenido,
           categoria: 'Recetas',
           usuario_id: userId,
         });
