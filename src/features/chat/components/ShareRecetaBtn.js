@@ -13,10 +13,11 @@ async function generarImagenIA(titulo, ingredientes, tipo) {
   if (!res.ok) throw new Error(data.error || 'Error generando imagen');
 
   // Convertir base64 a Blob
+  const mime = data.mimeType || 'image/png';
   const byteChars = atob(data.imageBase64);
   const bytes = new Uint8Array(byteChars.length);
   for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i);
-  return new Blob([bytes], { type: 'image/png' });
+  return new Blob([bytes], { type: mime });
 }
 
 export default function ShareRecetaBtn({ recetaCompleta }) {
@@ -45,10 +46,11 @@ export default function ShareRecetaBtn({ recetaCompleta }) {
       const blob = await generarImagenIA(titulo, ingredientes || [], tipo || '');
 
       // 3. Subir imagen a Supabase Storage
-      const path = `${userId}/${Date.now()}.png`;
+      const ext = blob.type.includes('jpeg') ? 'jpg' : 'png';
+      const path = `${userId}/${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage
         .from('posts')
-        .upload(path, blob, { contentType: 'image/png', upsert: true });
+        .upload(path, blob, { contentType: blob.type, upsert: true });
       if (uploadError) throw new Error(uploadError.message);
 
       const { data: urlData } = supabase.storage.from('posts').getPublicUrl(path);
