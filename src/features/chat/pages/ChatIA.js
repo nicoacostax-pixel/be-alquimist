@@ -219,15 +219,17 @@ function ChatIA() {
 
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (!raw) continue;
         try {
-          const parsed = JSON.parse(line.slice(6));
+          const parsed = JSON.parse(raw);
           if (parsed.error) throw new Error(parsed.error);
           if (parsed.text) {
             full += parsed.text;
             onChunk(full);
           }
         } catch (err) {
-          if (err.message && !err.message.startsWith('JSON')) throw err;
+          if (!(err instanceof SyntaxError)) throw err; // solo silenciar errores de parse
         }
       }
     }

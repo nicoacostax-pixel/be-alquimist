@@ -1,7 +1,3 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
 const SYSTEM_INSTRUCTION = `Eres Be Alquimist, asistente experto en cosmética natural y formulación artesanal para el mercado mexicano.
 Responde SIEMPRE en español, de forma cálida y profesional.
 
@@ -42,95 +38,123 @@ const MODEL_CANDIDATES = [
   'gemini-2.5-flash-lite',
 ];
 
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+const isNotFound = (e) => {
+  const m = e?.message || '';
+  return m.includes('404') || m.includes('not found');
+};
 
 const isTransient = (e) => {
-  const msg = e?.message || '';
-  return e?.status === 429 || e?.status === 503 ||
-    msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests') ||
-    msg.includes('503') || msg.includes('Service Unavailable') || msg.includes('high demand');
+  const m = e?.message || '';
+  return m.includes('429') || m.includes('quota') || m.includes('503') || m.includes('Too Many Requests');
 };
 
-const isNotFound = (e) => {
-  const msg = e?.message || '';
-  return e?.status === 404 || msg.includes('not found') || msg.includes('404');
-};
-
-const sse = (res, data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
-
-module.exports = async function handler(req, res) {
+export default async function handler(req) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
   if (!GEMINI_API_KEY) {
-    return res.status(500).json({ error: 'GEMINI_API_KEY missing' });
+    return new Response(JSON.stringify({ error: 'GEMINI_API_KEY missing' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
-  const prompt  = (req.body?.prompt  || '').toString().trim();
-  const history = Array.isArray(req.body?.history) ? req.body.history : [];
+  let body = {};
+  try { body = await req.json(); } catch {}
 
-  if (!prompt) return res.status(400).json({ error: 'Missing prompt.' });
+  const prompt  = (body?.prompt  || '').toString().trim();
+  const history = Array.isArray(body?.history) ? body.history : [];
 
-  // SSE headers — must be set before any write
-  res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no');
+  if (!prompt) {
+    return new Response(JSON.stringify({ error: 'Missing prompt.' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const encoder = new TextEncoder();
+  const sse = (ctrl, data) =>
+    ctrl.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
 
-  const contents = [
-    ...history.map(m => ({
-      role: m.role === 'model' ? 'model' : 'user',
-      parts: [{ text: m.text }],
-    })),
-    { role: 'user', parts: [{ text: prompt }] },
-  ];
-
-  const candidates = [process.env.GEMINI_MODEL, ...MODEL_CANDIDATES].filter(Boolean);
-  let lastErr  = null;
-  let dataSent = false;
-
-  for (const modelName of candidates) {
-    for (let attempt = 0; attempt < 2; attempt++) {
+  const stream = new ReadableStream({
+    async start(controller) {
       try {
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          systemInstruction: SYSTEM_INSTRUCTION,
-        });
+        const { GoogleGenerativeAI } = await import('@google/generative-ai');
+        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-        const streamResult = await model.generateContentStream({ contents });
+        const contents = [
+          ...history.map(m => ({
+            role: m.role === 'model' ? 'model' : 'user',
+            parts: [{ text: m.text }],
+          })),
+          { role: 'user', parts: [{ text: prompt }] },
+        ];
 
-        for await (const chunk of streamResult.stream) {
-          const text = chunk.text();
-          if (text) {
-            sse(res, { text });
-            dataSent = true;
+        const candidates = [process.env.GEMINI_MODEL, ...MODEL_CANDIDATES].filter(Boolean);
+        let lastErr  = null;
+        let dataSent = false;
+
+        for (const modelName of candidates) {
+          for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+              const model = genAI.getGenerativeModel({
+                model: modelName,
+                systemInstruction: SYSTEM_INSTRUCTION,
+              });
+
+              const result = await model.generateContentStream({ contents });
+
+              for await (const chunk of result.stream) {
+                const text = chunk.text();
+                if (text) {
+                  sse(controller, { text });
+                  dataSent = true;
+                }
+              }
+
+              sse(controller, { done: true, model: modelName });
+              controller.close();
+              return;
+
+            } catch (e) {
+              lastErr = e;
+              if (dataSent) {
+                sse(controller, { error: e.message });
+                controller.close();
+                return;
+              }
+              if (isNotFound(e)) break;
+              if (isTransient(e) && attempt === 0) {
+                await new Promise(r => setTimeout(r, 1200));
+                continue;
+              }
+              break;
+            }
           }
         }
 
-        sse(res, { done: true, model: modelName });
-        return res.end();
+        sse(controller, { error: lastErr?.message || 'No compatible model found' });
+        controller.close();
 
       } catch (e) {
-        lastErr = e;
-
-        if (dataSent) {
-          sse(res, { error: e.message });
-          return res.end();
-        }
-
-        if (isNotFound(e)) break;
-        if (isTransient(e)) {
-          if (attempt === 0) { await sleep(1200); continue; }
-          break;
-        }
-        break;
+        controller.enqueue(
+          encoder.encode(`data: ${JSON.stringify({ error: e.message })}\n\n`)
+        );
+        controller.close();
       }
-    }
-  }
+    },
+  });
 
-  sse(res, { error: lastErr?.message || 'No compatible model found' });
-  res.end();
-};
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  });
+}
