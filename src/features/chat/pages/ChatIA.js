@@ -410,7 +410,6 @@ function ChatIA() {
         <div className="chat-window">
           {mensajes.map((m, i) => {
             const isLast = i === mensajes.length - 1;
-            const esRecetaCompleta = m.rol === 'ai' && !m.streaming && parseSections(m.texto).length >= 2;
             return (
               <div key={i} className={`msg-bubble ${m.rol}`}>
                 {m.rol === 'ai'
@@ -421,7 +420,7 @@ function ChatIA() {
                     : <RecipeCard text={m.texto} />
                   : m.texto
                 }
-                {isLast && esRecetaCompleta && recetaCompleta && (
+                {isLast && parseSections(m.texto).length >= 1 && parseSections(recetaCompleta).length >= 2 && (
                   <ShareRecetaBtn recetaCompleta={recetaCompleta} />
                 )}
               </div>
