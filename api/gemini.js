@@ -36,7 +36,10 @@ Si el usuario no ha dado suficiente información, haz máximo 3 preguntas concre
 Para preguntas generales o de seguimiento responde directamente sin [[split]] ni secciones.`;
 
 const MODEL_CANDIDATES = [
-  'gemini-1.5-flash-latest',
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-001',
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-lite',
 ];
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
