@@ -218,13 +218,14 @@ export default function PerfilUsuario() {
       const { data: { session } } = await supabase.auth.getSession();
       const uid = session?.user?.id;
 
-      const [{ data: perfilesArr }, { data: postsData }] = await Promise.all([
-        supabase.from('perfiles').select('id, nombre, apellido, bio, avatar_url, created_at').in('id', [userId]),
+      const [perfilesRes, postsRes] = await Promise.all([
+        supabase.from('perfiles').select('id, nombre, apellido, bio, avatar_url').in('id', [userId]),
         supabase.from('posts').select('id, titulo, contenido, imagen_url, metadata, created_at').eq('usuario_id', userId).order('created_at', { ascending: false }),
       ]);
-      const perfilData = perfilesArr?.[0] || null;
+      if (perfilesRes.error) console.error('perfiles query error:', perfilesRes.error);
+      const perfilData = perfilesRes.data?.[0] || null;
 
-      const userPosts = postsData || [];
+      const userPosts = postsRes.data || [];
       let totalLikesCount = 0;
 
       if (userPosts.length > 0) {
