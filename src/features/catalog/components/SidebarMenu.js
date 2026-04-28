@@ -83,6 +83,7 @@ function SidebarMenu({ isOpen, onClose }) {
             <span>Insumos</span>
             <span className="menu-arrow">›</span>
           </button>
+          <button className="menu-item" onClick={() => goTo('/comunidad')}>Comunidad</button>
           <button className="menu-item" onClick={closeAll}>Biblioteca de ingredientes</button>
           <button className="menu-item" onClick={handleCuentaClick}>Cuenta</button>
         </nav>
