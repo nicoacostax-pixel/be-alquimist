@@ -130,6 +130,42 @@ body {
 .md-text code   { background: #F3EFE8; padding: 1px 5px; border-radius: 4px; font-size: 13px; font-family: monospace; }
 
 /* ── Recipe card sections ── */
+.msg-bubble.ai:has(.chat-login-wall) {
+  max-width: 92%;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.chat-login-wall {
+  background: linear-gradient(135deg, #FFF8F2 0%, #F3EFE8 100%);
+  border: 1.5px solid #B08968;
+  border-radius: 14px;
+  padding: 24px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.chat-login-icon  { font-size: 32px; }
+.chat-login-title { font-size: 16px; font-weight: 800; color: #4A3F35; margin: 0; }
+.chat-login-sub   { font-size: 13px; color: #888; margin: 0; line-height: 1.5; }
+.chat-login-btn {
+  margin-top: 4px;
+  background: #B08968;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-block;
+}
+.chat-login-btn:hover { background: #4A3F35; }
+
 .msg-bubble.ai:has(.recipe-card-response) {
   max-width: 98%;
   padding: 10px;

@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import '../../../App.css';
 import SidebarMenu from '../../catalog/components/SidebarMenu';
+import { supabase } from '../../../shared/lib/supabaseClient';
+
+const RECIPE_LIMIT = 3;
+const STORAGE_KEY  = 'ba_free_recipes';
 
 function inlineFormat(str) {
   return str
@@ -89,6 +94,17 @@ function RecipeCard({ text }) {
   );
 }
 
+function LoginRequired() {
+  return (
+    <div className="chat-login-wall">
+      <span className="chat-login-icon">🔒</span>
+      <p className="chat-login-title">Has usado tus 3 recetas gratuitas</p>
+      <p className="chat-login-sub">Inicia sesión para seguir usando el laboratorio de formulación sin límites.</p>
+      <Link to="/login" className="chat-login-btn">Iniciar sesión</Link>
+    </div>
+  );
+}
+
 function ChatIA() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -96,6 +112,21 @@ function ChatIA() {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const [isLoggedIn, setIsLoggedIn]   = useState(false);
+  const [recipeCount, setRecipeCount] = useState(
+    () => parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
+  );
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsLoggedIn(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const palabras = useMemo(() => ["Crea", "Formula", "Produce", "Vende"], []);
   const [index, setIndex] = useState(0);
@@ -180,10 +211,20 @@ function ChatIA() {
     e.preventDefault();
     if (!input.trim()) return;
 
+    // Block non-logged-in users after RECIPE_LIMIT recipes
+    if (!isLoggedIn && recipeCount >= RECIPE_LIMIT) {
+      setMensajes(prev => [...prev,
+        { rol: 'user', texto: input },
+        { rol: 'ai',   texto: '[[login_required]]' },
+      ]);
+      setInput('');
+      return;
+    }
+
     const userMsg = { rol: 'user', texto: input };
     const historialActual = [...mensajes];
     setMensajes(prev => [...prev, userMsg]);
-    setInput("");
+    setInput('');
     setIsLoading(true);
 
     const historial = historialActual.map(m => ({
@@ -192,9 +233,15 @@ function ChatIA() {
     }));
 
     const respuestaIA = await enviarAGemini(input, historial);
-
-    // Split into multiple bubbles if [[split]] is present
     const partes = respuestaIA.split('[[split]]').map(s => s.trim()).filter(Boolean);
+
+    // Count recipe if cost calculator section was included
+    const tieneCalculadora = partes.some(p => p.toLowerCase().includes('calculadora de costos'));
+    if (!isLoggedIn && tieneCalculadora) {
+      const nuevo = recipeCount + 1;
+      setRecipeCount(nuevo);
+      localStorage.setItem(STORAGE_KEY, String(nuevo));
+    }
 
     setIsLoading(false);
     for (const parte of partes) {
@@ -228,7 +275,12 @@ function ChatIA() {
         <div className="chat-window">
           {mensajes.map((m, i) => (
             <div key={i} className={`msg-bubble ${m.rol}`}>
-              {m.rol === 'ai' ? <RecipeCard text={m.texto} /> : m.texto}
+              {m.rol === 'ai'
+                ? m.texto === '[[login_required]]'
+                  ? <LoginRequired />
+                  : <RecipeCard text={m.texto} />
+                : m.texto
+              }
             </div>
           ))}
           {isLoading && <div className="msg-bubble ai typing">Analizando activos...</div>}
