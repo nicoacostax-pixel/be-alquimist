@@ -129,6 +129,45 @@ body {
 .md-text em     { font-style: italic; }
 .md-text code   { background: #F3EFE8; padding: 1px 5px; border-radius: 4px; font-size: 13px; font-family: monospace; }
 
+/* ── Recipe card sections ── */
+.msg-bubble.ai:has(.recipe-card-response) {
+  max-width: 98%;
+  padding: 10px;
+  background: transparent;
+  box-shadow: none;
+}
+.recipe-card-response {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.recipe-sec {
+  border-left: 4px solid #B08968;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.recipe-sec-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+.recipe-sec-icon  { font-size: 16px; line-height: 1; }
+.recipe-sec-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #4A3F35;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.recipe-sec-body { font-size: 14px; }
+.recipe-sec-body .md-p  { margin-bottom: 6px; font-size: 14px; }
+.recipe-sec-body .md-ol,
+.recipe-sec-body .md-ul { font-size: 14px; margin: 4px 0 4px 16px; }
+.recipe-sec-body .md-ol li,
+.recipe-sec-body .md-ul li { margin-bottom: 3px; }
+
 /* Animación de escritura */
 .typing {
   font-style: italic;

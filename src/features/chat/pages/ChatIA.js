@@ -2,13 +2,18 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import '../../../App.css';
 import SidebarMenu from '../../catalog/components/SidebarMenu';
 
+function inlineFormat(str) {
+  return str
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,     '<em>$1</em>')
+    .replace(/`(.+?)`/g,       '<code>$1</code>');
+}
+
 function MarkdownText({ text }) {
-  // Split into blocks by double newline (paragraphs) then handle inline
   const blocks = text.split(/\n{2,}/);
   return (
     <div className="md-text">
       {blocks.map((block, bi) => {
-        // Numbered list block
         if (/^\d+\.\s/.test(block)) {
           const items = block.split(/\n/).filter(Boolean);
           return (
@@ -19,7 +24,6 @@ function MarkdownText({ text }) {
             </ol>
           );
         }
-        // Bullet list block
         if (/^[\*\-]\s/.test(block)) {
           const items = block.split(/\n/).filter(Boolean);
           return (
@@ -30,7 +34,6 @@ function MarkdownText({ text }) {
             </ul>
           );
         }
-        // Regular paragraph (preserve single \n as <br>)
         const html = block.split('\n').map(line => inlineFormat(line)).join('<br/>');
         return <p key={bi} className="md-p" dangerouslySetInnerHTML={{ __html: html }} />;
       })}
@@ -38,11 +41,52 @@ function MarkdownText({ text }) {
   );
 }
 
-function inlineFormat(str) {
-  return str
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,     '<em>$1</em>')
-    .replace(/`(.+?)`/g,       '<code>$1</code>');
+const SECTION_META = {
+  'Descripción':               { icon: '📝', color: '#FFF8F2', border: '#B08968' },
+  'Fórmula (%)':               { icon: '🧪', color: '#F2FFF5', border: '#4CAF50' },
+  'Receta en gramos (100g)':   { icon: '⚖️', color: '#F2F6FF', border: '#5B8DEF' },
+  'Instrucciones paso a paso': { icon: '📋', color: '#FFFDF2', border: '#E6B800' },
+  'Dónde comprar los ingredientes': { icon: '🛒', color: '#F9F2FF', border: '#9C6ADE' },
+  'Calculadora de costos':     { icon: '💰', color: '#F2FFF8', border: '#26A69A' },
+};
+
+function parseSections(text) {
+  const parts = text.split(/\n(?=## )/);
+  const sections = parts
+    .map(part => {
+      const m = part.match(/^## (.+)\n([\s\S]*)/);
+      if (!m) return null;
+      return { title: m[1].trim(), content: m[2].trim() };
+    })
+    .filter(Boolean);
+  return sections;
+}
+
+function RecipeCard({ text }) {
+  const sections = parseSections(text);
+  if (sections.length < 2) return <MarkdownText text={text} />;
+
+  return (
+    <div className="recipe-card-response">
+      {sections.map((sec, i) => {
+        const meta = Object.entries(SECTION_META).find(([k]) =>
+          sec.title.toLowerCase().includes(k.toLowerCase().slice(0, 8))
+        );
+        const { icon, color, border } = meta?.[1] || { icon: '•', color: '#F9F9F9', border: '#B08968' };
+        return (
+          <div key={i} className="recipe-sec" style={{ background: color, borderLeftColor: border }}>
+            <div className="recipe-sec-header">
+              <span className="recipe-sec-icon">{icon}</span>
+              <span className="recipe-sec-title">{sec.title}</span>
+            </div>
+            <div className="recipe-sec-body">
+              <MarkdownText text={sec.content} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 function ChatIA() {
@@ -179,7 +223,7 @@ function ChatIA() {
         <div className="chat-window">
           {mensajes.map((m, i) => (
             <div key={i} className={`msg-bubble ${m.rol}`}>
-              {m.rol === 'ai' ? <MarkdownText text={m.texto} /> : m.texto}
+              {m.rol === 'ai' ? <RecipeCard text={m.texto} /> : m.texto}
             </div>
           ))}
           {isLoading && <div className="msg-bubble ai typing">Analizando activos...</div>}
