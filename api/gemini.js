@@ -42,11 +42,11 @@ async function streamModel(modelName, contents, apiKey, onChunk) {
   const body = {
     system_instruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
     contents,
+    generationConfig: {
+      maxOutputTokens: 800,
+      ...(modelName.includes('2.5') ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
+    },
   };
-
-  if (modelName.includes('2.5')) {
-    body.generationConfig = { thinkingConfig: { thinkingBudget: 0 } };
-  }
 
   const res = await fetch(url, {
     method: 'POST',
