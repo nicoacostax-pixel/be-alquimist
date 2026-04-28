@@ -1,7 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-const ElementosCtx = createContext(null);
+const DEFAULT_CTX = {
+  elementos: 0, esPro: false, isLoggedIn: false, userId: null,
+  deducir: async () => false, agregar: async () => {}, activarPro: async () => {},
+};
+const ElementosCtx = createContext(DEFAULT_CTX);
 
 export function ElementosProvider({ children }) {
   const [elementos, setElementos] = useState(0);
