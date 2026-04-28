@@ -1,61 +1,64 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-export default async function handler(req, res) {
-  // 1. Configuración de seguridad y métodos
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+const systemStyle = [
+  'Eres Be Alquimist, un asistente experto en cosmética natural.',
+  'Responde en español, de forma clara y accionable.',
+  'Cuando des fórmulas, incluye porcentajes y un paso a paso breve.',
+  'Si faltan datos, haz 1-3 preguntas concretas antes de asumir.',
+].join(' ');
+
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
   if (!GEMINI_API_KEY) {
-    return res.status(500).json({ error: 'GEMINI_API_KEY no configurada en Vercel' });
+    console.error('GEMINI_API_KEY is not set');
+    return res.status(500).json({ error: 'Server not configured', details: { message: 'GEMINI_API_KEY environment variable is missing' } });
   }
 
   const prompt = (req.body?.prompt || '').toString().trim();
   if (!prompt) {
-    return res.status(400).json({ error: 'Falta el prompt del usuario.' });
+    return res.status(400).json({ error: 'Missing prompt.' });
   }
-
-  const systemStyle = [
-    'Eres Be Alquimist, un asistente experto en cosmética natural.',
-    'Responde en español, de forma clara y accionable.',
-    'Cuando des fórmulas, incluye porcentajes y un paso a paso breve.',
-    'Si faltan datos, haz 1-3 preguntas concretas antes de asumir.',
-  ].join(' ');
 
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-  // 2. Priorizamos 1.5-flash porque es el que tiene la cuota más estable y gratuita
   const modelCandidates = [
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-latest',
-    'gemini-2.0-flash-lite-preview-02-05',
-    'gemini-pro',
-  ];
+    process.env.GEMINI_MODEL,
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-lite',
+    'gemini-flash-latest',
+  ].filter(Boolean);
 
   let lastErr = null;
-
   for (const modelName of modelCandidates) {
     try {
+      console.log(`Trying model: ${modelName}`);
       const model = genAI.getGenerativeModel({ model: modelName });
       const result = await model.generateContent(`${systemStyle}\n\nUsuario: ${prompt}`);
-      const response = await result.response;
-      const text = response.text();
-      
+      const text = result?.response?.text?.() || '';
+      console.log(`Success with model: ${modelName}`);
       return res.status(200).json({ text, model: modelName });
     } catch (e) {
+      console.error(`Model ${modelName} failed:`, e.message);
       lastErr = e;
-      // Si es error de cuota (429) o no encontrado (404), intentamos con el siguiente
-      if (e.status === 429 || e.status === 404 || e.message.includes('quota')) {
-        continue;
-      }
-      break; 
+      const msg = e?.message || '';
+      const skip = e?.status === 404 || e?.status === 429 ||
+        msg.includes('not found') || msg.includes('404') ||
+        msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests');
+      if (skip) continue;
+      break;
     }
   }
 
+  const err = lastErr || new Error('No compatible model found');
+  console.error('All models failed. Last error:', err.message);
   return res.status(500).json({
-    error: 'Hubo un problema al conectar con el laboratorio',
-    details: lastErr?.message
+    error: 'Gemini request failed.',
+    details: { name: err.name, message: err.message },
   });
-}
+};
