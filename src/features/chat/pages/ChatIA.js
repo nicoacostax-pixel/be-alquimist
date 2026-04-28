@@ -363,6 +363,16 @@ function ChatIA() {
       {showElementosModal && <ElementosModal onClose={() => setShowElementosModal(false)} />}
       <SidebarMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
+      {isLoggedIn && (
+        <button className="elementos-banner" onClick={() => setShowElementosModal(true)}>
+          <span className="elementos-banner-icon">⚗️</span>
+          <span className="elementos-banner-text">
+            {esPro ? '∞ Elementos ilimitados — Alquimista PRO' : `${elementos} Elemento${elementos !== 1 ? 's' : ''} disponible${elementos !== 1 ? 's' : ''} para formular`}
+          </span>
+          <span className="elementos-banner-arrow">›</span>
+        </button>
+      )}
+
       <header className="app-header-final">
         <div className="header-left-section">
           <div className="static-name">Be Alquimist</div>
@@ -376,16 +386,6 @@ function ChatIA() {
           <div className="barras-menu"></div><div className="barras-menu"></div><div className="barras-menu"></div>
         </button>
       </header>
-
-      {isLoggedIn && (
-        <button className="elementos-banner" onClick={() => setShowElementosModal(true)}>
-          <span className="elementos-banner-icon">⚗️</span>
-          <span className="elementos-banner-text">
-            {esPro ? '∞ Elementos ilimitados — Alquimista PRO' : `${elementos} Elemento${elementos !== 1 ? 's' : ''} disponible${elementos !== 1 ? 's' : ''} para formular`}
-          </span>
-          <span className="elementos-banner-arrow">›</span>
-        </button>
-      )}
 
       <main className="content">
         <p className="welcome-text">{saludoAleatorio}</p>
