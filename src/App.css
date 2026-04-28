@@ -5488,6 +5488,16 @@ body, #root {
   background: #fff;
 }
 
+.perfil-card-posts{
+  background: #fff;
+}
+
+@media (max-width: 900px) {.perfil-card-posts{
+  width: 39%;
+  background: #fff;
+}
+}
+
 @media (max-width: 768px) {.perfil-card-activity{
   width: 39%;
   background: #fff;
@@ -5647,10 +5657,14 @@ body, #root {
 }
  @media (max-width: 768px) { 
   .perfil-post-item {
-    width: 100%;
+    width: 39%;
     background-color: #fff;
   }
 }
+
+  .perfil-post-item {
+    background-color: #fff;
+  }
 
 .perfil-post-item:hover { border-color: #B08968; }
 
