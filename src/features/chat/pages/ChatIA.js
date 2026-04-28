@@ -206,6 +206,30 @@ function ChatIA() {
       body: JSON.stringify({ prompt: promptUsuario, history: historial }),
     });
 
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      throw new Error(json.error || `Error ${res.status}`);
+    }
+
+    // Fallback para browsers que no soportan ReadableStream (Android WebView antiguo)
+    if (!res.body || !res.body.getReader) {
+      const text = await res.text();
+      let full = '';
+      for (const line of text.split('\n')) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (!raw) continue;
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed.error) throw new Error(parsed.error);
+          if (parsed.text) { full += parsed.text; onChunk(full); }
+        } catch (err) {
+          if (!(err instanceof SyntaxError)) throw err;
+        }
+      }
+      return full;
+    }
+
     const reader  = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
@@ -231,7 +255,7 @@ function ChatIA() {
             onChunk(full);
           }
         } catch (err) {
-          if (!(err instanceof SyntaxError)) throw err; // solo silenciar errores de parse
+          if (!(err instanceof SyntaxError)) throw err;
         }
       }
     }

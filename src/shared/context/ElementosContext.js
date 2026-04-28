@@ -36,20 +36,21 @@ export function ElementosProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data }) => {
+      const uid = data?.session?.user?.id || null;
+      setUserId(uid);
+      setIsLoggedIn(!!uid);
+      if (uid) sincronizar(uid).catch(console.error);
+    }).catch(console.error);
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_e, session) => {
       const uid = session?.user?.id || null;
       setUserId(uid);
       setIsLoggedIn(!!uid);
-      if (uid) sincronizar(uid);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      const uid = session?.user?.id || null;
-      setUserId(uid);
-      setIsLoggedIn(!!uid);
-      if (uid) sincronizar(uid);
+      if (uid) sincronizar(uid).catch(console.error);
       else { setElementos(0); setEsPro(false); }
     });
-    return () => subscription.unsubscribe();
+    return () => authListener?.subscription?.unsubscribe();
   }, [sincronizar]);
 
   const deducir = useCallback(async () => {

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CartProvider } from './shared/context/CartContext';
 import { ElementosProvider } from './shared/context/ElementosContext';
+import ErrorBoundary from './shared/components/ErrorBoundary';
 
 import Login from './features/auth/pages/Login';
 import ChatIA from './features/chat/pages/ChatIA';
@@ -27,6 +28,7 @@ import Marcadores from './features/comunidad/pages/Marcadores';
 
 function App() {
   return (
+    <ErrorBoundary>
     <CartProvider>
     <ElementosProvider>
       <Router>
@@ -64,6 +66,7 @@ function App() {
       </Router>
     </ElementosProvider>
     </CartProvider>
+    </ErrorBoundary>
   );
 }
 
