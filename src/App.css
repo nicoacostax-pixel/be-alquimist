@@ -5493,7 +5493,7 @@ body, #root {
 }
 
 @media (max-width: 900px) {.perfil-card-posts{
-  width: 39%;
+  width: 45%;
   background: #fff;
 }
 }
@@ -5511,10 +5511,11 @@ body, #root {
   overflow: hidden;
 }
 .perfil-card-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #1A1A1A;
-  margin: 0 0 16px;
+      color: #1a1a1a;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 6px 14px 16px;
+    padding-top: 12px;
 }
 
 /* ── Heatmap ── */
@@ -5657,7 +5658,7 @@ body, #root {
 }
  @media (max-width: 768px) { 
   .perfil-post-item {
-    width: 39%;
+    width: 91%;
     background-color: #fff;
   }
 }
