@@ -218,10 +218,11 @@ export default function PerfilUsuario() {
       const { data: { session } } = await supabase.auth.getSession();
       const uid = session?.user?.id;
 
-      const [{ data: perfilData }, { data: postsData }] = await Promise.all([
-        supabase.from('perfiles').select('id, nombre, apellido, bio, avatar_url, created_at').eq('id', userId).maybeSingle(),
+      const [{ data: perfilesArr }, { data: postsData }] = await Promise.all([
+        supabase.from('perfiles').select('id, nombre, apellido, bio, avatar_url, created_at').in('id', [userId]),
         supabase.from('posts').select('id, titulo, contenido, imagen_url, metadata, created_at').eq('usuario_id', userId).order('created_at', { ascending: false }),
       ]);
+      const perfilData = perfilesArr?.[0] || null;
 
       const userPosts = postsData || [];
       let totalLikesCount = 0;

@@ -43,6 +43,7 @@ function randomItem(items) {
 
 function SocialProofPopup() {
   const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const [productosPool, setProductosPool] = useState(FALLBACK_PRODUCTOS);
   const [data, setData] = useState({ nombre: '', ciudad: '', producto: '', tiempo: 1 });
 
@@ -93,6 +94,8 @@ function SocialProofPopup() {
     };
   }, [showRandomPopup]);
 
+  if (dismissed) return null;
+
   return (
     <div
       className={`global-social-proof-popup ${visible ? 'is-visible' : 'is-hidden'}`}
@@ -100,6 +103,7 @@ function SocialProofPopup() {
       aria-live={visible ? 'polite' : undefined}
       aria-hidden={!visible}
     >
+      <button className="gsp-close" onClick={() => setDismissed(true)} aria-label="Cerrar">✕</button>
       <div className="gsp-badge">Actividad reciente</div>
       <p className="gsp-message">
         <strong>{data.nombre}</strong> de <strong>{data.ciudad}</strong> compro{' '}

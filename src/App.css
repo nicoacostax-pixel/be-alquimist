@@ -4077,6 +4077,22 @@ header.app-header-premium .header-right-actions {
   transition: opacity 0.28s ease, transform 0.28s ease;
   pointer-events: none;
 }
+.global-social-proof-popup.is-visible { pointer-events: auto; }
+.gsp-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #B08968;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+  opacity: 0.7;
+}
+.gsp-close:hover { opacity: 1; background: #F3EFE8; }
 
 .global-social-proof-popup.is-visible {
   opacity: 1;
