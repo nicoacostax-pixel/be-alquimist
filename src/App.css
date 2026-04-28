@@ -354,8 +354,26 @@ body {
 }
 
 .premium-input-field:focus {
-  border-color: #B08968; /* Borde Terracota al escribir */
+  border-color: #B08968;
   box-shadow: 0 4px 12px rgba(176, 137, 104, 0.1);
+}
+
+.premium-input-field.input-error {
+  border-color: #E53E3E;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.15);
+}
+
+.premium-input-field.input-error:focus {
+  border-color: #E53E3E;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2);
+}
+
+.error-message-alquimist {
+  display: block;
+  color: #E53E3E;
+  font-size: 12px;
+  margin-top: 6px;
+  padding-left: 4px;
 }
 
 /* BOTÓN ENTRAR (Terracota Sólido) */

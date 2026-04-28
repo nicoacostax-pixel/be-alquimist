@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../shared/lib/supabaseClient';
 import '../../../App.css';
@@ -24,10 +24,40 @@ function Registro() {
   const [errorTelefono, setErrorTelefono] = useState('');
   const [loading,       setLoading]       = useState(false);
 
+  const telefonoTimer = useRef(null);
+  const emailTimer    = useRef(null);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (e.target.name === 'email')    setErrorEmail('');
-    if (e.target.name === 'telefono') setErrorTelefono('');
+    const { name, value } = e.target;
+    setFormData(p => ({ ...p, [name]: value }));
+
+    if (name === 'telefono') {
+      setErrorTelefono('');
+      clearTimeout(telefonoTimer.current);
+      telefonoTimer.current = setTimeout(async () => {
+        if (!value.trim()) return;
+        const { data } = await supabase
+          .from('perfiles')
+          .select('telefono')
+          .eq('telefono', value.trim())
+          .maybeSingle();
+        if (data) setErrorTelefono("Este número ya está registrado");
+      }, 500);
+    }
+
+    if (name === 'email') {
+      setErrorEmail('');
+      clearTimeout(emailTimer.current);
+      emailTimer.current = setTimeout(async () => {
+        if (!value.trim()) return;
+        const { data } = await supabase
+          .from('perfiles')
+          .select('email')
+          .eq('email', value.trim())
+          .single();
+        if (data) setErrorEmail("Ups, otra Alquimista registró este correo");
+      }, 500);
+    }
   };
 
   const checkEmailExists = async () => {
@@ -38,16 +68,6 @@ function Registro() {
       .eq('email', formData.email)
       .single();
     if (data) setErrorEmail("Ups, otra Alquimista registró este correo");
-  };
-
-  const checkTelefonoExists = async () => {
-    if (!formData.telefono) return;
-    const { data } = await supabase
-      .from('perfiles')
-      .select('telefono')
-      .eq('telefono', formData.telefono.trim())
-      .maybeSingle();
-    if (data) setErrorTelefono("Este número ya está registrado");
   };
 
   const handleRegistro = async (e) => {
@@ -111,7 +131,6 @@ function Registro() {
               placeholder="Ej: +52 8112345678"
               value={formData.telefono}
               onChange={handleChange}
-              onBlur={checkTelefonoExists}
               required
             />
             {errorTelefono && <span className="error-message-alquimist">{errorTelefono}</span>}
@@ -125,7 +144,6 @@ function Registro() {
               className={`premium-input-field ${errorEmail ? 'input-error' : ''}`}
               placeholder="tu@email.com"
               onChange={handleChange}
-              onBlur={checkEmailExists}
               required
             />
             {errorEmail && <span className="error-message-alquimist">{errorEmail}</span>}
