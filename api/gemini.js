@@ -2,12 +2,18 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-const systemStyle = [
-  'Eres Be Alquimist, un asistente experto en cosmética natural.',
-  'Responde en español, de forma clara y accionable.',
-  'Cuando des fórmulas, incluye porcentajes y un paso a paso breve.',
-  'Si faltan datos, haz 1-3 preguntas concretas antes de asumir.',
-].join(' ');
+const SYSTEM_INSTRUCTION = `Eres Be Alquimist, asistente experto en cosmética natural y formulación artesanal.
+Responde siempre en español, de forma clara, cálida y accionable.
+Cuando des fórmulas incluye porcentajes exactos y un paso a paso numerado.
+Si el usuario no da suficiente información, haz máximo 3 preguntas concretas antes de asumir.
+Usa formato Markdown: **negrita** para términos clave, listas numeradas para pasos, listas con guiones para ingredientes.`;
+
+const MODEL_CANDIDATES = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-lite',
+  'gemini-flash-latest',
+];
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -15,36 +21,41 @@ module.exports = async function handler(req, res) {
   }
 
   if (!GEMINI_API_KEY) {
-    console.error('GEMINI_API_KEY is not set');
-    return res.status(500).json({ error: 'Server not configured', details: { message: 'GEMINI_API_KEY environment variable is missing' } });
+    return res.status(500).json({
+      error: 'Server not configured',
+      details: { message: 'GEMINI_API_KEY environment variable is missing' },
+    });
   }
 
-  const prompt = (req.body?.prompt || '').toString().trim();
-  if (!prompt) {
-    return res.status(400).json({ error: 'Missing prompt.' });
-  }
+  const prompt  = (req.body?.prompt  || '').toString().trim();
+  const history = Array.isArray(req.body?.history) ? req.body.history : [];
+
+  if (!prompt) return res.status(400).json({ error: 'Missing prompt.' });
 
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-  const modelCandidates = [
-    process.env.GEMINI_MODEL,
-    'gemini-2.5-flash',
-    'gemini-2.0-flash',
-    'gemini-2.0-flash-lite',
-    'gemini-flash-latest',
-  ].filter(Boolean);
+  // Build Gemini conversation history format
+  const contents = [
+    ...history.map(m => ({
+      role: m.role === 'model' ? 'model' : 'user',
+      parts: [{ text: m.text }],
+    })),
+    { role: 'user', parts: [{ text: prompt }] },
+  ];
 
   let lastErr = null;
-  for (const modelName of modelCandidates) {
+  const candidates = [process.env.GEMINI_MODEL, ...MODEL_CANDIDATES].filter(Boolean);
+
+  for (const modelName of candidates) {
     try {
-      console.log(`Trying model: ${modelName}`);
-      const model = genAI.getGenerativeModel({ model: modelName });
-      const result = await model.generateContent(`${systemStyle}\n\nUsuario: ${prompt}`);
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction: SYSTEM_INSTRUCTION,
+      });
+      const result = await model.generateContent({ contents });
       const text = result?.response?.text?.() || '';
-      console.log(`Success with model: ${modelName}`);
       return res.status(200).json({ text, model: modelName });
     } catch (e) {
-      console.error(`Model ${modelName} failed:`, e.message);
       lastErr = e;
       const msg = e?.message || '';
       const skip = e?.status === 404 || e?.status === 429 ||
@@ -56,7 +67,6 @@ module.exports = async function handler(req, res) {
   }
 
   const err = lastErr || new Error('No compatible model found');
-  console.error('All models failed. Last error:', err.message);
   return res.status(500).json({
     error: 'Gemini request failed.',
     details: { name: err.name, message: err.message },

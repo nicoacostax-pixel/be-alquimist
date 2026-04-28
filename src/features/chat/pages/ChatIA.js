@@ -2,6 +2,49 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import '../../../App.css';
 import SidebarMenu from '../../catalog/components/SidebarMenu';
 
+function MarkdownText({ text }) {
+  // Split into blocks by double newline (paragraphs) then handle inline
+  const blocks = text.split(/\n{2,}/);
+  return (
+    <div className="md-text">
+      {blocks.map((block, bi) => {
+        // Numbered list block
+        if (/^\d+\.\s/.test(block)) {
+          const items = block.split(/\n/).filter(Boolean);
+          return (
+            <ol key={bi} className="md-ol">
+              {items.map((item, ii) => (
+                <li key={ii} dangerouslySetInnerHTML={{ __html: inlineFormat(item.replace(/^\d+\.\s*/, '')) }} />
+              ))}
+            </ol>
+          );
+        }
+        // Bullet list block
+        if (/^[\*\-]\s/.test(block)) {
+          const items = block.split(/\n/).filter(Boolean);
+          return (
+            <ul key={bi} className="md-ul">
+              {items.map((item, ii) => (
+                <li key={ii} dangerouslySetInnerHTML={{ __html: inlineFormat(item.replace(/^[\*\-]\s*/, '')) }} />
+              ))}
+            </ul>
+          );
+        }
+        // Regular paragraph (preserve single \n as <br>)
+        const html = block.split('\n').map(line => inlineFormat(line)).join('<br/>');
+        return <p key={bi} className="md-p" dangerouslySetInnerHTML={{ __html: html }} />;
+      })}
+    </div>
+  );
+}
+
+function inlineFormat(str) {
+  return str
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,     '<em>$1</em>')
+    .replace(/`(.+?)`/g,       '<code>$1</code>');
+}
+
 function ChatIA() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -70,12 +113,12 @@ function ChatIA() {
     return () => clearTimeout(timeout);
   }, [subIndex, index, reversa, palabras]);
 
-  const enviarAGemini = async (promptUsuario) => {
+  const enviarAGemini = async (promptUsuario, historial) => {
     try {
       const res = await fetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: promptUsuario }),
+        body: JSON.stringify({ prompt: promptUsuario, history: historial }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -94,11 +137,18 @@ function ChatIA() {
     if (!input.trim()) return;
 
     const userMsg = { rol: 'user', texto: input };
+    const historialActual = [...mensajes];
     setMensajes(prev => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
 
-    const respuestaIA = await enviarAGemini(input);
+    // Pass conversation history so Gemini has context
+    const historial = historialActual.map(m => ({
+      role: m.rol === 'user' ? 'user' : 'model',
+      text: m.texto,
+    }));
+
+    const respuestaIA = await enviarAGemini(input, historial);
 
     setMensajes(prev => [...prev, { rol: 'ai', texto: respuestaIA }]);
     setIsLoading(false);
@@ -128,7 +178,9 @@ function ChatIA() {
 
         <div className="chat-window">
           {mensajes.map((m, i) => (
-            <div key={i} className={`msg-bubble ${m.rol}`}>{m.texto}</div>
+            <div key={i} className={`msg-bubble ${m.rol}`}>
+              {m.rol === 'ai' ? <MarkdownText text={m.texto} /> : m.texto}
+            </div>
           ))}
           {isLoading && <div className="msg-bubble ai typing">Analizando activos...</div>}
           <div ref={scrollRef} />
