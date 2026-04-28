@@ -4951,7 +4951,7 @@ body, #root {
 /* ── Columna izquierda ── */
 .co-left {
   flex: 1 1 0;
-  max-width: 700px;
+  max-width: 750px;
   margin-left: auto;
   padding: 48px 56px 80px 48px;
   box-sizing: border-box;

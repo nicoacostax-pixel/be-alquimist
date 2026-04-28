@@ -20,35 +20,43 @@ function Registro() {
     password: ''
   });
 
-  const [errorEmail, setErrorEmail] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [errorEmail,    setErrorEmail]    = useState('');
+  const [errorTelefono, setErrorTelefono] = useState('');
+  const [loading,       setLoading]       = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (e.target.name === 'email') setErrorEmail('');
+    if (e.target.name === 'email')    setErrorEmail('');
+    if (e.target.name === 'telefono') setErrorTelefono('');
   };
 
   const checkEmailExists = async () => {
     if (!formData.email) return;
-
     const { data } = await supabase
       .from('perfiles')
       .select('email')
       .eq('email', formData.email)
       .single();
+    if (data) setErrorEmail("Ups, otra Alquimista registró este correo");
+  };
 
-    if (data) {
-      setErrorEmail("Ups, otra Alquimista registró este correo");
-    }
+  const checkTelefonoExists = async () => {
+    if (!formData.telefono) return;
+    const { data } = await supabase
+      .from('perfiles')
+      .select('telefono')
+      .eq('telefono', formData.telefono.trim())
+      .maybeSingle();
+    if (data) setErrorTelefono("Este número ya está registrado");
   };
 
   const handleRegistro = async (e) => {
     e.preventDefault();
-    if (errorEmail) return;
+    if (errorEmail || errorTelefono) return;
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
       options: {
@@ -63,6 +71,12 @@ function Registro() {
     if (error) {
       alert("Error: " + error.message);
     } else {
+      if (signUpData?.user) {
+        await supabase.from('perfiles').upsert({
+          id: signUpData.user.id,
+          telefono: formData.telefono.trim(),
+        });
+      }
       alert("¡Bienvenida al laboratorio!");
       navigate('/login');
     }
@@ -93,12 +107,14 @@ function Registro() {
             <input
               name="telefono"
               type="tel"
-              className="premium-input-field"
+              className={`premium-input-field ${errorTelefono ? 'input-error' : ''}`}
               placeholder="Ej: +52 8112345678"
               value={formData.telefono}
               onChange={handleChange}
+              onBlur={checkTelefonoExists}
               required
             />
+            {errorTelefono && <span className="error-message-alquimist">{errorTelefono}</span>}
           </div>
 
           <div className="input-group-premium">
@@ -120,7 +136,7 @@ function Registro() {
             <input name="password" type="password" className="premium-input-field" placeholder="Tu contraseña" onChange={handleChange} required />
           </div>
 
-          <button type="submit" className="premium-submit-btn" disabled={loading || errorEmail}>
+          <button type="submit" className="premium-submit-btn" disabled={loading || !!errorEmail || !!errorTelefono}>
             {loading ? "Mezclando ingredientes..." : "Crear Cuenta"}
           </button>
         </form>
