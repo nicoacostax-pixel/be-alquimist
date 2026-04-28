@@ -49,7 +49,11 @@ module.exports = async function handler(req, res) {
     } catch (e) {
       console.error(`Model ${modelName} failed:`, e.message);
       lastErr = e;
-      if (e?.status === 404 || e?.message?.includes('not found') || e?.message?.includes('404')) continue;
+      const msg = e?.message || '';
+      const skip = e?.status === 404 || e?.status === 429 ||
+        msg.includes('not found') || msg.includes('404') ||
+        msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests');
+      if (skip) continue;
       break;
     }
   }
