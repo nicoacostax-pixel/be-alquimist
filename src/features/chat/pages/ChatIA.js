@@ -99,10 +99,10 @@ function LoginModal({ onClose }) {
     <div className="chat-modal-overlay">
       <div className="chat-modal">
         <span className="chat-modal-icon">🔒</span>
-        <h3 className="chat-modal-title">Laboratorio gratuito agotado</h3>
-        <p className="chat-modal-sub">Has usado tus <strong>3 recetas gratuitas</strong>.<br/>Inicia sesión para seguir formulando sin límites.</p>
+        <h3 className="chat-modal-title">Función exclusiva</h3>
+        <p className="chat-modal-sub">La <strong>calculadora de costos</strong> es exclusiva para usuarios registrados.<br/>Inicia sesión para desbloquearla.</p>
         <Link to="/login" className="chat-login-btn">Iniciar sesión</Link>
-        <button className="chat-modal-skip" onClick={onClose}>Ahora no</button>
+        <button className="chat-modal-skip" onClick={onClose}>Crear otra receta</button>
       </div>
     </div>
   );
@@ -311,7 +311,7 @@ function ChatIA() {
 
   return (
     <div className={`app-container ${isMenuOpen ? 'menu-visible' : ''}`}>
-      {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
+      {showLoginModal && <LoginModal onClose={() => { setShowLoginModal(false); setMensajes([]); }} />}
       <SidebarMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
       <header className="app-header-final">
