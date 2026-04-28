@@ -2,7 +2,8 @@
   "buildCommand": "npm run build",
   "outputDirectory": "build",
   "functions": {
-    "api/gemini.js": { "maxDuration": 45 }
+    "api/gemini.js": { "maxDuration": 45 },
+    "api/generar-imagen-receta.js": { "maxDuration": 45 }
   },
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/index.html" }
