@@ -4,8 +4,7 @@ import '../../../App.css';
 import SidebarMenu from '../../catalog/components/SidebarMenu';
 import { supabase } from '../../../shared/lib/supabaseClient';
 
-const RECIPE_LIMIT = 3;
-const STORAGE_KEY  = 'ba_free_recipes';
+const STORAGE_KEY = 'ba_free_recipes';
 
 function inlineFormat(str) {
   return str
@@ -108,6 +107,20 @@ function LoginModal({ onClose }) {
   );
 }
 
+function LimitModal({ onClose }) {
+  return (
+    <div className="chat-modal-overlay">
+      <div className="chat-modal">
+        <span className="chat-modal-icon">🧪</span>
+        <h3 className="chat-modal-title">Receta gratuita agotada</h3>
+        <p className="chat-modal-sub">Puedes crear <strong>1 receta gratuita</strong> sin registrarte.<br/>Inicia sesión para seguir formulando sin límites.</p>
+        <Link to="/login" className="chat-login-btn">Iniciar sesión</Link>
+        <button className="chat-modal-skip" onClick={onClose}>Ahora no</button>
+      </div>
+    </div>
+  );
+}
+
 function ChatIA() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -121,6 +134,7 @@ function ChatIA() {
     () => parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
   );
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -275,6 +289,22 @@ function ChatIA() {
     }
 
     setIsLoading(false);
+
+    // Detecta si la IA acaba de iniciar una receta (primer paso: descripción)
+    const esInicioReceta = /¿Quieres ver la fórmula completa\?/i.test(respuestaIA);
+    if (esInicioReceta && !isLoggedIn) {
+      if (recipeCount >= 1) {
+        // Ya usó su receta gratuita — bloquear y mostrar modal
+        setMensajes(prev => prev.filter(m => !m.streaming));
+        setShowLimitModal(true);
+        return;
+      }
+      // Primera receta gratuita — contabilizar
+      const nuevo = recipeCount + 1;
+      setRecipeCount(nuevo);
+      localStorage.setItem(STORAGE_KEY, String(nuevo));
+    }
+
     setMensajes(prev => [
       ...prev.filter(m => !m.streaming),
       { rol: 'ai', texto: respuestaIA },
@@ -283,16 +313,8 @@ function ChatIA() {
 
   function handleConfirm() {
     if (isCalculadoraConfirm && !isLoggedIn) {
-      const nuevo = recipeCount + 1;
-      setRecipeCount(nuevo);
-      localStorage.setItem(STORAGE_KEY, String(nuevo));
       setShowLoginModal(true);
       return;
-    }
-    if (isCalculadoraConfirm) {
-      const nuevo = recipeCount + 1;
-      setRecipeCount(nuevo);
-      localStorage.setItem(STORAGE_KEY, String(nuevo));
     }
     enviar('Sí');
   }
@@ -312,6 +334,7 @@ function ChatIA() {
   return (
     <div className={`app-container ${isMenuOpen ? 'menu-visible' : ''}`}>
       {showLoginModal && <LoginModal onClose={() => { setShowLoginModal(false); setMensajes([]); }} />}
+      {showLimitModal && <LimitModal onClose={() => { setShowLimitModal(false); setMensajes([]); }} />}
       <SidebarMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
       <header className="app-header-final">
