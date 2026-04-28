@@ -4945,15 +4945,14 @@ body, #root {
   min-height: 100vh;
   background: #ffffff;
   font-family: 'Poppins', sans-serif;
-  max-width: 1200px;
-  margin: 0 auto;
   width: 100%;
 }
 
 /* ── Columna izquierda ── */
 .co-left {
   flex: 1 1 0;
-  max-width: 640px;
+  max-width: 700px;
+  margin-left: auto;
   padding: 48px 56px 80px 48px;
   box-sizing: border-box;
   border-right: 1px solid #E5E5E5;
@@ -5244,10 +5243,11 @@ body, #root {
 
 /* ── Columna derecha: resumen ── */
 .co-summary {
-  flex: 0 0 400px;
+  flex: 1 1 380px;
+  max-width: 500px;
   background: #F5F0EA;
   border-left: 1px solid #E5E5E5;
-  padding: 48px 32px 60px;
+  padding: 48px 40px 60px;
   box-sizing: border-box;
   min-height: 100vh;
 }
@@ -5418,8 +5418,8 @@ body, #root {
    CHECKOUT RESPONSIVE
    ═══════════════════════════════════════════════ */
 @media (max-width: 900px) {
-  .co-left    { padding: 32px 28px 60px; }
-  .co-summary { flex: 0 0 320px; padding: 32px 20px; }
+  .co-left    { padding: 32px 28px 60px; margin-left: 0; }
+  .co-summary { flex: 1 1 280px; max-width: 360px; padding: 32px 20px; }
 }
 
 @media (max-width: 680px) {
