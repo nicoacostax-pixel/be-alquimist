@@ -2124,6 +2124,140 @@ body {
     text-decoration: underline;
 }
 
+/* ── CUENTA TABS ─────────────────────────────────────────────── */
+.cuenta-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 16px 0 24px;
+  border-bottom: 2px solid #EDE8E1;
+}
+
+.cuenta-tab {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.cuenta-tab.active {
+  color: #B08968;
+  border-bottom-color: #B08968;
+}
+
+.cuenta-tab:hover:not(.active) { color: #4A3F35; }
+
+.cuenta-section {
+  padding-top: 4px;
+}
+
+.cuenta-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #4A3F35;
+  margin: 0 0 12px;
+}
+
+.cuenta-loading { color: #888; padding: 24px 0; text-align: center; }
+.cuenta-success { color: #2e7d32; font-size: 14px; margin: 8px 0; }
+.cuenta-error   { color: #c0392b; font-size: 14px; margin: 8px 0; }
+
+.cuenta-empty {
+  text-align: center;
+  padding: 40px 0;
+  color: #888;
+}
+
+.cuenta-empty-icon { font-size: 40px; display: block; margin-bottom: 12px; }
+
+/* ── PEDIDOS ─────────────────────────────────────────────────── */
+.pedidos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pedido-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #FDFAF6;
+  border: 1px solid #EDE8E1;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.pedido-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pedido-desc  { font-size: 14px; font-weight: 500; color: #4A3F35; }
+.pedido-fecha { font-size: 12px; color: #888; }
+
+.pedido-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.pedido-monto { font-size: 15px; font-weight: 600; color: #4A3F35; }
+
+.pedido-status {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.pedido-status--ok { background: #E8F5E9; color: #2e7d32; }
+
+/* ── PLAN ────────────────────────────────────────────────────── */
+.plan-status-card {
+  background: #FDF8F4;
+  border: 1px solid #EDE8E1;
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+}
+
+.plan-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.plan-badge--pro  { background: #B08968; color: #fff; }
+.plan-badge--free { background: #EDE8E1; color: #4A3F35; }
+
+.plan-desc { font-size: 14px; color: #666; margin: 0 0 14px; line-height: 1.5; }
+
+.cuenta-cancel-btn {
+  background: none;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.cuenta-cancel-btn:hover:not(:disabled) { background: #c0392b; color: #fff; }
+.cuenta-cancel-btn:disabled { opacity: 0.6; cursor: wait; }
+
 @media (max-width: 768px) {
     .app-container {
       max-width: 100%;
