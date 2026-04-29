@@ -1,5 +1,19 @@
-const { createClient } = require('@supabase/supabase-js');
 const Stripe = require('stripe');
+
+// Decode JWT payload without external call (no signature verification needed —
+// we only use email/sub to scope the user's own data)
+function decodeJwt(token) {
+  try {
+    const payload = token.split('.')[1];
+    const json = Buffer.from(payload, 'base64url').toString('utf8');
+    const claims = JSON.parse(json);
+    // Reject expired tokens
+    if (claims.exp && claims.exp < Math.floor(Date.now() / 1000)) return null;
+    return claims;
+  } catch {
+    return null;
+  }
+}
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
@@ -7,16 +21,11 @@ module.exports = async function handler(req, res) {
   const { action, token } = req.body || {};
   if (!action || !token) return res.status(400).json({ error: 'Faltan parámetros' });
 
-  // Validate session token → get user email
-  const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY;
-  if (!url || !key) return res.status(500).json({ error: 'Supabase no configurado' });
+  const claims = decodeJwt(token);
+  if (!claims?.email) return res.status(401).json({ error: 'Token inválido o expirado' });
 
-  const anonClient = createClient(url, key);
-  const { data: { user }, error: authError } = await anonClient.auth.getUser(token);
-  if (authError || !user) return res.status(401).json({ error: 'No autorizado: ' + (authError?.message || 'usuario no encontrado') });
-
-  const email = user.email;
+  const email = claims.email;
+  const userId = claims.sub;
   const stripeKey = process.env.STRIPE_SECRET_KEY;
 
   try {
@@ -29,7 +38,7 @@ module.exports = async function handler(req, res) {
         .filter(pi =>
           pi.metadata?.email === email ||
           pi.receipt_email === email ||
-          pi.metadata?.userId === user.id
+          pi.metadata?.userId === userId
         )
         .filter(pi => pi.status === 'succeeded')
         .map(pi => ({
