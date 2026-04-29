@@ -8172,20 +8172,15 @@ a.post-author-name.post-author-link:hover {
 .lead-right {
   width: 260px;
   flex-shrink: 0;
-  background: #2C1F14;
-  background-image:
-    radial-gradient(circle at 25% 75%, rgba(176, 137, 104, 0.35) 0%, transparent 55%),
-    radial-gradient(circle at 80% 15%, rgba(176, 137, 104, 0.2)  0%, transparent 40%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
 }
 
-.lead-right-icon {
-  font-size: 120px;
-  opacity: 0.18;
-  line-height: 1;
-  user-select: none;
+.lead-right-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 @media (max-width: 580px) {

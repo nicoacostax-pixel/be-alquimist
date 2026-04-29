@@ -86,7 +86,7 @@ export default function InsumoPopup() {
         </div>
 
         <div className="lead-right">
-          <span className="lead-right-icon">⚗</span>
+          <img src="/popup-aceite.jpg" alt="" className="lead-right-img" />
         </div>
       </div>
     </div>
