@@ -392,16 +392,91 @@ function compressImage(file) {
   });
 }
 
-const EMPTY_FORM = { nombre: '', descripcion: '', categoria: 'General' };
+const EMPTY_FORM  = { nombre: '', categoria: 'General' };
+const EMPTY_BLOCK = { type: 'text', content: '' };
+
+function parseBlocks(desc) {
+  if (!desc) return [{ ...EMPTY_BLOCK }];
+  try {
+    const parsed = JSON.parse(desc);
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+  } catch {}
+  return [{ type: 'text', content: desc }]; // compatibilidad con texto plano
+}
+
+function BlockEditor({ blocks, onChange }) {
+  const update = (i, field, value) => {
+    const next = blocks.map((b, idx) => idx === i ? { ...b, [field]: value } : b);
+    onChange(next);
+  };
+  const add    = (type) => onChange([...blocks, { type, content: '' }]);
+  const remove = (i)    => onChange(blocks.filter((_, idx) => idx !== i));
+  const move   = (i, dir) => {
+    const next = [...blocks];
+    const to   = i + dir;
+    if (to < 0 || to >= next.length) return;
+    [next[i], next[to]] = [next[to], next[i]];
+    onChange(next);
+  };
+
+  return (
+    <div className="block-editor">
+      {blocks.map((block, i) => (
+        <div key={i} className={`block-row block-row--${block.type}`}>
+          {/* Tipo */}
+          <select
+            className="block-type-select"
+            value={block.type}
+            onChange={e => update(i, 'type', e.target.value)}
+          >
+            <option value="h1">H1 — Título</option>
+            <option value="text">Texto</option>
+          </select>
+
+          {/* Contenido */}
+          {block.type === 'h1' ? (
+            <input
+              className="block-input block-input--h1"
+              placeholder="Título de sección…"
+              value={block.content}
+              onChange={e => update(i, 'content', e.target.value)}
+            />
+          ) : (
+            <textarea
+              className="block-input block-input--text"
+              placeholder="Párrafo de texto…"
+              rows={3}
+              value={block.content}
+              onChange={e => update(i, 'content', e.target.value)}
+            />
+          )}
+
+          {/* Acciones */}
+          <div className="block-actions">
+            <button type="button" className="block-btn" onClick={() => move(i, -1)} title="Subir">↑</button>
+            <button type="button" className="block-btn" onClick={() => move(i,  1)} title="Bajar">↓</button>
+            <button type="button" className="block-btn block-btn--del" onClick={() => remove(i)} title="Eliminar">✕</button>
+          </div>
+        </div>
+      ))}
+
+      <div className="block-add-row">
+        <button type="button" className="block-add-btn" onClick={() => add('h1')}>+ Título H1</button>
+        <button type="button" className="block-add-btn" onClick={() => add('text')}>+ Texto</button>
+      </div>
+    </div>
+  );
+}
 
 function BibliotecaAdmin() {
   const [ingredientes, setIngredientes] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [saving,  setSaving]    = useState(false);
-  const [err,     setErr]       = useState('');
-  const [form,    setForm]      = useState(EMPTY_FORM);
-  const [imagen,  setImagen]    = useState(null); // { data, mimeType, previewUrl }
-  const [editId,  setEditId]    = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving,  setSaving]  = useState(false);
+  const [err,     setErr]     = useState('');
+  const [form,    setForm]    = useState(EMPTY_FORM);
+  const [blocks,  setBlocks]  = useState([{ ...EMPTY_BLOCK }]);
+  const [imagen,  setImagen]  = useState(null);
+  const [editId,  setEditId]  = useState(null);
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -427,18 +502,20 @@ function BibliotecaAdmin() {
     if (!form.nombre.trim()) { setErr('El nombre es obligatorio'); return; }
     setSaving(true);
     setErr('');
+    const descripcion = JSON.stringify(blocks.filter(b => b.content.trim()));
     try {
       if (editId) {
         const ing = ingredientes.find(i => i.id === editId);
         await callAdmin('updateIngrediente', {
-          id: editId, ...form,
+          id: editId, ...form, descripcion,
           imagen: imagen || undefined,
           imagen_url: ing?.imagen_url,
         });
       } else {
-        await callAdmin('createIngrediente', { ...form, imagen: imagen || undefined });
+        await callAdmin('createIngrediente', { ...form, descripcion, imagen: imagen || undefined });
       }
       setForm(EMPTY_FORM);
+      setBlocks([{ ...EMPTY_BLOCK }]);
       setImagen(null);
       setEditId(null);
       await cargar();
@@ -448,7 +525,8 @@ function BibliotecaAdmin() {
 
   const handleEdit = (ing) => {
     setEditId(ing.id);
-    setForm({ nombre: ing.nombre || '', descripcion: ing.descripcion || '', categoria: ing.categoria || 'General' });
+    setForm({ nombre: ing.nombre || '', categoria: ing.categoria || 'General' });
+    setBlocks(parseBlocks(ing.descripcion));
     setImagen(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -459,7 +537,10 @@ function BibliotecaAdmin() {
     catch (e) { setErr(e.message); }
   };
 
-  const handleCancel = () => { setEditId(null); setForm(EMPTY_FORM); setImagen(null); setErr(''); };
+  const handleCancel = () => {
+    setEditId(null); setForm(EMPTY_FORM);
+    setBlocks([{ ...EMPTY_BLOCK }]); setImagen(null); setErr('');
+  };
 
   return (
     <div>
@@ -471,9 +552,12 @@ function BibliotecaAdmin() {
             value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} />
           <input className="adm-input" placeholder="Categoría (ej: Aceite vegetal, Activo, Conservador…)"
             value={form.categoria} onChange={e => setForm(f => ({ ...f, categoria: e.target.value }))} />
-          <textarea className="adm-input" placeholder="Descripción, propiedades y usos cosméticos…"
-            rows={4} value={form.descripcion}
-            onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
+
+          {/* Editor de bloques */}
+          <div>
+            <p style={{ fontSize: 12, color: '#888', margin: '0 0 8px' }}>Contenido (bloques)</p>
+            <BlockEditor blocks={blocks} onChange={setBlocks} />
+          </div>
 
           {/* Imagen */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

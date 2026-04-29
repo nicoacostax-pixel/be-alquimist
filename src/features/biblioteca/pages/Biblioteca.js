@@ -7,6 +7,29 @@ import '../../../App.css';
 
 const DEFAULT_IMG = 'https://via.placeholder.com/400x300/F3EFE8/B08968?text=🌿';
 
+function parseBlocks(desc) {
+  if (!desc) return null;
+  try {
+    const parsed = JSON.parse(desc);
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+  } catch {}
+  return [{ type: 'text', content: desc }];
+}
+
+function RenderBlocks({ descripcion }) {
+  const blocks = parseBlocks(descripcion);
+  if (!blocks) return null;
+  return (
+    <div className="bib-blocks">
+      {blocks.map((block, i) =>
+        block.type === 'h1'
+          ? <h3 key={i} className="bib-block-h1">{block.content}</h3>
+          : <p   key={i} className="bib-block-text">{block.content}</p>
+      )}
+    </div>
+  );
+}
+
 export default function Biblioteca() {
   const { esPro, isLoggedIn } = useElementos();
   const [ingredientes, setIngredientes] = useState([]);
@@ -101,7 +124,9 @@ export default function Biblioteca() {
                 <div className="bib-card-body">
                   {ing.categoria && <span className="bib-card-cat">{ing.categoria}</span>}
                   <h3 className="bib-card-name">{ing.nombre}</h3>
-                  <p className="bib-card-desc">{ing.descripcion?.slice(0, 90)}{ing.descripcion?.length > 90 ? '…' : ''}</p>
+                  <p className="bib-card-desc">{
+                    (() => { try { const b = JSON.parse(ing.descripcion); return (Array.isArray(b) ? b.find(x => x.type === 'text')?.content : ing.descripcion) || ''; } catch { return ing.descripcion || ''; } })().slice(0, 90)
+                  }…</p>
                 </div>
               </button>
             ))}
@@ -121,7 +146,7 @@ export default function Biblioteca() {
             <div className="bib-modal-body">
               {selected.categoria && <span className="bib-card-cat">{selected.categoria}</span>}
               <h2 className="bib-modal-name">{selected.nombre}</h2>
-              <p className="bib-modal-desc">{selected.descripcion}</p>
+              <RenderBlocks descripcion={selected.descripcion} />
             </div>
           </div>
         </div>
