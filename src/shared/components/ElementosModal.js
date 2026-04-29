@@ -5,7 +5,9 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { useElementos } from '../context/ElementosContext';
 import { supabase } from '../lib/supabaseClient';
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+const stripePromise = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY)
+  : null;
 
 const PAQUETES = [
   { id: '10',  label: '10 elementos',  precio: '$99 MXN',   monto: 9900,  cantidad: 10 },
