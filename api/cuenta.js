@@ -75,6 +75,28 @@ module.exports = async function handler(req, res) {
       return res.json({ url: session.url });
     }
 
+    // ── CANCELAR SUSCRIPCIÓN ─────────────────────────────────────────
+    if (action === 'cancelSuscripcion') {
+      if (!stripeKey) return res.status(500).json({ error: 'Stripe no configurado' });
+      const stripe = Stripe(stripeKey);
+
+      const customers = await stripe.customers.list({ email, limit: 1 });
+      if (!customers.data.length) return res.json({ ok: true, message: 'Sin suscripción activa' });
+
+      const subs = await stripe.subscriptions.list({
+        customer: customers.data[0].id, status: 'active', limit: 1,
+      });
+      if (!subs.data.length) return res.json({ ok: true, message: 'Sin suscripción activa' });
+
+      const sub = subs.data[0];
+      await stripe.subscriptions.update(sub.id, { cancel_at_period_end: true });
+
+      const cancelDate = new Date(sub.current_period_end * 1000).toLocaleDateString('es-MX', {
+        year: 'numeric', month: 'long', day: 'numeric',
+      });
+      return res.json({ ok: true, cancelDate });
+    }
+
     return res.status(400).json({ error: 'Acción desconocida' });
   } catch (err) {
     return res.status(500).json({ error: err.message });

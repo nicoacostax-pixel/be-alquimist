@@ -242,6 +242,7 @@ function SeguridadSection() {
 function PlanSection({ userId, esPro }) {
   const [portalLoading, setPortalLoading] = useState(false);
   const [cancelando, setCancelando] = useState(false);
+  const [cancelDate, setCancelDate] = useState('');
   const [msg, setMsg] = useState('');
 
   const handlePortal = async () => {
@@ -257,13 +258,15 @@ function PlanSection({ userId, esPro }) {
   };
 
   const handleCancelarPro = async () => {
-    if (!window.confirm('¿Segura que quieres cancelar tu plan PRO? Perderás acceso a las funciones exclusivas.')) return;
+    if (!window.confirm('¿Segura que quieres cancelar tu plan PRO? Seguirás con PRO hasta el fin del período actual.')) return;
     setCancelando(true);
     setMsg('');
     try {
-      const { error } = await supabase.from('perfiles').update({ es_pro: false }).eq('id', userId);
-      if (error) throw error;
-      setMsg('Plan PRO cancelado. Los cambios aplican en el próximo inicio de sesión.');
+      const { cancelDate: fecha } = await callCuenta('cancelSuscripcion');
+      setCancelDate(fecha || '');
+      setMsg(fecha
+        ? `Suscripción cancelada. Conservas el acceso PRO hasta el ${fecha}.`
+        : 'Suscripción cancelada correctamente.');
     } catch (err) {
       setMsg('Error: ' + err.message);
     } finally {

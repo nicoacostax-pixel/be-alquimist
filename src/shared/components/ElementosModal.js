@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useElementos } from '../context/ElementosContext';
+import { supabase } from '../lib/supabaseClient';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
@@ -57,10 +58,17 @@ export default function ElementosModal({ onClose }) {
     setLoading(true);
     setPkg(p);
     try {
+      const body = { paquete: p.id };
+      // Para PRO necesitamos el token del usuario para crear la suscripción
+      if (p.id === 'pro') {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error('Debes iniciar sesión para activar el plan PRO');
+        body.token = session.access_token;
+      }
       const res  = await fetch('/api/comprar-elementos', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paquete: p.id }),
+        body: JSON.stringify(body),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error);

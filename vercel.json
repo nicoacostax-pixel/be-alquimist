@@ -3,7 +3,8 @@
   "outputDirectory": "build",
   "functions": {
     "api/gemini.js": { "maxDuration": 45 },
-    "api/generar-imagen-receta.js": { "maxDuration": 45 }
+    "api/generar-imagen-receta.js": { "maxDuration": 45 },
+    "api/stripe-webhook.js": { "maxDuration": 30 }
   },
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/index.html" }
