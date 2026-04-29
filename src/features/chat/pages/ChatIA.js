@@ -128,6 +128,7 @@ function ChatIA() {
   const [input, setInput] = useState("");
   const [mensajes, setMensajes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [pendingImage, setPendingImage] = useState(null); // { data, mimeType, previewUrl }
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -201,11 +202,25 @@ function ChatIA() {
     return () => clearTimeout(timeout);
   }, [subIndex, index, reversa, palabras]);
 
-  const streamGemini = async (promptUsuario, historial, onChunk) => {
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      const mimeType = result.match(/data:([^;]+)/)?.[1] || 'image/jpeg';
+      const data = result.split(',')[1];
+      setPendingImage({ data, mimeType, previewUrl: result });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const streamGemini = async (promptUsuario, historial, onChunk, image = null) => {
     const res = await fetch('/api/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: promptUsuario, history: historial }),
+      body: JSON.stringify({ prompt: promptUsuario, history: historial, image }),
     });
 
     if (!res.ok) {
@@ -285,12 +300,12 @@ function ChatIA() {
       .join('\n\n');
   }, [mensajes]);
 
-  const enviar = async (text) => {
-    if (!text.trim() || isLoading) return;
+  const enviar = async (text, image = null) => {
+    if (!text.trim() && !image || isLoading) return;
 
     const historialActual = [...mensajes].filter(m => !m.streaming);
     setMensajes(prev => [...prev.filter(m => !m.streaming),
-      { rol: 'user', texto: text },
+      { rol: 'user', texto: text, imagePreview: image?.previewUrl || null },
       { rol: 'ai',   texto: '', streaming: true },
     ]);
     setIsLoading(true);
@@ -300,9 +315,11 @@ function ChatIA() {
       text: m.texto,
     }));
 
+    const apiImage = image ? { data: image.data, mimeType: image.mimeType } : null;
+
     let respuestaIA = '';
     try {
-      respuestaIA = await streamGemini(text, historial, (accumulated) => {
+      respuestaIA = await streamGemini(text || '', historial, (accumulated) => {
         setIsLoading(false);
         setMensajes(prev => {
           const copy = [...prev];
@@ -310,7 +327,7 @@ function ChatIA() {
           if (last?.streaming) copy[copy.length - 1] = { ...last, texto: accumulated };
           return copy;
         });
-      });
+      }, apiImage);
     } catch (err) {
       respuestaIA = 'Hubo un problema al conectar con el laboratorio: ' + err.message;
     }
@@ -360,10 +377,12 @@ function ChatIA() {
 
   const handleEnviar = (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() && !pendingImage) return;
     const text = input;
+    const img = pendingImage;
     setInput('');
-    enviar(text);
+    setPendingImage(null);
+    enviar(text, img);
   };
 
   return (
@@ -411,6 +430,9 @@ function ChatIA() {
             const isLast = i === mensajes.length - 1;
             return (
               <div key={i} className={`msg-bubble ${m.rol}`}>
+                {m.rol === 'user' && m.imagePreview && (
+                  <img src={m.imagePreview} alt="Etiqueta" className="msg-image-preview" />
+                )}
                 {m.rol === 'ai'
                   ? m.streaming
                     ? m.texto
@@ -440,16 +462,22 @@ function ChatIA() {
 
         <div className="chat-interface-wrapper">
           <form className="input-box-container" onSubmit={handleEnviar}>
+            {pendingImage && (
+              <div className="image-pending-wrap">
+                <img src={pendingImage.previewUrl} alt="Etiqueta seleccionada" className="image-pending-thumb" />
+                <button type="button" className="image-pending-remove" onClick={() => setPendingImage(null)}>×</button>
+              </div>
+            )}
             <input
               type="text"
-              placeholder="¿Qué quieres formular hoy?"
+              placeholder={pendingImage ? "Describe qué quieres analizar (opcional)" : "¿Qué quieres formular hoy?"}
               className="chat-input-final"
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
             <div className="input-actions-row">
-              <button type="button" className="action-plus-btn" onClick={() => fileInputRef.current.click()}>+</button>
-              <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" />
+              <button type="button" className="action-plus-btn" title="Subir etiqueta de producto" onClick={() => fileInputRef.current.click()}>+</button>
+              <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleFileChange} />
               <button type="submit" className="send-icon-btn">➤</button>
             </div>
           </form>

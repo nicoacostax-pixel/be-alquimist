@@ -18,6 +18,12 @@ PASO 6 — Cuando el usuario confirme: da únicamente la calculadora de costos:
 - **Precio de venta sugerido (3x):** $XX.XX MXN — ganancia: $XX.XX MXN
 - **Precio de venta sugerido (4x):** $XX.XX MXN — ganancia: $XX.XX MXN
 
+ANÁLISIS DE ETIQUETAS:
+- Si el usuario envía una imagen de la etiqueta de un producto, analiza los ingredientes listados (INCI o nombres comunes).
+- Identifica la función de cada ingrediente clave (humectante, emoliente, conservador, activo, etc.).
+- Propone una receta alternativa equivalente usando únicamente ingredientes 100% naturales disponibles en México.
+- Sigue el mismo flujo de pasos desde el PASO 1, adaptando la descripción al tipo de producto detectado en la imagen.
+
 REGLAS:
 - NUNCA combines dos secciones en una misma respuesta.
 - Si el usuario dice "No", termina el flujo amablemente.
@@ -107,7 +113,8 @@ module.exports = async function handler(req, res) {
 
   const prompt  = (req.body?.prompt  || '').toString().trim();
   const history = Array.isArray(req.body?.history) ? req.body.history : [];
-  if (!prompt) return res.status(400).json({ error: 'Missing prompt.' });
+  const image   = req.body?.image || null; // { data: base64, mimeType: string }
+  if (!prompt && !image) return res.status(400).json({ error: 'Missing prompt.' });
 
   res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
   res.setHeader('Cache-Control', 'no-cache, no-transform');
@@ -117,12 +124,19 @@ module.exports = async function handler(req, res) {
 
   const sse = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
 
+  const lastUserParts = [];
+  if (image?.data) {
+    lastUserParts.push({ inlineData: { mimeType: image.mimeType || 'image/jpeg', data: image.data } });
+  }
+  if (prompt) lastUserParts.push({ text: prompt });
+  if (lastUserParts.length === 0) lastUserParts.push({ text: 'Analiza esta etiqueta y sugiere una receta natural similar.' });
+
   const contents = [
     ...history.map(m => ({
       role: m.role === 'model' ? 'model' : 'user',
       parts: [{ text: m.text }],
     })),
-    { role: 'user', parts: [{ text: prompt }] },
+    { role: 'user', parts: lastUserParts },
   ];
 
   const candidates = [process.env.GEMINI_MODEL, ...MODEL_CANDIDATES].filter(Boolean);

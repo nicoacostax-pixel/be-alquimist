@@ -270,6 +270,52 @@ body {
 
 .action-plus-btn:hover { color: #B08968; }
 
+/* Image pending preview inside input box */
+.image-pending-wrap {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.image-pending-thumb {
+  display: block;
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid #B08968;
+}
+
+.image-pending-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #B08968;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Image shown inside user message bubble */
+.msg-image-preview {
+  display: block;
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
 .send-icon-btn {
   background: none;
   border: none;
