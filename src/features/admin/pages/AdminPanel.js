@@ -23,12 +23,43 @@ async function callAdmin(action, extra = {}) {
 function Dashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
 
   useEffect(() => {
-    callAdmin('getStats').then(s => { setStats(s); setLoading(false); }).catch(() => setLoading(false));
+    async function load() {
+      try {
+        // Queries directas al cliente anon (sin necesitar service role)
+        const [
+          { count: totalUsers },
+          { count: proUsers },
+          { count: totalPosts },
+          { count: recetasPosts },
+          { count: totalProductos },
+          { count: totalComentarios },
+        ] = await Promise.all([
+          supabase.from('perfiles').select('*', { count: 'exact', head: true }),
+          supabase.from('perfiles').select('*', { count: 'exact', head: true }).eq('es_pro', true),
+          supabase.from('posts').select('*', { count: 'exact', head: true }),
+          supabase.from('posts').select('*', { count: 'exact', head: true }).eq('categoria', 'Recetas'),
+          supabase.from('productos').select('*', { count: 'exact', head: true }),
+          supabase.from('post_comentarios').select('*', { count: 'exact', head: true }),
+        ]);
+        const hace7dias = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+        const [{ count: recentUsers }, { count: recentPosts }] = await Promise.all([
+          supabase.from('perfiles').select('*', { count: 'exact', head: true }).gte('created_at', hace7dias),
+          supabase.from('posts').select('*', { count: 'exact', head: true }).gte('created_at', hace7dias),
+        ]);
+        setStats({ totalUsers, proUsers, totalPosts, recetasPosts, totalProductos, totalComentarios, recentUsers, recentPosts });
+      } catch (e) {
+        setErr(e.message);
+      }
+      setLoading(false);
+    }
+    load();
   }, []);
 
   if (loading) return <div className="adm-loading">Cargando estadísticas…</div>;
+  if (err)     return <div className="adm-error">Error: {err}</div>;
   if (!stats)  return <div className="adm-error">No se pudieron cargar las estadísticas</div>;
 
   const cards = [
@@ -66,7 +97,9 @@ function Usuarios() {
 
   const load = useCallback(() => {
     setLoading(true);
-    callAdmin('getUsers').then(d => { setUsers(d.users); setLoading(false); }).catch(() => setLoading(false));
+    callAdmin('getUsers')
+      .then(d => { setUsers(d.users); setLoading(false); })
+      .catch(e => { setMsg('Error cargando usuarios: ' + e.message); setLoading(false); });
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -167,7 +200,13 @@ function Productos() {
   const [saving, setSaving]       = useState(false);
 
   const load = useCallback(() => {
-    callAdmin('getProductos').then(d => { setProductos(d.productos); setLoading(false); }).catch(() => setLoading(false));
+    // Productos no necesita service role — query directa
+    supabase.from('productos').select('*').order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (error) setMsg('Error: ' + error.message);
+        else setProductos(data || []);
+        setLoading(false);
+      });
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -288,7 +327,14 @@ function Comunidad() {
   const [msg, setMsg]         = useState('');
 
   const load = useCallback(() => {
-    callAdmin('getPosts').then(d => { setPosts(d.posts); setLoading(false); }).catch(() => setLoading(false));
+    supabase.from('posts')
+      .select('id, titulo, contenido, categoria, created_at, usuario_id, perfiles(nombre)')
+      .order('created_at', { ascending: false }).limit(50)
+      .then(({ data, error }) => {
+        if (error) setMsg('Error: ' + error.message);
+        else setPosts(data || []);
+        setLoading(false);
+      });
   }, []);
   useEffect(() => { load(); }, [load]);
 
