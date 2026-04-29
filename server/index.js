@@ -29,6 +29,7 @@ const API_ROUTES = [
   'create-payment-intent',
   'generar-imagen-receta',
   'resumir-receta',
+  'leads',
 ];
 
 for (const name of API_ROUTES) {

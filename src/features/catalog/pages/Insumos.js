@@ -11,6 +11,7 @@ import { useCart } from '../../../shared/context/CartContext';
 import CartSidebar from '../../../shared/components/CartSidebar';
 import '../../../App.css';
 import SidebarMenu from '../components/SidebarMenu';
+import InsumoPopup from '../components/InsumoPopup';
 
 function toCategoryPath(value = '') {
   return value.toLowerCase().replace(/\s+/g, '-');
@@ -88,6 +89,7 @@ function Insumos() {
 
   return (
     <div className={`insumos-container ${isSidebarOpen ? 'menu-visible' : ''}`}>
+      <InsumoPopup />
       <SidebarMenu isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <header className="app-header-premium insumos-header">
