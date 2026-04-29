@@ -18,6 +18,7 @@ import CheckoutGracias from './features/checkout/pages/CheckoutGracias';
 import PerfilUsuario from './features/comunidad/pages/PerfilUsuario';
 import ProLanding from './features/pro/pages/ProLanding';
 import Cursos from './features/cursos/pages/Cursos';
+import Biblioteca from './features/biblioteca/pages/Biblioteca';
 
 // Importaciones de Comunidad
 import ComunidadLayout from './features/comunidad/components/ComunidadLayout';
@@ -67,6 +68,7 @@ function App() {
           <Route path="/perfil/:userId" element={<PerfilUsuario />} />
           <Route path="/pro" element={<ProLanding />} />
           <Route path="/cursos" element={<Cursos />} />
+          <Route path="/biblioteca" element={<Biblioteca />} />
 
           {/* --- RUTAS DE COMUNIDAD (TIPO SKOOL) --- */}
           <Route path="/comunidad" element={<ComunidadLayout />}>

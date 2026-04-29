@@ -370,12 +370,176 @@ function Comunidad() {
 }
 
 /* ── MAIN ───────────────────────────────────────────────── */
+/* ── BIBLIOTECA ADMIN ───────────────────────────────────────── */
+function compressImage(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 900;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width  = Math.round(img.width  * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressed = canvas.toDataURL('image/jpeg', 0.8);
+        resolve({ data: compressed.split(',')[1], mimeType: 'image/jpeg', previewUrl: compressed });
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+const EMPTY_FORM = { nombre: '', descripcion: '', categoria: 'General' };
+
+function BibliotecaAdmin() {
+  const [ingredientes, setIngredientes] = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [saving,  setSaving]    = useState(false);
+  const [err,     setErr]       = useState('');
+  const [form,    setForm]      = useState(EMPTY_FORM);
+  const [imagen,  setImagen]    = useState(null); // { data, mimeType, previewUrl }
+  const [editId,  setEditId]    = useState(null);
+
+  const cargar = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { ingredientes: data } = await callAdmin('getIngredientes');
+      setIngredientes(data);
+    } catch (e) { setErr(e.message); }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { cargar(); }, [cargar]);
+
+  const handleImagen = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const compressed = await compressImage(file);
+    setImagen(compressed);
+    e.target.value = '';
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!form.nombre.trim()) { setErr('El nombre es obligatorio'); return; }
+    setSaving(true);
+    setErr('');
+    try {
+      if (editId) {
+        const ing = ingredientes.find(i => i.id === editId);
+        await callAdmin('updateIngrediente', {
+          id: editId, ...form,
+          imagen: imagen || undefined,
+          imagen_url: ing?.imagen_url,
+        });
+      } else {
+        await callAdmin('createIngrediente', { ...form, imagen: imagen || undefined });
+      }
+      setForm(EMPTY_FORM);
+      setImagen(null);
+      setEditId(null);
+      await cargar();
+    } catch (e) { setErr(e.message); }
+    setSaving(false);
+  };
+
+  const handleEdit = (ing) => {
+    setEditId(ing.id);
+    setForm({ nombre: ing.nombre || '', descripcion: ing.descripcion || '', categoria: ing.categoria || 'General' });
+    setImagen(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('¿Eliminar este ingrediente?')) return;
+    try { await callAdmin('deleteIngrediente', { id }); await cargar(); }
+    catch (e) { setErr(e.message); }
+  };
+
+  const handleCancel = () => { setEditId(null); setForm(EMPTY_FORM); setImagen(null); setErr(''); };
+
+  return (
+    <div>
+      {/* FORMULARIO */}
+      <div className="adm-card" style={{ marginBottom: 24 }}>
+        <h3 className="adm-section-title">{editId ? '✏️ Editar ingrediente' : '➕ Nuevo ingrediente'}</h3>
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <input className="adm-input" placeholder="Nombre del ingrediente *"
+            value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} />
+          <input className="adm-input" placeholder="Categoría (ej: Aceite vegetal, Activo, Conservador…)"
+            value={form.categoria} onChange={e => setForm(f => ({ ...f, categoria: e.target.value }))} />
+          <textarea className="adm-input" placeholder="Descripción, propiedades y usos cosméticos…"
+            rows={4} value={form.descripcion}
+            onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
+
+          {/* Imagen */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {imagen ? (
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <img src={imagen.previewUrl} alt="preview"
+                  style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '2px solid #B08968' }} />
+                <button type="button" onClick={() => setImagen(null)}
+                  style={{ position: 'absolute', top: -6, right: -6, background: '#B08968', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, cursor: 'pointer', fontSize: 12 }}>×</button>
+              </div>
+            ) : (
+              <label className="adm-upload-btn">
+                📷 {editId ? 'Cambiar foto' : 'Subir foto'}
+                <input type="file" accept="image/*" hidden onChange={handleImagen} />
+              </label>
+            )}
+          </div>
+
+          {err && <p style={{ color: '#c0392b', fontSize: 13, margin: 0 }}>{err}</p>}
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button type="submit" className="adm-btn-primary" disabled={saving}>
+              {saving ? 'Guardando…' : editId ? 'Guardar cambios' : 'Agregar ingrediente'}
+            </button>
+            {editId && <button type="button" className="adm-btn-secondary" onClick={handleCancel}>Cancelar</button>}
+          </div>
+        </form>
+      </div>
+
+      {/* LISTA */}
+      {loading ? <div className="adm-loading">Cargando…</div> : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {ingredientes.length === 0 && <p style={{ color: '#888', fontSize: 14 }}>No hay ingredientes aún.</p>}
+          {ingredientes.map(ing => (
+            <div key={ing.id} className="adm-card" style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '14px 16px' }}>
+              {ing.imagen_url && (
+                <img src={ing.imagen_url} alt={ing.nombre}
+                  style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <strong style={{ fontSize: 14 }}>{ing.nombre}</strong>
+                  {ing.categoria && <span style={{ fontSize: 11, background: '#F3EFE8', color: '#B08968', padding: '1px 7px', borderRadius: 10 }}>{ing.categoria}</span>}
+                </div>
+                <p style={{ fontSize: 12, color: '#666', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {ing.descripcion || '—'}
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                <button className="adm-btn-secondary" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => handleEdit(ing)}>Editar</button>
+                <button className="adm-btn-danger"    style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => handleDelete(ing.id)}>Eliminar</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const TABS = [
-  { id: 'dashboard', label: '📊 Dashboard' },
-  { id: 'usuarios',  label: '👥 Usuarios' },
-  { id: 'productos', label: '📦 Productos' },
-  { id: 'pedidos',   label: '🛒 Pedidos' },
-  { id: 'comunidad', label: '💬 Comunidad' },
+  { id: 'dashboard',  label: '📊 Dashboard' },
+  { id: 'usuarios',   label: '👥 Usuarios' },
+  { id: 'productos',  label: '📦 Productos' },
+  { id: 'pedidos',    label: '🛒 Pedidos' },
+  { id: 'comunidad',  label: '💬 Comunidad' },
+  { id: 'biblioteca', label: '🌿 Biblioteca' },
 ];
 
 export default function AdminPanel() {
@@ -411,11 +575,12 @@ export default function AdminPanel() {
           <h1 className="adm-title">{TABS.find(t => t.id === tab)?.label}</h1>
         </header>
         <div className="adm-content">
-          {tab === 'dashboard' && <Dashboard />}
-          {tab === 'usuarios'  && <Usuarios />}
-          {tab === 'productos' && <Productos />}
-          {tab === 'pedidos'   && <Pedidos />}
-          {tab === 'comunidad' && <Comunidad />}
+          {tab === 'dashboard'  && <Dashboard />}
+          {tab === 'usuarios'   && <Usuarios />}
+          {tab === 'productos'  && <Productos />}
+          {tab === 'pedidos'    && <Pedidos />}
+          {tab === 'comunidad'  && <Comunidad />}
+          {tab === 'biblioteca' && <BibliotecaAdmin />}
         </div>
       </main>
     </div>

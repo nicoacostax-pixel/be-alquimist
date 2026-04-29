@@ -150,8 +150,67 @@ module.exports = async function handler(req, res) {
       return res.json({ ok: true });
     }
 
+    // ── BIBLIOTECA DE INGREDIENTES ────────────────────────────────
+    if (action === 'getIngredientes') {
+      const { data } = await sb.from('ingredientes').select('*').order('created_at', { ascending: false });
+      return res.json({ ingredientes: data || [] });
+    }
+
+    if (action === 'createIngrediente') {
+      const { nombre, descripcion, categoria, imagen } = req.body;
+      let imagen_url = null;
+
+      if (imagen?.data) {
+        const buffer   = Buffer.from(imagen.data, 'base64');
+        const fileName = `${Date.now()}.jpg`;
+        const { error: upErr } = await sb.storage
+          .from('ingredientes')
+          .upload(fileName, buffer, { contentType: imagen.mimeType || 'image/jpeg', upsert: false });
+        if (!upErr) {
+          const { data: { publicUrl } } = sb.storage.from('ingredientes').getPublicUrl(fileName);
+          imagen_url = publicUrl;
+        }
+      }
+
+      const { error } = await sb.from('ingredientes').insert({
+        nombre, descripcion, categoria: categoria || 'General', imagen_url,
+      });
+      if (error) throw new Error(error.message);
+      return res.json({ ok: true });
+    }
+
+    if (action === 'updateIngrediente') {
+      const { id, nombre, descripcion, categoria, imagen, imagen_url: existingUrl } = req.body;
+      let imagen_url = existingUrl || null;
+
+      if (imagen?.data) {
+        const buffer   = Buffer.from(imagen.data, 'base64');
+        const fileName = `${Date.now()}.jpg`;
+        const { error: upErr } = await sb.storage
+          .from('ingredientes')
+          .upload(fileName, buffer, { contentType: imagen.mimeType || 'image/jpeg', upsert: false });
+        if (!upErr) {
+          const { data: { publicUrl } } = sb.storage.from('ingredientes').getPublicUrl(fileName);
+          imagen_url = publicUrl;
+        }
+      }
+
+      await sb.from('ingredientes').update({ nombre, descripcion, categoria, imagen_url }).eq('id', id);
+      return res.json({ ok: true });
+    }
+
+    if (action === 'deleteIngrediente') {
+      const { id } = req.body;
+      await sb.from('ingredientes').delete().eq('id', id);
+      return res.json({ ok: true });
+    }
+
     return res.status(400).json({ error: 'Acción desconocida' });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
+};
+
+module.exports.config = {
+  api: { bodyParser: { sizeLimit: '10mb' } },
 };
