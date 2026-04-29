@@ -302,7 +302,8 @@ body {
 
 /* --- UTILIDADES --- */
 .content { padding: 0 0px; }
-.welcome-text { font-size: 14px; margin-top: 10px; }
+.welcome-text { font-size: 17px;
+    margin-top: -10px;}
 .divider { border: 0; border-top: 1px solid #D1C7B7; margin: 20px 0; }
 .menu-visible { overflow: hidden; }
 
