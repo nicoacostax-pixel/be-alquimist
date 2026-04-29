@@ -168,3 +168,9 @@ module.exports = async function handler(req, res) {
   sse({ error: lastErr?.message || 'No compatible model found' });
   res.end();
 };
+
+module.exports.config = {
+  api: {
+    bodyParser: { sizeLimit: '10mb' },
+  },
+};

@@ -207,10 +207,21 @@ function ChatIA() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      const result = reader.result;
-      const mimeType = result.match(/data:([^;]+)/)?.[1] || 'image/jpeg';
-      const data = result.split(',')[1];
-      setPendingImage({ data, mimeType, previewUrl: result });
+      const original = reader.result;
+      // Compress to max 900px and 0.75 JPEG quality to stay under Vercel's 4.5MB body limit
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 900;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width  = Math.round(img.width  * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressed = canvas.toDataURL('image/jpeg', 0.75);
+        const data = compressed.split(',')[1];
+        setPendingImage({ data, mimeType: 'image/jpeg', previewUrl: compressed });
+      };
+      img.src = original;
     };
     reader.readAsDataURL(file);
     e.target.value = '';
