@@ -19,9 +19,8 @@ function toCategoryPath(value = '') {
 function pseudoRating(slug = '') {
   let hash = 0;
   for (let i = 0; i < slug.length; i++) hash = (hash * 31 + slug.charCodeAt(i)) | 0;
-  const stars = 4 + (Math.abs(hash) % 2 === 0 ? 1 : 0);
   const reviews = 8 + (Math.abs(hash) % 43);
-  return { stars, reviews };
+  return { stars: 5, reviews };
 }
 
 function Insumos() {
