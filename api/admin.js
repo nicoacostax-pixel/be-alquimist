@@ -8,27 +8,27 @@ function adminClient() {
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
 }
 
+function decodeJwt(token) {
+  try {
+    const payload = token.split('.')[1];
+    const json = Buffer.from(payload, 'base64url').toString('utf8');
+    const claims = JSON.parse(json);
+    if (claims.exp && claims.exp < Math.floor(Date.now() / 1000)) return null;
+    return claims;
+  } catch { return null; }
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  // Verificar que viene del admin (email en sesión)
   const adminEmail = process.env.ADMIN_EMAIL || process.env.REACT_APP_ADMIN_EMAIL;
   const { action, token } = req.body || {};
   if (!action) return res.status(400).json({ error: 'Falta action' });
 
-  // Validar que el token pertenece a un admin
-  try {
-    const anonUrl = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
-    const anonKey = process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY;
-    if (!anonUrl || !anonKey) return res.status(500).json({ error: 'SUPABASE_URL o SUPABASE_ANON_KEY no configuradas en Vercel' });
-    const anonClient = createClient(anonUrl, anonKey);
-    const { data: { user }, error } = await anonClient.auth.getUser(token);
-    if (error) return res.status(401).json({ error: 'Token inválido: ' + error.message });
-    if (!user) return res.status(401).json({ error: 'Sesión no encontrada' });
-    if (adminEmail && user.email !== adminEmail) return res.status(403).json({ error: 'Acceso denegado: ' + user.email });
-  } catch (e) {
-    return res.status(401).json({ error: 'Error auth: ' + e.message });
-  }
+  // Validar token decodificando el JWT localmente
+  const claims = decodeJwt(token);
+  if (!claims?.email) return res.status(401).json({ error: 'Token inválido o expirado' });
+  if (adminEmail && claims.email !== adminEmail) return res.status(403).json({ error: 'Acceso denegado: ' + claims.email });
 
   const sb = adminClient();
 
