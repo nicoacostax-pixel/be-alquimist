@@ -44,7 +44,7 @@ const buildDir = path.join(__dirname, '..', 'build');
 app.use(express.static(buildDir));
 
 // ── React Router: serve index.html for all non-API paths ──────────────────────
-app.get('*', (_req, res) => {
+app.get(/.*/, (_req, res) => {
   res.sendFile(path.join(buildDir, 'index.html'));
 });
 
