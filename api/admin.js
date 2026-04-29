@@ -18,14 +18,16 @@ module.exports = async function handler(req, res) {
 
   // Validar que el token pertenece a un admin
   try {
-    const anonUrl = process.env.REACT_APP_SUPABASE_URL || process.env.SUPABASE_URL;
-    const anonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+    const anonUrl = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
+    const anonKey = process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY;
+    if (!anonUrl || !anonKey) return res.status(500).json({ error: 'SUPABASE_URL o SUPABASE_ANON_KEY no configuradas en Vercel' });
     const anonClient = createClient(anonUrl, anonKey);
     const { data: { user }, error } = await anonClient.auth.getUser(token);
-    if (error || !user) return res.status(401).json({ error: 'No autorizado' });
-    if (adminEmail && user.email !== adminEmail) return res.status(403).json({ error: 'Acceso denegado' });
+    if (error) return res.status(401).json({ error: 'Token inválido: ' + error.message });
+    if (!user) return res.status(401).json({ error: 'Sesión no encontrada' });
+    if (adminEmail && user.email !== adminEmail) return res.status(403).json({ error: 'Acceso denegado: ' + user.email });
   } catch (e) {
-    return res.status(401).json({ error: e.message });
+    return res.status(401).json({ error: 'Error auth: ' + e.message });
   }
 
   const sb = adminClient();
