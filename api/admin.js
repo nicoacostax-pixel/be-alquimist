@@ -12,7 +12,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   // Verificar que viene del admin (email en sesión)
-  const adminEmail = process.env.REACT_APP_ADMIN_EMAIL;
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.REACT_APP_ADMIN_EMAIL;
   const { action, token } = req.body || {};
   if (!action) return res.status(400).json({ error: 'Falta action' });
 
