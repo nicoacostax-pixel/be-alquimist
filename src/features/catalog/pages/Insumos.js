@@ -233,7 +233,12 @@ function Insumos() {
                 <div key={prod.id} className="producto-card">
                   <Link to={`/insumos/${toCategoryPath(prod.categoria)}/${prod.slug}`} className="card-link-wrapper">
                     <div className="prod-img-wrap">
-                      <img src={prod.imagen_url} alt={prod.nombre} />
+                      <img
+                        src={prod.imagen_url}
+                        alt={prod.nombre}
+                        loading="lazy"
+                        onLoad={(e) => e.currentTarget.classList.add('img-loaded')}
+                      />
                     </div>
                     <div className="prod-info">
                       <h3 className="prod-name">{prod.nombre}</h3>
