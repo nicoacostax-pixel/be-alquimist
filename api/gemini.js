@@ -120,6 +120,7 @@ module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-cache, no-transform');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('X-Accel-Buffering', 'no');
+  res.socket?.setNoDelay(true);
   res.flushHeaders();
 
   const sse = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
