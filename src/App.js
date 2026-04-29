@@ -16,6 +16,8 @@ import SocialProofPopup from './shared/components/SocialProofPopup';
 import Checkout from './features/checkout/pages/Checkout';
 import CheckoutGracias from './features/checkout/pages/CheckoutGracias';
 import PerfilUsuario from './features/comunidad/pages/PerfilUsuario';
+import ProLanding from './features/pro/pages/ProLanding';
+import Cursos from './features/cursos/pages/Cursos';
 
 // Importaciones de Comunidad
 import ComunidadLayout from './features/comunidad/components/ComunidadLayout';
@@ -63,6 +65,8 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/checkout/gracias" element={<CheckoutGracias />} />
           <Route path="/perfil/:userId" element={<PerfilUsuario />} />
+          <Route path="/pro" element={<ProLanding />} />
+          <Route path="/cursos" element={<Cursos />} />
 
           {/* --- RUTAS DE COMUNIDAD (TIPO SKOOL) --- */}
           <Route path="/comunidad" element={<ComunidadLayout />}>

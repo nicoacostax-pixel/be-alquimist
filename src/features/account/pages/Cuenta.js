@@ -286,7 +286,7 @@ function PlanSection({ userId, esPro }) {
           <>
             <span className="plan-badge plan-badge--free">Plan Gratuito</span>
             <p className="plan-desc">Estás en el plan gratuito. Obtén elementos ilimitados y la calculadora de costos con el plan PRO.</p>
-            <Link to="/" className="premium-submit-btn" style={{ display: 'inline-block', textDecoration: 'none', textAlign: 'center' }}>
+            <Link to="/pro" className="premium-submit-btn" style={{ display: 'inline-block', textDecoration: 'none', textAlign: 'center' }}>
               Ver planes PRO
             </Link>
           </>
@@ -297,7 +297,7 @@ function PlanSection({ userId, esPro }) {
         <h3 className="cuenta-section-title" style={{ marginTop: '28px' }}>Métodos de pago</h3>
         <p className="plan-desc" style={{ marginBottom: '12px' }}>Administra tus tarjetas y ve el historial de pagos desde el portal de Stripe.</p>
         <button className="premium-submit-btn" onClick={handlePortal} disabled={portalLoading} style={{ background: '#635BFF' }}>
-          {portalLoading ? 'Abriendo portal…' : '💳 Portal de pagos'}
+          {portalLoading ? 'Abriendo portal…' : '💳 Administra tus pagos'}
         </button>
 
         {esPro && (

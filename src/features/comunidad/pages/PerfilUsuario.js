@@ -219,7 +219,7 @@ export default function PerfilUsuario() {
       const uid = session?.user?.id;
 
       const [perfilesRes, postsRes] = await Promise.all([
-        supabase.from('perfiles').select('id, nombre, apellido, bio, avatar_url').in('id', [userId]),
+        supabase.from('perfiles').select('id, nombre, apellido, bio, avatar_url, es_pro').in('id', [userId]),
         supabase.from('posts').select('id, titulo, contenido, imagen_url, metadata, created_at').eq('usuario_id', userId).order('created_at', { ascending: false }),
       ]);
       if (perfilesRes.error) console.error('perfiles query error:', perfilesRes.error);
@@ -632,7 +632,10 @@ export default function PerfilUsuario() {
               )}
 
               {/* Name + handle */}
-              <h2 className="perfil-nombre">{perfil.nombre} {perfil.apellido}</h2>
+              <h2 className="perfil-nombre">
+                {perfil.nombre} {perfil.apellido}
+                {perfil.es_pro && <span className="perfil-pro-badge">⚗️ PRO</span>}
+              </h2>
               <p className="perfil-handle">{handle}</p>
 
               {/* Bio */}

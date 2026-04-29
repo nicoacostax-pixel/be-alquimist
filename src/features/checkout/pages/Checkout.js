@@ -4,6 +4,7 @@ import { ChevronRight, Lock, ShoppingBag } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useCart } from '../../../shared/context/CartContext';
+import { useElementos } from '../../../shared/context/ElementosContext';
 import '../../../App.css';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
@@ -46,8 +47,8 @@ function OrderSummary({ cart, cartSubtotal, shipping, total, descuento, setDescu
         <div className="co-total-line"><span>Subtotal</span><span>{fmt(cartSubtotal)}</span></div>
         <div className="co-total-line">
           <span>Envío</span>
-          <span className={shipping === null ? 'co-muted' : ''}>
-            {shipping !== null ? fmt(shipping) : 'Introducir dirección de envío'}
+          <span className={shipping === null ? 'co-muted' : shipping === 0 ? 'co-free-shipping' : ''}>
+            {shipping === 0 ? '🚚 Gratis (PRO)' : shipping !== null ? fmt(shipping) : 'Introducir dirección de envío'}
           </span>
         </div>
         <div className="co-total-line co-total-final">
@@ -122,6 +123,7 @@ function StripePayForm({ form, total, onSuccess }) {
 // ── Main checkout ───────────────────────────────────────────────────────────
 export default function Checkout() {
   const { cart, cartSubtotal, cartCount, clearCart } = useCart();
+  const { esPro } = useElementos();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -142,7 +144,7 @@ export default function Checkout() {
     setForm(p => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const shipping = form.direccion.trim() ? 99 : null;
+  const shipping = esPro ? 0 : form.direccion.trim() ? 99 : null;
   const total    = cartSubtotal + (shipping || 0);
 
   // Create PaymentIntent when moving to pay step

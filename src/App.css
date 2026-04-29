@@ -7108,3 +7108,362 @@ a.post-author-name.post-author-link:hover {
   .adm-content { padding: 16px; }
   .adm-stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ── CUENTA TABS — scroll horizontal en móvil ─────────────── */
+.cuenta-tabs {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-wrap: nowrap;
+}
+.cuenta-tabs::-webkit-scrollbar { display: none; }
+.cuenta-tab { white-space: nowrap; flex-shrink: 0; }
+
+/* ── PRO LANDING ──────────────────────────────────────────── */
+.pro-landing {
+  min-height: 100vh;
+  background: #F3EFE8;
+  font-family: 'Poppins', sans-serif;
+  color: #4A3F35;
+}
+
+.pro-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.pro-nav-logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: #B08968;
+  text-decoration: none;
+}
+
+.pro-nav-link {
+  font-size: 14px;
+  color: #B08968;
+  text-decoration: none;
+}
+
+.pro-hero {
+  text-align: center;
+  padding: 40px 24px 32px;
+}
+
+.pro-hero-icon { font-size: 56px; display: block; margin-bottom: 12px; }
+
+.pro-hero-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #4A3F35;
+  margin: 0 0 10px;
+}
+
+.pro-hero-sub {
+  font-size: 18px;
+  color: #7A6A5E;
+  margin: 0;
+}
+
+.pro-already-badge {
+  display: inline-block;
+  margin-top: 16px;
+  background: #B08968;
+  color: #fff;
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pro-features {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pro-feature-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.pro-feature-icon { font-size: 28px; flex-shrink: 0; }
+
+.pro-feature-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: #4A3F35;
+}
+
+.pro-feature-desc {
+  font-size: 13px;
+  color: #7A6A5E;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.pro-pricing {
+  padding: 0 24px 40px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.pro-pricing-card {
+  background: #4A3F35;
+  color: #F3EFE8;
+  border-radius: 20px;
+  padding: 32px 28px;
+  text-align: center;
+}
+
+.pro-pricing-label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.7;
+  margin: 0 0 12px;
+}
+
+.pro-pricing-amount {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.pro-pricing-currency { font-size: 22px; font-weight: 600; opacity: 0.8; }
+.pro-pricing-number   { font-size: 60px; font-weight: 700; line-height: 1; }
+.pro-pricing-period   { font-size: 16px; opacity: 0.7; }
+
+.pro-pricing-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pro-pricing-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.pro-check {
+  color: #B08968;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.pro-cta-btn {
+  display: block;
+  width: 100%;
+  background: #B08968;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-sizing: border-box;
+}
+
+.pro-cta-btn:hover { background: #9A7558; }
+
+.pro-pricing-fine {
+  font-size: 12px;
+  opacity: 0.5;
+  margin: 12px 0 0;
+}
+
+.pro-faq {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+}
+
+.pro-faq-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 16px;
+}
+
+.pro-faq-item {
+  border-bottom: 1px solid #DDD5CC;
+  padding: 4px 0;
+}
+
+.pro-faq-q {
+  width: 100%;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4A3F35;
+  text-align: left;
+  padding: 14px 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pro-faq-arrow { font-size: 10px; opacity: 0.5; }
+
+.pro-faq-a {
+  font-size: 13px;
+  color: #7A6A5E;
+  margin: 0 0 14px;
+  line-height: 1.6;
+}
+
+.pro-footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 14px;
+}
+
+.pro-footer a { color: #B08968; text-decoration: none; }
+
+/* ── CURSOS ──────────────────────────────────────────────── */
+.cursos-page {
+  min-height: 100vh;
+  background: #F3EFE8;
+  font-family: 'Poppins', sans-serif;
+  color: #4A3F35;
+}
+
+.cursos-header {
+  text-align: center;
+  padding: 40px 24px 32px;
+}
+
+.cursos-header-icon { font-size: 52px; display: block; margin-bottom: 12px; }
+
+.cursos-header-title {
+  font-size: 30px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.cursos-header-sub {
+  font-size: 15px;
+  color: #7A6A5E;
+  margin: 0;
+}
+
+.cursos-grid {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 520px) {
+  .cursos-grid { grid-template-columns: 1fr; }
+}
+
+.curso-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.curso-card.locked { filter: brightness(0.97); }
+
+.curso-lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(243,239,232,0.75);
+  backdrop-filter: blur(3px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  z-index: 1;
+}
+
+.curso-lock-overlay span { font-size: 28px; }
+.curso-lock-overlay p {
+  font-size: 12px;
+  font-weight: 600;
+  color: #B08968;
+  margin: 0;
+}
+
+.curso-icon { font-size: 32px; display: block; margin-bottom: 10px; }
+
+.curso-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.curso-desc {
+  font-size: 12px;
+  color: #7A6A5E;
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+.curso-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.curso-nivel, .curso-duracion {
+  font-size: 11px;
+  background: #F3EFE8;
+  color: #B08968;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ── PRO BADGE EN PERFIL ─────────────────────────────────── */
+.perfil-pro-badge {
+  display: inline-block;
+  background: #B08968;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* ── CHECKOUT FREE SHIPPING ──────────────────────────────── */
+.co-free-shipping {
+  color: #2e7d32;
+  font-weight: 600;
+}
