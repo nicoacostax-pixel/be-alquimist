@@ -5,7 +5,6 @@ import {
   Menu,
   Search,
   ShoppingCart,
-  ShoppingBag
 } from 'lucide-react';
 import { supabase } from '../../../shared/lib/supabaseClient';
 import { useCart } from '../../../shared/context/CartContext';
@@ -15,6 +14,14 @@ import SidebarMenu from '../components/SidebarMenu';
 
 function toCategoryPath(value = '') {
   return value.toLowerCase().replace(/\s+/g, '-');
+}
+
+function pseudoRating(slug = '') {
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) hash = (hash * 31 + slug.charCodeAt(i)) | 0;
+  const stars = 4 + (Math.abs(hash) % 2 === 0 ? 1 : 0);
+  const reviews = 8 + (Math.abs(hash) % 43);
+  return { stars, reviews };
 }
 
 function Insumos() {
@@ -219,22 +226,27 @@ function Insumos() {
           </header>
 
           <div className="productos-grid">
-            {productos.map((prod) => (
-              <div key={prod.id} className="producto-card">
-                <Link to={`/insumos/${toCategoryPath(prod.categoria)}/${prod.slug}`} className="card-link-wrapper">
-                  <div className="producto-img-wrapper">
-                    <img src={prod.imagen_url} alt={prod.nombre} />
-                  </div>
-                  <div className="producto-info-card">
-                    <h3>{prod.nombre}</h3>
-                    <p className="price-tag">Desde ${prod.variantes?.[0]?.precio} MXN</p>
-                    <button className="view-more-btn">
-                      Explorar <ShoppingBag size={16} />
-                    </button>
-                  </div>
-                </Link>
-              </div>
-            ))}
+            {productos.map((prod) => {
+              const { stars, reviews } = pseudoRating(prod.slug);
+              return (
+                <div key={prod.id} className="producto-card">
+                  <Link to={`/insumos/${toCategoryPath(prod.categoria)}/${prod.slug}`} className="card-link-wrapper">
+                    <div className="prod-img-wrap">
+                      <img src={prod.imagen_url} alt={prod.nombre} />
+                    </div>
+                    <div className="prod-info">
+                      <h3 className="prod-name">{prod.nombre}</h3>
+                      <div className="prod-rating">
+                        <span className="prod-stars">{'★'.repeat(stars)}{'☆'.repeat(5 - stars)}</span>
+                        <span className="prod-reviews">({reviews})</span>
+                      </div>
+                      <p className="prod-price">Desde ${prod.variantes?.[0]?.precio} MXN</p>
+                      <button className="prod-btn">Ver producto</button>
+                    </div>
+                  </Link>
+                </div>
+              );
+            })}
           </div>
         </div>
       </main>
