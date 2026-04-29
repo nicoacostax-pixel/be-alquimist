@@ -36,7 +36,10 @@ export function ElementosProvider({ children }) {
     }
 
     setElementos(qty);
-    setEsPro(!!data.es_pro);
+    const adminEmail = process.env.REACT_APP_ADMIN_EMAIL;
+    const { data: { session } } = await supabase.auth.getSession();
+    const isAdmin = adminEmail && session?.user?.email === adminEmail;
+    setEsPro(!!data.es_pro || isAdmin);
   }, []);
 
   useEffect(() => {

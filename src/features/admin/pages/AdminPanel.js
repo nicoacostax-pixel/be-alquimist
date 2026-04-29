@@ -404,6 +404,44 @@ function parseBlocks(desc) {
   return [{ type: 'text', content: desc }]; // compatibilidad con texto plano
 }
 
+function isHeaderLine(line) {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  if (trimmed === trimmed.toUpperCase() && trimmed.length > 3 && /[A-ZÁÉÍÓÚÑ]/.test(trimmed)) return true;
+  if (
+    trimmed.length <= 60 &&
+    !trimmed.endsWith('.') &&
+    !trimmed.includes(':') &&
+    !trimmed.startsWith('•') &&
+    !trimmed.startsWith('-') &&
+    !/^\d+\./.test(trimmed)
+  ) return true;
+  return false;
+}
+
+function parseTextToBlocks(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const result = [];
+  let buffer = [];
+
+  const flushBuffer = () => {
+    if (buffer.length === 0) return;
+    result.push({ type: 'text', content: buffer.join('\n') });
+    buffer = [];
+  };
+
+  for (const line of lines) {
+    if (isHeaderLine(line)) {
+      flushBuffer();
+      result.push({ type: 'h1', content: line });
+    } else {
+      buffer.push(line);
+    }
+  }
+  flushBuffer();
+  return result.length > 0 ? result : [{ type: 'text', content: text }];
+}
+
 function BlockEditor({ blocks, onChange }) {
   const update = (i, field, value) => {
     const next = blocks.map((b, idx) => idx === i ? { ...b, [field]: value } : b);
@@ -417,6 +455,21 @@ function BlockEditor({ blocks, onChange }) {
     if (to < 0 || to >= next.length) return;
     [next[i], next[to]] = [next[to], next[i]];
     onChange(next);
+  };
+
+  const handlePaste = (e, i) => {
+    const text = e.clipboardData.getData('text/plain');
+    if (!text.includes('\n')) return; // single line — let default paste happen
+    e.preventDefault();
+    const parsed = parseTextToBlocks(text);
+    const before = blocks.slice(0, i);
+    const after  = blocks.slice(i + 1);
+    const merged = [
+      ...before,
+      ...parsed,
+      ...after,
+    ].filter(b => b.content.trim() || after.length === 0);
+    onChange(merged.length > 0 ? merged : [{ type: 'text', content: '' }]);
   };
 
   return (
@@ -440,14 +493,16 @@ function BlockEditor({ blocks, onChange }) {
               placeholder="Título de sección…"
               value={block.content}
               onChange={e => update(i, 'content', e.target.value)}
+              onPaste={e => handlePaste(e, i)}
             />
           ) : (
             <textarea
               className="block-input block-input--text"
-              placeholder="Párrafo de texto…"
+              placeholder="Párrafo de texto… (pega texto largo para auto-detectar títulos)"
               rows={3}
               value={block.content}
               onChange={e => update(i, 'content', e.target.value)}
+              onPaste={e => handlePaste(e, i)}
             />
           )}
 
