@@ -14,7 +14,7 @@ module.exports = async function handler(req, res) {
 
   const anonClient = createClient(url, key);
   const { data: { user }, error: authError } = await anonClient.auth.getUser(token);
-  if (authError || !user) return res.status(401).json({ error: 'No autorizado' });
+  if (authError || !user) return res.status(401).json({ error: 'No autorizado: ' + (authError?.message || 'usuario no encontrado') });
 
   const email = user.email;
   const stripeKey = process.env.STRIPE_SECRET_KEY;
