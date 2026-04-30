@@ -220,23 +220,10 @@ module.exports = async function handler(req, res) {
       let phoneMap  = {};
 
       if (userIds.length > 0) {
-        // Nombres desde perfiles
-        const { data: perfiles } = await sb.from('perfiles').select('id, nombre').in('id', userIds);
+        // Nombres y teléfonos desde perfiles
+        const { data: perfiles } = await sb.from('perfiles').select('id, nombre, telefono').in('id', userIds);
         perfilMap = Object.fromEntries((perfiles || []).map(p => [p.id, p.nombre]));
-
-        // Emails desde auth para cruzar con leads
-        const { data: authData } = await sb.auth.admin.listUsers({ perPage: 1000 });
-        const authUsers = (authData?.users || []).filter(u => userIds.includes(u.id));
-        const emailToUid = Object.fromEntries(authUsers.map(u => [u.email, u.id]));
-        const emails = authUsers.map(u => u.email).filter(Boolean);
-
-        if (emails.length > 0) {
-          const { data: leadsData } = await sb.from('leads').select('email, telefono').in('email', emails);
-          for (const lead of (leadsData || [])) {
-            const uid = emailToUid[lead.email];
-            if (uid && lead.telefono) phoneMap[uid] = lead.telefono;
-          }
-        }
+        phoneMap  = Object.fromEntries((perfiles || []).map(p => [p.id, p.telefono]));
       }
 
       const recetas = (recetasData || []).map(r => ({
