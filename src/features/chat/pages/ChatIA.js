@@ -5,7 +5,6 @@ import SidebarMenu from '../../catalog/components/SidebarMenu';
 import { useElementos } from '../../../shared/context/ElementosContext';
 import ElementosModal from '../../../shared/components/ElementosModal';
 import ShareRecetaBtn from '../components/ShareRecetaBtn';
-import { supabase } from '../../../shared/lib/supabaseClient';
 
 const STORAGE_KEY = 'ba_free_recipes';
 
@@ -377,9 +376,11 @@ function ChatIA() {
     // Guardar receta desde PASO 1 (descripción generada)
     if (esInicioReceta) {
       const nombre = (text || historialActual.find(m => m.rol === 'user')?.texto || 'Receta').slice(0, 120);
-      supabase.from('recetas')
-        .insert({ user_id: userId || null, nombre, contenido: respuestaIA })
-        .then(({ error }) => { if (error) console.error('[recetas]', error.message); });
+      fetch('/api/recetas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId || null, nombre, contenido: respuestaIA }),
+      }).catch(() => {});
     }
   };
 

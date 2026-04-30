@@ -30,6 +30,7 @@ const API_ROUTES = [
   'generar-imagen-receta',
   'resumir-receta',
   'leads',
+  'recetas',
 ];
 
 for (const name of API_ROUTES) {
