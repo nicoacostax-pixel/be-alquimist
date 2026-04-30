@@ -31,7 +31,7 @@ export default function InsumoPopup() {
       await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telefono, email }),
+        body: JSON.stringify({ telefono, email, tipo: 'aceite_de_regalo' }),
       });
       setSent(true);
       setTimeout(cerrar, 2200);

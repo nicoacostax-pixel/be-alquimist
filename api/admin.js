@@ -205,6 +205,25 @@ module.exports = async function handler(req, res) {
       return res.json({ ok: true });
     }
 
+    // ── LEADS ──────────────────────────────────────────────────────
+    if (action === 'getLeads') {
+      const { data } = await sb.from('leads').select('*').order('created_at', { ascending: false }).limit(500);
+      return res.json({ leads: data || [] });
+    }
+
+    // ── RECETAS IA ─────────────────────────────────────────────────
+    if (action === 'getRecetas') {
+      const { data: recetasData } = await sb.from('recetas').select('*').order('created_at', { ascending: false }).limit(200);
+      const userIds = [...new Set((recetasData || []).map(r => r.user_id).filter(Boolean))];
+      let perfilMap = {};
+      if (userIds.length > 0) {
+        const { data: perfiles } = await sb.from('perfiles').select('id, nombre').in('id', userIds);
+        perfilMap = Object.fromEntries((perfiles || []).map(p => [p.id, p.nombre]));
+      }
+      const recetas = (recetasData || []).map(r => ({ ...r, nombre_usuario: perfilMap[r.user_id] || '—' }));
+      return res.json({ recetas });
+    }
+
     return res.status(400).json({ error: 'Acción desconocida' });
   } catch (err) {
     return res.status(500).json({ error: err.message });

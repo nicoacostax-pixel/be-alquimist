@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../shared/lib/supabaseClient';
 import '../../../App.css';
@@ -672,6 +672,129 @@ function BibliotecaAdmin() {
   );
 }
 
+/* ── LEADS ──────────────────────────────────────────────────── */
+const TIPO_LABELS = { 'aceite_de_regalo': '🎁 Aceite de regalo' };
+
+function Leads() {
+  const [leads,   setLeads]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filtro,  setFiltro]  = useState('todos');
+  const [msg,     setMsg]     = useState('');
+
+  useEffect(() => {
+    callAdmin('getLeads')
+      .then(d => { setLeads(d.leads); setLoading(false); })
+      .catch(e => { setMsg('Error: ' + e.message); setLoading(false); });
+  }, []);
+
+  const tipos = useMemo(() => [...new Set(leads.map(l => l.tipo).filter(Boolean))], [leads]);
+  const filtrados = filtro === 'todos' ? leads : leads.filter(l => l.tipo === filtro);
+
+  return (
+    <div className="adm-section">
+      {msg && <div className="adm-msg" onClick={() => setMsg('')}>{msg} ×</div>}
+      <div className="adm-toolbar">
+        <div className="adm-tabs-mini">
+          <button className={filtro === 'todos' ? 'active' : ''} onClick={() => setFiltro('todos')}>
+            Todos ({leads.length})
+          </button>
+          {tipos.map(t => (
+            <button key={t} className={filtro === t ? 'active' : ''} onClick={() => setFiltro(t)}>
+              {TIPO_LABELS[t] || t}
+            </button>
+          ))}
+        </div>
+        <span className="adm-count">{filtrados.length} leads</span>
+      </div>
+      {loading ? <div className="adm-loading">Cargando…</div> : (
+        <div className="adm-table-wrap">
+          <table className="adm-table">
+            <thead><tr><th>Email</th><th>Teléfono</th><th>Formulario</th><th>Fecha</th></tr></thead>
+            <tbody>
+              {filtrados.length === 0 && (
+                <tr><td colSpan={4} style={{ textAlign: 'center', color: '#999', padding: 24 }}>Sin leads aún</td></tr>
+              )}
+              {filtrados.map(l => (
+                <tr key={l.id}>
+                  <td><strong>{l.email}</strong></td>
+                  <td>{l.telefono || '—'}</td>
+                  <td><span className="adm-badge">{TIPO_LABELS[l.tipo] || l.tipo || '—'}</span></td>
+                  <td className="adm-date">{new Date(l.created_at).toLocaleDateString('es-MX')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── RECETAS IA ─────────────────────────────────────────────── */
+function RecetasAdmin() {
+  const [recetas, setRecetas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [vista,   setVista]   = useState(null);
+  const [msg,     setMsg]     = useState('');
+
+  useEffect(() => {
+    callAdmin('getRecetas')
+      .then(d => { setRecetas(d.recetas); setLoading(false); })
+      .catch(e => { setMsg('Error: ' + e.message); setLoading(false); });
+  }, []);
+
+  return (
+    <div className="adm-section">
+      {msg && <div className="adm-msg" onClick={() => setMsg('')}>{msg} ×</div>}
+      <div className="adm-toolbar">
+        <span className="adm-count">{recetas.length} recetas generadas</span>
+      </div>
+      {loading ? <div className="adm-loading">Cargando…</div> : (
+        <div className="adm-table-wrap">
+          <table className="adm-table">
+            <thead><tr><th>Receta</th><th>Usuario</th><th>Fecha</th><th></th></tr></thead>
+            <tbody>
+              {recetas.length === 0 && (
+                <tr><td colSpan={4} style={{ textAlign: 'center', color: '#999', padding: 24 }}>Sin recetas aún</td></tr>
+              )}
+              {recetas.map(r => (
+                <tr key={r.id}>
+                  <td>
+                    <strong>{r.nombre?.slice(0, 60) || '—'}</strong>
+                    <br />
+                    <span className="adm-email">{r.contenido?.slice(0, 80)}…</span>
+                  </td>
+                  <td>{r.nombre_usuario || '—'}</td>
+                  <td className="adm-date">{new Date(r.created_at).toLocaleDateString('es-MX')}</td>
+                  <td>
+                    <button className="adm-btn-edit" onClick={() => setVista(r)}>Ver</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {vista && (
+        <div className="adm-modal-overlay" onClick={e => e.target === e.currentTarget && setVista(null)}>
+          <div className="adm-modal" style={{ maxWidth: 640, maxHeight: '80vh', overflowY: 'auto' }}>
+            <h3 style={{ marginBottom: 4 }}>{vista.nombre}</h3>
+            <p style={{ fontSize: 12, color: '#9E9188', marginBottom: 16 }}>
+              {vista.nombre_usuario} · {new Date(vista.created_at).toLocaleDateString('es-MX')}
+            </p>
+            <pre style={{ fontSize: 13, color: '#4A3F35', whiteSpace: 'pre-wrap', lineHeight: 1.6, margin: 0 }}>
+              {vista.contenido}
+            </pre>
+            <div className="adm-modal-btns" style={{ marginTop: 20 }}>
+              <button className="adm-btn-sec" onClick={() => setVista(null)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const TABS = [
   { id: 'dashboard',  label: '📊 Dashboard' },
   { id: 'usuarios',   label: '👥 Usuarios' },
@@ -679,6 +802,8 @@ const TABS = [
   { id: 'pedidos',    label: '🛒 Pedidos' },
   { id: 'comunidad',  label: '💬 Comunidad' },
   { id: 'biblioteca', label: '🌿 Biblioteca' },
+  { id: 'leads',      label: '📧 Leads' },
+  { id: 'recetas',    label: '🧪 Recetas IA' },
 ];
 
 export default function AdminPanel() {
@@ -720,6 +845,8 @@ export default function AdminPanel() {
           {tab === 'pedidos'    && <Pedidos />}
           {tab === 'comunidad'  && <Comunidad />}
           {tab === 'biblioteca' && <BibliotecaAdmin />}
+          {tab === 'leads'      && <Leads />}
+          {tab === 'recetas'    && <RecetasAdmin />}
         </div>
       </main>
     </div>
