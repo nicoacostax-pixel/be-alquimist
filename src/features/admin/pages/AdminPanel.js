@@ -732,10 +732,11 @@ function Leads() {
 
 /* ── RECETAS IA ─────────────────────────────────────────────── */
 function RecetasAdmin() {
-  const [recetas, setRecetas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [vista,   setVista]   = useState(null);
-  const [msg,     setMsg]     = useState('');
+  const [recetas,       setRecetas]       = useState([]);
+  const [loading,       setLoading]       = useState(true);
+  const [expandedUser,  setExpandedUser]  = useState(null); // user_id con desglose abierto
+  const [vistaReceta,   setVistaReceta]   = useState(null); // receta individual
+  const [msg,           setMsg]           = useState('');
 
   useEffect(() => {
     callAdmin('getRecetas')
@@ -743,50 +744,94 @@ function RecetasAdmin() {
       .catch(e => { setMsg('Error: ' + e.message); setLoading(false); });
   }, []);
 
+  // Agrupar por usuario
+  const grupos = useMemo(() => {
+    const map = new Map();
+    for (const r of recetas) {
+      const key = r.user_id || '__anonimo__';
+      if (!map.has(key)) map.set(key, { user_id: key, nombre_usuario: r.nombre_usuario || 'Anónimo', recetas: [] });
+      map.get(key).recetas.push(r);
+    }
+    return [...map.values()].sort((a, b) => b.recetas.length - a.recetas.length);
+  }, [recetas]);
+
+  const toggleUser = (uid) => setExpandedUser(prev => prev === uid ? null : uid);
+
   return (
     <div className="adm-section">
       {msg && <div className="adm-msg" onClick={() => setMsg('')}>{msg} ×</div>}
       <div className="adm-toolbar">
-        <span className="adm-count">{recetas.length} recetas generadas</span>
+        <span className="adm-count">{grupos.length} usuarios · {recetas.length} recetas generadas</span>
       </div>
+
       {loading ? <div className="adm-loading">Cargando…</div> : (
         <div className="adm-table-wrap">
           <table className="adm-table">
-            <thead><tr><th>Receta</th><th>Usuario</th><th>Fecha</th><th></th></tr></thead>
+            <thead>
+              <tr><th>Usuario</th><th>Recetas</th><th>Última actividad</th><th></th></tr>
+            </thead>
             <tbody>
-              {recetas.length === 0 && (
+              {grupos.length === 0 && (
                 <tr><td colSpan={4} style={{ textAlign: 'center', color: '#999', padding: 24 }}>Sin recetas aún</td></tr>
               )}
-              {recetas.map(r => (
-                <tr key={r.id}>
-                  <td>
-                    <strong>{r.nombre?.slice(0, 60) || '—'}</strong>
-                    <br />
-                    <span className="adm-email">{r.contenido?.slice(0, 80)}…</span>
-                  </td>
-                  <td>{r.nombre_usuario || '—'}</td>
-                  <td className="adm-date">{new Date(r.created_at).toLocaleDateString('es-MX')}</td>
-                  <td>
-                    <button className="adm-btn-edit" onClick={() => setVista(r)}>Ver</button>
-                  </td>
-                </tr>
+              {grupos.map(g => (
+                <React.Fragment key={g.user_id}>
+                  {/* Fila de usuario */}
+                  <tr style={{ background: expandedUser === g.user_id ? '#FDF8F4' : undefined }}>
+                    <td>
+                      <strong>{g.nombre_usuario}</strong>
+                      {g.user_id === '__anonimo__' && <span className="adm-badge" style={{ marginLeft: 6 }}>sin cuenta</span>}
+                    </td>
+                    <td><span className="adm-badge">{g.recetas.length} receta{g.recetas.length !== 1 ? 's' : ''}</span></td>
+                    <td className="adm-date">
+                      {new Date(g.recetas[0].created_at).toLocaleDateString('es-MX')}
+                    </td>
+                    <td>
+                      <button className="adm-btn-edit" onClick={() => toggleUser(g.user_id)}>
+                        {expandedUser === g.user_id ? '▲ Ocultar' : '▼ Ver recetas'}
+                      </button>
+                    </td>
+                  </tr>
+
+                  {/* Desglose de recetas del usuario */}
+                  {expandedUser === g.user_id && g.recetas.map(r => (
+                    <tr key={r.id} style={{ background: '#FFFDF9' }}>
+                      <td colSpan={3} style={{ paddingLeft: 32 }}>
+                        <span style={{ fontSize: 13, color: '#4A3F35' }}>
+                          🧪 {r.nombre?.slice(0, 80) || '—'}
+                        </span>
+                        <span className="adm-date" style={{ marginLeft: 12 }}>
+                          {new Date(r.created_at).toLocaleDateString('es-MX')}
+                        </span>
+                      </td>
+                      <td>
+                        <button className="adm-btn-sec" style={{ fontSize: 12, padding: '3px 10px' }}
+                          onClick={() => setVistaReceta(r)}>
+                          Leer
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
         </div>
       )}
-      {vista && (
-        <div className="adm-modal-overlay" onClick={e => e.target === e.currentTarget && setVista(null)}>
+
+      {/* Modal detalle de receta */}
+      {vistaReceta && (
+        <div className="adm-modal-overlay" onClick={e => e.target === e.currentTarget && setVistaReceta(null)}>
           <div className="adm-modal" style={{ maxWidth: 640, maxHeight: '80vh', overflowY: 'auto' }}>
-            <h3 style={{ marginBottom: 4 }}>{vista.nombre}</h3>
+            <h3 style={{ marginBottom: 4 }}>{vistaReceta.nombre}</h3>
             <p style={{ fontSize: 12, color: '#9E9188', marginBottom: 16 }}>
-              {vista.nombre_usuario} · {new Date(vista.created_at).toLocaleDateString('es-MX')}
+              {vistaReceta.nombre_usuario} · {new Date(vistaReceta.created_at).toLocaleDateString('es-MX')}
             </p>
             <pre style={{ fontSize: 13, color: '#4A3F35', whiteSpace: 'pre-wrap', lineHeight: 1.6, margin: 0 }}>
-              {vista.contenido}
+              {vistaReceta.contenido}
             </pre>
             <div className="adm-modal-btns" style={{ marginTop: 20 }}>
-              <button className="adm-btn-sec" onClick={() => setVista(null)}>Cerrar</button>
+              <button className="adm-btn-sec" onClick={() => setVistaReceta(null)}>Cerrar</button>
             </div>
           </div>
         </div>
