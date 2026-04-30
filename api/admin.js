@@ -111,8 +111,22 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === 'updateProducto') {
-      const { id, ...fields } = req.body.producto;
-      await sb.from('productos').update(fields).eq('id', id);
+      const { id, nombre, descripcion, categoria, variantes, slug, imagen, imagen_url: existingUrl } = req.body;
+      let imagen_url = existingUrl || null;
+
+      if (imagen?.data) {
+        const buffer   = Buffer.from(imagen.data, 'base64');
+        const fileName = `${Date.now()}.jpg`;
+        const { error: upErr } = await sb.storage
+          .from('ingredientes')
+          .upload(fileName, buffer, { contentType: imagen.mimeType || 'image/jpeg', upsert: false });
+        if (!upErr) {
+          const { data: { publicUrl } } = sb.storage.from('ingredientes').getPublicUrl(fileName);
+          imagen_url = publicUrl;
+        }
+      }
+
+      await sb.from('productos').update({ nombre, descripcion, categoria, variantes, slug, imagen_url }).eq('id', id);
       return res.json({ ok: true });
     }
 

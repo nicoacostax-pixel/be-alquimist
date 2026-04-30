@@ -192,15 +192,16 @@ function Usuarios() {
 /* ── PRODUCTOS ──────────────────────────────────────────── */
 function Productos() {
   const [productos, setProductos] = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [msg, setMsg]             = useState('');
-  const [tab, setTab]             = useState('list');
-  const [form, setForm]           = useState({ nombre:'', descripcion:'', categoria:'', imagen_url:'' });
+  const [loading,   setLoading]   = useState(true);
+  const [msg,       setMsg]       = useState('');
+  const [tab,       setTab]       = useState('list');
+  const [editId,    setEditId]    = useState(null);
+  const [form,      setForm]      = useState({ nombre:'', descripcion:'', categoria:'', imagen_url:'' });
   const [variantes, setVariantes] = useState([{ ...emptyVariante }]);
-  const [saving, setSaving]       = useState(false);
+  const [imagen,    setImagen]    = useState(null); // { data, mimeType, previewUrl }
+  const [saving,    setSaving]    = useState(false);
 
   const load = useCallback(() => {
-    // Productos no necesita service role — query directa
     supabase.from('productos').select('*').order('created_at', { ascending: false })
       .then(({ data, error }) => {
         if (error) setMsg('Error: ' + error.message);
@@ -209,6 +210,30 @@ function Productos() {
       });
   }, []);
   useEffect(() => { load(); }, [load]);
+
+  const resetForm = () => {
+    setForm({ nombre:'', descripcion:'', categoria:'', imagen_url:'' });
+    setVariantes([{ ...emptyVariante }]);
+    setImagen(null);
+    setEditId(null);
+  };
+
+  const handleEdit = (p) => {
+    setEditId(p.id);
+    setForm({ nombre: p.nombre || '', descripcion: p.descripcion || '', categoria: p.categoria || '', imagen_url: p.imagen_url || '' });
+    setVariantes(p.variantes?.length ? p.variantes.map(v => ({ nombre: v.nombre||'', precio: v.precio||'', peso: v.peso||'' })) : [{ ...emptyVariante }]);
+    setImagen(null);
+    setTab('form');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleImagen = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const compressed = await compressImage(file);
+    setImagen(compressed);
+    e.target.value = '';
+  };
 
   const del = async (id, nombre) => {
     if (!window.confirm(`¿Eliminar "${nombre}"?`)) return;
@@ -221,21 +246,41 @@ function Productos() {
     const cleanV = variantes
       .map(v => ({ nombre: v.nombre.trim(), precio: Number(v.precio), peso: Number(v.peso) }))
       .filter(v => v.nombre && v.precio);
-    const { error } = await supabase.from('productos').insert({ ...form, slug: generateSlug(form.nombre), variantes: cleanV });
-    if (error) { setMsg('Error: ' + error.message); }
-    else { setMsg('Producto guardado ✓'); setForm({ nombre:'', descripcion:'', categoria:'', imagen_url:'' }); setVariantes([{ ...emptyVariante }]); setTab('list'); load(); }
+    try {
+      if (editId) {
+        await callAdmin('updateProducto', {
+          id: editId, ...form, slug: generateSlug(form.nombre),
+          variantes: cleanV,
+          imagen: imagen || undefined,
+        });
+        setMsg('Producto actualizado ✓');
+      } else {
+        const { error } = await supabase.from('productos').insert({ ...form, slug: generateSlug(form.nombre), variantes: cleanV });
+        if (error) throw new Error(error.message);
+        setMsg('Producto guardado ✓');
+      }
+      resetForm(); setTab('list'); load();
+    } catch (err) { setMsg('Error: ' + err.message); }
     setSaving(false);
   };
+
+  const varSet = (i, field, val) => setVariantes(p => { const c=[...p]; c[i]={...c[i],[field]:val}; return c; });
 
   return (
     <div className="adm-section">
       {msg && <div className="adm-msg" onClick={() => setMsg('')}>{msg} ×</div>}
       <div className="adm-toolbar">
         <div className="adm-tabs-mini">
-          <button className={tab === 'list' ? 'active' : ''} onClick={() => setTab('list')}>Lista ({productos.length})</button>
-          <button className={tab === 'new'  ? 'active' : ''} onClick={() => setTab('new')}>+ Nuevo producto</button>
+          <button className={tab === 'list' ? 'active' : ''} onClick={() => { resetForm(); setTab('list'); }}>
+            Lista ({productos.length})
+          </button>
+          <button className={tab === 'form' && !editId ? 'active' : ''} onClick={() => { resetForm(); setTab('form'); }}>
+            + Nuevo producto
+          </button>
         </div>
+        {editId && <span style={{ fontSize:13, color:'#B08968', fontWeight:600 }}>✏️ Editando producto</span>}
       </div>
+
       {tab === 'list' && (
         loading ? <div className="adm-loading">Cargando…</div> :
         <div className="adm-table-wrap">
@@ -247,36 +292,91 @@ function Productos() {
                   <td><img src={p.imagen_url} alt={p.nombre} className="adm-product-thumb" /></td>
                   <td><strong>{p.nombre}</strong><br/><span className="adm-email">{p.slug}</span></td>
                   <td>{p.categoria}</td>
-                  <td>{p.variantes?.length || 0} variantes</td>
-                  <td><button className="adm-btn-del" onClick={() => del(p.id, p.nombre)}>Eliminar</button></td>
+                  <td>
+                    {(p.variantes || []).map((v,i) => (
+                      <div key={i} style={{ fontSize:12, color:'#666' }}>{v.nombre} — ${v.precio} / {v.peso}g</div>
+                    ))}
+                  </td>
+                  <td>
+                    <div className="adm-actions">
+                      <button className="adm-btn-edit" onClick={() => handleEdit(p)}>Editar</button>
+                      <button className="adm-btn-del"  onClick={() => del(p.id, p.nombre)}>✕</button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-      {tab === 'new' && (
+
+      {tab === 'form' && (
         <form className="adm-form" onSubmit={handleSubmit}>
-          {['nombre','descripcion','categoria','imagen_url'].map(f => (
-            <div key={f} className="adm-form-group">
-              <label className="adm-label">{f === 'imagen_url' ? 'Imagen (URL)' : f.charAt(0).toUpperCase()+f.slice(1)}</label>
-              {f === 'descripcion'
-                ? <textarea className="adm-input adm-textarea" value={form[f]} onChange={e => setForm(p => ({ ...p, [f]: e.target.value }))} required />
-                : <input className="adm-input" type={f==='imagen_url'?'url':'text'} value={form[f]} onChange={e => setForm(p => ({ ...p, [f]: e.target.value }))} required />
-              }
+          <div className="adm-form-group">
+            <label className="adm-label">Nombre</label>
+            <input className="adm-input" value={form.nombre} onChange={e => setForm(p=>({...p,nombre:e.target.value}))} required />
+          </div>
+          <div className="adm-form-group">
+            <label className="adm-label">Descripción</label>
+            <textarea className="adm-input adm-textarea" value={form.descripcion} onChange={e => setForm(p=>({...p,descripcion:e.target.value}))} />
+          </div>
+          <div className="adm-form-group">
+            <label className="adm-label">Categoría</label>
+            <input className="adm-input" value={form.categoria} onChange={e => setForm(p=>({...p,categoria:e.target.value}))} required />
+          </div>
+
+          {/* Imagen */}
+          <div className="adm-form-group">
+            <label className="adm-label">Imagen</label>
+            <div style={{ display:'flex', alignItems:'center', gap:12, flexWrap:'wrap' }}>
+              {(imagen?.previewUrl || form.imagen_url) && (
+                <img src={imagen?.previewUrl || form.imagen_url} alt=""
+                  style={{ width:72, height:72, objectFit:'cover', borderRadius:8, border:'2px solid #EDE8E1' }} />
+              )}
+              <div style={{ display:'flex', flexDirection:'column', gap:6, flex:1 }}>
+                <input className="adm-input" type="url" placeholder="URL de imagen"
+                  value={imagen ? '' : form.imagen_url}
+                  onChange={e => { setImagen(null); setForm(p=>({...p,imagen_url:e.target.value})); }}
+                  disabled={!!imagen} />
+                <label className="adm-upload-btn" style={{ width:'fit-content' }}>
+                  📷 {imagen ? 'Cambiar foto' : 'Subir foto'}
+                  <input type="file" accept="image/*" hidden onChange={handleImagen} />
+                </label>
+                {imagen && (
+                  <button type="button" className="adm-btn-sec" style={{ fontSize:12, padding:'4px 10px', width:'fit-content' }}
+                    onClick={() => setImagen(null)}>
+                    Usar URL en su lugar
+                  </button>
+                )}
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Variantes */}
           <label className="adm-label">Variantes</label>
           {variantes.map((v, i) => (
             <div key={i} className="adm-variante-row">
-              <input className="adm-input" placeholder="Nombre" value={v.nombre} onChange={e => setVariantes(p => { const c=[...p]; c[i]={...c[i],nombre:e.target.value}; return c; })} />
-              <input className="adm-input" placeholder="Precio" type="number" value={v.precio} onChange={e => setVariantes(p => { const c=[...p]; c[i]={...c[i],precio:e.target.value}; return c; })} />
-              <input className="adm-input" placeholder="Peso (g)" type="number" value={v.peso} onChange={e => setVariantes(p => { const c=[...p]; c[i]={...c[i],peso:e.target.value}; return c; })} />
-              {variantes.length > 1 && <button type="button" className="adm-btn-del" onClick={() => setVariantes(p => p.filter((_,j)=>j!==i))}>×</button>}
+              <input className="adm-input" placeholder="Nombre (ej: 250g)" value={v.nombre}
+                onChange={e => varSet(i,'nombre',e.target.value)} />
+              <input className="adm-input" placeholder="Precio (MXN)" type="number" value={v.precio}
+                onChange={e => varSet(i,'precio',e.target.value)} />
+              <input className="adm-input" placeholder="Peso (g)" type="number" value={v.peso}
+                onChange={e => varSet(i,'peso',e.target.value)} />
+              {variantes.length > 1 &&
+                <button type="button" className="adm-btn-del" onClick={() => setVariantes(p=>p.filter((_,j)=>j!==i))}>×</button>}
             </div>
           ))}
-          <button type="button" className="adm-btn-sec" style={{ marginTop:8 }} onClick={() => setVariantes(p => [...p, { ...emptyVariante }])}>+ Variante</button>
-          <button type="submit" className="adm-btn-primary" style={{ marginTop: 16 }} disabled={saving}>{saving ? 'Guardando…' : 'Guardar producto'}</button>
+          <button type="button" className="adm-btn-sec" style={{ marginTop:8 }}
+            onClick={() => setVariantes(p=>[...p,{...emptyVariante}])}>+ Variante</button>
+
+          <div style={{ display:'flex', gap:10, marginTop:16 }}>
+            <button type="submit" className="adm-btn-primary" disabled={saving}>
+              {saving ? 'Guardando…' : editId ? 'Guardar cambios' : 'Crear producto'}
+            </button>
+            <button type="button" className="adm-btn-sec" onClick={() => { resetForm(); setTab('list'); }}>
+              Cancelar
+            </button>
+          </div>
         </form>
       )}
     </div>
