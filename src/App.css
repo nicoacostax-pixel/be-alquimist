@@ -1378,6 +1378,13 @@ body {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+.variant-selected-msg {
+    margin-top: 12px;
+    font-size: 0.95rem;
+    color: #B08968;
+    font-weight: 500;
+}
+
 .insumos-page-container {
     padding: 40px 5%;
     max-width: 1400px;

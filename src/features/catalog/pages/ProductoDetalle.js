@@ -258,6 +258,11 @@ function ProductoDetalle() {
                   </button>
                 ))}
               </div>
+              {varianteSeleccionada && (
+                <p className="variant-selected-msg">
+                  Has seleccionado {varianteSeleccionada.nombre?.replace(/[^0-9]/g, '') || varianteSeleccionada.nombre} cantidad
+                </p>
+              )}
             </div>
 
             <div className="purchase-controls">
