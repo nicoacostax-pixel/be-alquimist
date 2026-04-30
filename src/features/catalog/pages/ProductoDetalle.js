@@ -260,7 +260,7 @@ function ProductoDetalle() {
               </div>
               {varianteSeleccionada && (
                 <p className="variant-selected-msg">
-                  Has seleccionado {varianteSeleccionada.nombre?.replace(/[^0-9]/g, '') || varianteSeleccionada.nombre} cantidad
+                  Haz seleccionado {varianteSeleccionada.nombre?.replace(/[^0-9]/g, '') || varianteSeleccionada.nombre} gr/ml
                 </p>
               )}
             </div>
