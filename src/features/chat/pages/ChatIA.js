@@ -374,15 +374,10 @@ function ChatIA() {
       { rol: 'ai', texto: respuestaIA },
     ]);
 
-    // Auto-guardar receta completa cuando llega PASO 4 (instrucciones)
-    if (userId && /## Instrucciones/i.test(respuestaIA)) {
-      const prevSections = historialActual
-        .filter(m => m.rol === 'ai' && parseSections(m.texto).length > 0)
-        .map(m => m.texto)
-        .join('\n\n');
-      const contenido = [prevSections, respuestaIA].filter(Boolean).join('\n\n');
-      const nombre = historialActual.find(m => m.rol === 'user')?.texto || 'Receta';
-      supabase.from('recetas').insert({ user_id: userId, nombre: nombre.slice(0, 120), contenido }).catch(() => {});
+    // Guardar receta desde PASO 1 (descripción generada)
+    if (userId && esInicioReceta) {
+      const nombre = (text || historialActual.find(m => m.rol === 'user')?.texto || 'Receta').slice(0, 120);
+      supabase.from('recetas').insert({ user_id: userId, nombre, contenido: respuestaIA }).catch(() => {});
     }
   };
 
