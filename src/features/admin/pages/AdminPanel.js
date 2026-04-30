@@ -768,7 +768,7 @@ function RecetasAdmin() {
         <div className="adm-table-wrap">
           <table className="adm-table">
             <thead>
-              <tr><th>Usuario</th><th>Recetas</th><th>Última actividad</th><th></th></tr>
+              <tr><th>Usuario</th><th>Teléfono</th><th>Recetas</th><th>Última actividad</th><th></th></tr>
             </thead>
             <tbody>
               {grupos.length === 0 && (
@@ -782,6 +782,7 @@ function RecetasAdmin() {
                       <strong>{g.nombre_usuario}</strong>
                       {g.user_id === '__anonimo__' && <span className="adm-badge" style={{ marginLeft: 6 }}>sin cuenta</span>}
                     </td>
+                    <td className="adm-email">{g.recetas[0]?.telefono || '—'}</td>
                     <td><span className="adm-badge">{g.recetas.length} receta{g.recetas.length !== 1 ? 's' : ''}</span></td>
                     <td className="adm-date">
                       {new Date(g.recetas[0].created_at).toLocaleDateString('es-MX')}
