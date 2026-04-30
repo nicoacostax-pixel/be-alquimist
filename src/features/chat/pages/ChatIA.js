@@ -375,9 +375,11 @@ function ChatIA() {
     ]);
 
     // Guardar receta desde PASO 1 (descripción generada)
-    if (userId && esInicioReceta) {
+    if (esInicioReceta) {
       const nombre = (text || historialActual.find(m => m.rol === 'user')?.texto || 'Receta').slice(0, 120);
-      supabase.from('recetas').insert({ user_id: userId, nombre, contenido: respuestaIA }).catch(() => {});
+      supabase.from('recetas')
+        .insert({ user_id: userId || null, nombre, contenido: respuestaIA })
+        .then(({ error }) => { if (error) console.error('[recetas]', error.message); });
     }
   };
 
