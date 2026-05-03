@@ -10,10 +10,10 @@ const stripePromise = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
   : null;
 
 const PAQUETES = [
-  { id: '10',  label: '10 elementos',  precio: '$99 MXN',   monto: 9900,  cantidad: 10 },
-  { id: '20',  label: '20 elementos',  precio: '$149 MXN',  monto: 14900, cantidad: 20 },
-  { id: '50',  label: '50 elementos',  precio: '$350 MXN',  monto: 35000, cantidad: 50 },
-  { id: '100', label: '100 elementos', precio: '$500 MXN',  monto: 50000, cantidad: 100 },
+  { id: '10',  label: '10 elementos',  precio: '$19 MXN',  monto: 1900, cantidad: 10 },
+  { id: '20',  label: '20 elementos',  precio: '$29 MXN',  monto: 2900, cantidad: 20 },
+  { id: '50',  label: '50 elementos',  precio: '$59 MXN',  monto: 5900, cantidad: 50 },
+  { id: '100', label: '100 elementos', precio: '$99 MXN',  monto: 9900, cantidad: 100 },
 ];
 
 const PRO_PKG = { id: 'pro', label: 'Alquimista PRO', precio: '$149 MXN/mes', monto: 14900, cantidad: 0 };

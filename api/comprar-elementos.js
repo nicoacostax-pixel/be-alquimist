@@ -2,10 +2,10 @@ const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
 
 const PAQUETES = {
-  '10':  { elementos: 10,  monto: 9900  },
-  '20':  { elementos: 20,  monto: 14900 },
-  '50':  { elementos: 50,  monto: 35000 },
-  '100': { elementos: 100, monto: 50000 },
+  '10':  { elementos: 10,  monto: 1900 },
+  '20':  { elementos: 20,  monto: 2900 },
+  '50':  { elementos: 50,  monto: 5900 },
+  '100': { elementos: 100, monto: 9900 },
 };
 
 function decodeJwt(token) {
