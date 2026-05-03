@@ -7099,6 +7099,10 @@ a.post-author-name.post-author-link:hover {
 .adm-form { display: flex; flex-direction: column; gap: 14px; max-width: 600px; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 .adm-form-group { display: flex; flex-direction: column; gap: 6px; }
 .adm-variante-row { display: flex; gap: 8px; align-items: center; }
+.adm-cat-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.adm-cat-tag { display: inline-block; padding: 5px 12px; border-radius: 20px; border: 1.5px solid #E8D5C0; background: #FAF7F4; color: #6B5744; font-size: 12px; font-family: 'Poppins', sans-serif; cursor: pointer; user-select: none; transition: all 0.15s; }
+.adm-cat-tag:hover { border-color: #B08968; color: #B08968; }
+.adm-cat-tag.selected { background: #B08968; border-color: #B08968; color: #fff; font-weight: 600; }
 
 /* Msg */
 .adm-msg { background: #F2FFF5; border: 1px solid #4CAF50; color: #2E7D32; border-radius: 8px; padding: 10px 16px; font-size: 13px; cursor: pointer; }

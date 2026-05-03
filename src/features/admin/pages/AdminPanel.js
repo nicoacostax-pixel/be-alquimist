@@ -5,6 +5,12 @@ import '../../../App.css';
 
 const ADMIN_EMAIL = process.env.REACT_APP_ADMIN_EMAIL;
 const emptyVariante = { nombre: '', precio: '', peso: '' };
+
+const CATEGORIAS = [
+  'Aceites','Aceites Esenciales','Aditamentos','Hidrolatos y Aguas florales',
+  'Aromas','Antioxidantes','Bases de Jabón','Ceras y mantecas','Conservantes',
+  'Colorantes','Emulsionantes','Extractos y Activos','Hierbas secas','Tensioactivos','Polvos',
+];
 const generateSlug = t => t.toLowerCase().trim().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,'-').replace(/[^\w-]+/g,'');
 
 async function callAdmin(action, extra = {}) {
@@ -321,8 +327,25 @@ function Productos() {
             <textarea className="adm-input adm-textarea" value={form.descripcion} onChange={e => setForm(p=>({...p,descripcion:e.target.value}))} />
           </div>
           <div className="adm-form-group">
-            <label className="adm-label">Categoría</label>
-            <input className="adm-input" value={form.categoria} onChange={e => setForm(p=>({...p,categoria:e.target.value}))} required />
+            <label className="adm-label">Categorías</label>
+            <div className="adm-cat-grid">
+              {CATEGORIAS.map(cat => {
+                const sel = (form.categoria || '').split(',').map(c => c.trim()).includes(cat);
+                return (
+                  <label key={cat} className={`adm-cat-tag${sel ? ' selected' : ''}`}>
+                    <input type="checkbox" hidden checked={sel} onChange={() =>
+                      setForm(prev => {
+                        const cur = prev.categoria ? prev.categoria.split(',').map(c => c.trim()).filter(Boolean) : [];
+                        const next = sel ? cur.filter(c => c !== cat) : [...cur, cat];
+                        return { ...prev, categoria: next.join(',') };
+                      })
+                    } />
+                    {cat}
+                  </label>
+                );
+              })}
+            </div>
+            {!form.categoria && <span style={{ fontSize:11, color:'#999' }}>Selecciona al menos una categoría</span>}
           </div>
 
           {/* Imagen */}

@@ -20,6 +20,10 @@ function toCategoryPath(value = '') {
   return value?.toLowerCase().replace(/\s+/g, '-') || '';
 }
 
+function firstCategory(categoria = '') {
+  return (categoria.split(',')[0] || '').trim();
+}
+
 function ProductoDetalle() {
   const { categoria, slug } = useParams();
   const navigate = useNavigate();
@@ -60,7 +64,8 @@ function ProductoDetalle() {
   }, [slug, navigate]);
 
   async function fetchRelacionados(cat, currentId) {
-    const { data } = await supabase.from('productos').select('*').eq('categoria', cat).neq('id', currentId).limit(4);
+    const primaryCat = firstCategory(cat);
+    const { data } = await supabase.from('productos').select('*').ilike('categoria', `%${primaryCat}%`).neq('id', currentId).limit(4);
     if (data) setRelacionados(data);
   }
 
@@ -117,8 +122,8 @@ function ProductoDetalle() {
         setShowResults(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
   if (loading) return <div className="loading-state">Destilando la esencia...</div>;
@@ -171,7 +176,7 @@ function ProductoDetalle() {
                   {searchResults.map((res, index) => (
                     <Link
                       key={index}
-                      to={`/insumos/${toCategoryPath(res.categoria)}/${res.slug}`}
+                      to={`/insumos/${toCategoryPath(firstCategory(res.categoria))}/${res.slug}`}
                       className="search-result-item"
                       onClick={() => { setShowResults(false); setSearchTerm(''); }}
                     >
@@ -212,7 +217,7 @@ function ProductoDetalle() {
                 {searchResults.map((res, index) => (
                   <Link
                     key={index}
-                    to={`/insumos/${toCategoryPath(res.categoria)}/${res.slug}`}
+                    to={`/insumos/${toCategoryPath(firstCategory(res.categoria))}/${res.slug}`}
                     className="search-result-item"
                     onClick={() => { setShowResults(false); setSearchTerm(''); }}
                   >
@@ -231,7 +236,7 @@ function ProductoDetalle() {
       <main className="producto-detalle-container">
         <nav className="breadcrumb">
           <Link to="/insumos">Insumos</Link> <ChevronRight size={14} /> 
-          <Link to={`/insumos/${toCategoryPath(producto.categoria)}`} className="breadcrumb-category capitalize">{producto.categoria}</Link> <ChevronRight size={14} /> 
+          <Link to={`/insumos/${toCategoryPath(firstCategory(producto.categoria))}`} className="breadcrumb-category capitalize">{firstCategory(producto.categoria)}</Link> <ChevronRight size={14} />
           <span className="current">{producto.nombre}</span>
         </nav>
 
@@ -363,10 +368,10 @@ function ProductoDetalle() {
             </div>
             <div className="relacionados-grid-premium">
               {relacionados.map((item) => (
-                <Link key={item.id} to={`/insumos/${toCategoryPath(item.categoria)}/${item.slug}`} className="card-relacionado-premium">
+                <Link key={item.id} to={`/insumos/${toCategoryPath(firstCategory(item.categoria))}/${item.slug}`} className="card-relacionado-premium">
                   <div className="card-img-wrapper"><img src={item.imagen_url} alt={item.nombre} /></div>
                   <div className="card-body-premium">
-                    <span className="card-category-tag">{item.categoria}</span>
+                    <span className="card-category-tag">{firstCategory(item.categoria)}</span>
                     <h3 className="card-product-title">{item.nombre}</h3>
                   </div>
                 </Link>

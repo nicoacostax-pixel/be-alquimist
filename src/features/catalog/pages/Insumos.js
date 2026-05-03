@@ -17,6 +17,10 @@ function toCategoryPath(value = '') {
   return value.toLowerCase().replace(/\s+/g, '-');
 }
 
+function firstCategory(categoria = '') {
+  return (categoria.split(',')[0] || '').trim();
+}
+
 function pseudoRating(slug = '') {
   let hash = 0;
   for (let i = 0; i < slug.length; i++) hash = (hash * 31 + slug.charCodeAt(i)) | 0;
@@ -43,13 +47,17 @@ function Insumos() {
       setLoading(true);
       let query = supabase.from('productos').select('*');
 
-      if (categoria && categoria !== 'todos') {
-        const categoriaLabel = categoria.replace(/-/g, ' ');
-        query = query.ilike('categoria', categoriaLabel);
-      }
-
       const { data, error } = await query;
-      if (!error) setProductos(data || []);
+      if (!error) {
+        let result = data || [];
+        if (categoria && categoria !== 'todos') {
+          const categoriaLabel = categoria.replace(/-/g, ' ').toLowerCase();
+          result = result.filter(p =>
+            (p.categoria || '').split(',').some(c => c.trim().toLowerCase() === categoriaLabel)
+          );
+        }
+        setProductos(result);
+      }
       setLoading(false);
     }
     fetchProductos();
@@ -81,8 +89,8 @@ function Insumos() {
         setShowResults(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
   if (loading) return <div className="loading-state">Cargando catálogo...</div>;
@@ -135,7 +143,7 @@ function Insumos() {
                     searchResults.map((res, index) => (
                       <Link
                         key={index}
-                        to={`/insumos/${toCategoryPath(res.categoria)}/${res.slug}`}
+                        to={`/insumos/${toCategoryPath(firstCategory(res.categoria))}/${res.slug}`}
                         className="search-result-item"
                         onClick={() => { setShowResults(false); setSearchTerm(''); }}
                       >
@@ -181,7 +189,7 @@ function Insumos() {
                   searchResults.map((res, index) => (
                     <Link
                       key={index}
-                      to={`/insumos/${toCategoryPath(res.categoria)}/${res.slug}`}
+                      to={`/insumos/${toCategoryPath(firstCategory(res.categoria))}/${res.slug}`}
                       className="search-result-item"
                       onClick={() => { setShowResults(false); setSearchTerm(''); }}
                     >
@@ -231,7 +239,7 @@ function Insumos() {
               const { stars, reviews } = pseudoRating(prod.slug);
               return (
                 <div key={prod.id} className="producto-card">
-                  <Link to={`/insumos/${toCategoryPath(prod.categoria)}/${prod.slug}`} className="card-link-wrapper">
+                  <Link to={`/insumos/${toCategoryPath(firstCategory(prod.categoria))}/${prod.slug}`} className="card-link-wrapper">
                     <div className="prod-img-wrap">
                       <img
                         src={prod.imagen_url}
