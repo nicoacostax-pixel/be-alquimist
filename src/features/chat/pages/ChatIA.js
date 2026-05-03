@@ -435,11 +435,6 @@ function ChatIA() {
           <div className="elementos-banner-spacer" />
         </>
       )}
-      {isLoggedIn && !esPro && (
-        <button className="pro-float-btn" onClick={() => navigate('/pro')}>
-          Únete a PRO
-        </button>
-      )}
     <div className={`app-container ${isMenuOpen ? 'menu-visible' : ''}`}>
       {showLoginModal    && <LoginModal    onClose={() => { setShowLoginModal(false);    setMensajes([]); }} />}
       {showLimitModal    && <LimitModal    onClose={() => { setShowLimitModal(false);    setMensajes([]); }} />}
@@ -530,6 +525,11 @@ function ChatIA() {
           </div>
         </div>
       </main>
+      {isLoggedIn && !esPro && (
+        <button className="pro-float-btn" onClick={() => navigate('/pro')}>
+          Únete a PRO
+        </button>
+      )}
     </div>
     </>
   );
