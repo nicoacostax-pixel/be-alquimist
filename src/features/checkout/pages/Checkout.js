@@ -48,7 +48,7 @@ function OrderSummary({ cart, cartSubtotal, shipping, total, descuento, setDescu
         <div className="co-total-line">
           <span>Envío</span>
           <span className={shipping === null ? 'co-muted' : shipping === 0 ? 'co-free-shipping' : ''}>
-            {shipping === 0 ? '🚚 Gratis (PRO)' : shipping !== null ? fmt(shipping) : 'Introducir dirección de envío'}
+            {shipping === 0 ? '🚚 Gratis' : shipping !== null ? fmt(shipping) : 'Introducir dirección de envío'}
           </span>
         </div>
         <div className="co-total-line co-total-final">
@@ -144,7 +144,8 @@ export default function Checkout() {
     setForm(p => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const shipping = esPro ? 0 : form.direccion.trim() ? 99 : null;
+  const freeShipping = esPro || cartSubtotal >= 1999;
+  const shipping = !form.direccion.trim() ? null : freeShipping ? 0 : 99;
   const total    = cartSubtotal + (shipping || 0);
 
   // Create PaymentIntent when moving to pay step

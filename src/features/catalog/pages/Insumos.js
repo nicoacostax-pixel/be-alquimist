@@ -214,10 +214,7 @@ function Insumos() {
       <main className="insumos-page-content">
         <div className="promo-banner-full">
           <div className="promo-banner-inner">
-            <p>
-              Te regalamos $50 MXN en tu primera compra — solo tienes que usar el cupón
-              <strong> “Newuser”</strong> (Válido en compras mayores a $499 MXN)
-            </p>
+            <p>Envío gratuito a partir de <strong>$1,999 MXN</strong></p>
           </div>
         </div>
 

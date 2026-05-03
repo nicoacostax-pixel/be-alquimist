@@ -233,6 +233,12 @@ function ProductoDetalle() {
         </div>
       </header>
 
+      <div className="promo-banner-full">
+        <div className="promo-banner-inner">
+          <p>Envío gratuito a partir de <strong>$1,999 MXN</strong></p>
+        </div>
+      </div>
+
       <main className="producto-detalle-container">
         <nav className="breadcrumb">
           <Link to="/insumos">Insumos</Link> <ChevronRight size={14} /> 
