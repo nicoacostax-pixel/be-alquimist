@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../../../App.css';
 import SidebarMenu from '../../catalog/components/SidebarMenu';
 import { useElementos } from '../../../shared/context/ElementosContext';
@@ -132,7 +132,8 @@ function ChatIA() {
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const { elementos, esPro, isLoggedIn, userId, deducir } = useElementos();
+  const { elementos, esPro, isLoggedIn, userId, isInitializing, deducir } = useElementos();
+  const navigate = useNavigate();
 
   const [recipeCount, setRecipeCount] = useState(
     () => parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
@@ -406,6 +407,14 @@ function ChatIA() {
     enviar(text, img);
   };
 
+  if (isInitializing) {
+    return (
+      <div className="app-init-spinner">
+        <div className="spinner-ring" />
+      </div>
+    );
+  }
+
   return (
     <>
       {isLoggedIn && (
@@ -414,13 +423,22 @@ function ChatIA() {
             <div className="elementos-banner-inner">
               <span className="elementos-banner-icon">⚗️</span>
               <span className="elementos-banner-text">
-                {esPro ? '∞ Elementos ilimitados — Alquimista PRO' : `${elementos} Elemento${elementos !== 1 ? 's' : ''} disponible${elementos !== 1 ? 's' : ''} para formular`}
+                {esPro
+                  ? '∞ Elementos ilimitados — Alquimista PRO'
+                  : elementos === 0
+                    ? 'Recarga elementos'
+                    : `${elementos} Elemento${elementos !== 1 ? 's' : ''} disponible${elementos !== 1 ? 's' : ''} para formular`}
               </span>
               <span className="elementos-banner-arrow">›</span>
             </div>
           </button>
           <div className="elementos-banner-spacer" />
         </>
+      )}
+      {isLoggedIn && !esPro && (
+        <button className="pro-float-btn" onClick={() => navigate('/pro')}>
+          Únete a PRO
+        </button>
       )}
     <div className={`app-container ${isMenuOpen ? 'menu-visible' : ''}`}>
       {showLoginModal    && <LoginModal    onClose={() => { setShowLoginModal(false);    setMensajes([]); }} />}

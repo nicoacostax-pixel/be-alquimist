@@ -2,16 +2,17 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { supabase } from '../lib/supabaseClient';
 
 const DEFAULT_CTX = {
-  elementos: 0, esPro: false, isLoggedIn: false, userId: null,
+  elementos: 0, esPro: false, isLoggedIn: false, userId: null, isInitializing: true,
   deducir: async () => false, agregar: async () => {}, activarPro: async () => {},
 };
 const ElementosCtx = createContext(DEFAULT_CTX);
 
 export function ElementosProvider({ children }) {
-  const [elementos, setElementos] = useState(0);
-  const [esPro,     setEsPro]     = useState(false);
-  const [userId,    setUserId]    = useState(null);
-  const [isLoggedIn,setIsLoggedIn]= useState(false);
+  const [elementos,      setElementos]      = useState(0);
+  const [esPro,          setEsPro]          = useState(false);
+  const [userId,         setUserId]         = useState(null);
+  const [isLoggedIn,     setIsLoggedIn]     = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   const sincronizar = useCallback(async (uid) => {
     if (!uid) return;
@@ -20,7 +21,7 @@ export function ElementosProvider({ children }) {
       .select('elementos, elementos_reset_at, es_pro')
       .eq('id', uid)
       .maybeSingle();
-    if (!data) return;
+    if (!data) { setIsInitializing(false); return; }
 
     let qty = data.elementos ?? 3;
     const resetAt = data.elementos_reset_at ? new Date(data.elementos_reset_at) : null;
@@ -40,6 +41,7 @@ export function ElementosProvider({ children }) {
     const { data: { session } } = await supabase.auth.getSession();
     const isAdmin = adminEmail && session?.user?.email === adminEmail;
     setEsPro(!!data.es_pro || isAdmin);
+    setIsInitializing(false);
   }, []);
 
   useEffect(() => {
@@ -48,7 +50,8 @@ export function ElementosProvider({ children }) {
       setUserId(uid);
       setIsLoggedIn(!!uid);
       if (uid) sincronizar(uid).catch(console.error);
-    }).catch(console.error);
+      else setIsInitializing(false);
+    }).catch(() => setIsInitializing(false));
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_e, session) => {
       const uid = session?.user?.id || null;
@@ -84,7 +87,7 @@ export function ElementosProvider({ children }) {
   }, [userId]);
 
   return (
-    <ElementosCtx.Provider value={{ elementos, esPro, isLoggedIn, userId, deducir, agregar, activarPro }}>
+    <ElementosCtx.Provider value={{ elementos, esPro, isLoggedIn, userId, isInitializing, deducir, agregar, activarPro }}>
       {children}
     </ElementosCtx.Provider>
   );

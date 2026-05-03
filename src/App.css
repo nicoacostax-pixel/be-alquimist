@@ -6286,6 +6286,15 @@ a.post-author-name.post-author-link:hover {
 /* ═══════════════════════════════════════════
    CONTADOR DE ELEMENTOS (header)
    ═══════════════════════════════════════════ */
+/* App init spinner */
+.app-init-spinner { display: flex; align-items: center; justify-content: center; height: 100dvh; width: 100%; background: #FAF7F2; }
+.spinner-ring { width: 40px; height: 40px; border: 3px solid #E8D5C0; border-top-color: #B08968; border-radius: 50%; animation: spin 0.75s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Floating PRO button */
+.pro-float-btn { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 900; background: #fff; color: #B08968; border: 1.5px solid #B08968; border-radius: 24px; padding: 11px 28px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(176,137,104,0.18); transition: all 0.2s; white-space: nowrap; }
+.pro-float-btn:hover { background: #B08968; color: #fff; }
+
 .elementos-banner {
   display: flex;
   justify-content: center;
