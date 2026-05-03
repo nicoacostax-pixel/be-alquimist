@@ -4063,6 +4063,7 @@ header.app-header-premium .header-center {
 header.app-header-premium .app-logo-small {
         font-size: 21px !important;
     padding-left: 100px;
+        font-family: 'Poppins' !important;
     white-space: nowrap !important;
 }
 
