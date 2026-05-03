@@ -21,29 +21,36 @@ const PRO_PKG = { id: 'pro', label: 'Alquimista PRO', precio: '$149 MXN/mes', mo
 function PagoForm({ paquete, onSuccess, onCancel }) {
   const stripe   = useStripe();
   const elements = useElements();
-  const [paying, setPaying] = useState(false);
-  const [error,  setError]  = useState('');
+  const [paying,  setPaying]  = useState(false);
+  const [ready,   setReady]   = useState(false);
+  const [error,   setError]   = useState('');
 
   const handlePay = async () => {
-    if (!stripe || !elements) return;
+    if (!stripe || !elements || !ready) return;
     setPaying(true);
     setError('');
-    const { error: e } = await stripe.confirmPayment({
-      elements,
-      confirmParams: { return_url: window.location.href },
-      redirect: 'if_required',
-    });
-    if (e) { setError(e.message); setPaying(false); }
-    else   { onSuccess(); }
+    try {
+      const { error: e } = await stripe.confirmPayment({
+        elements,
+        confirmParams: { return_url: window.location.href },
+        redirect: 'if_required',
+      });
+      if (e) { setError(e.message); setPaying(false); }
+      else   { onSuccess(); }
+    } catch (e) {
+      setError(e.message || 'Error al procesar el pago');
+      setPaying(false);
+    }
   };
 
   return (
     <div className="el-pago-wrap">
       <button className="el-back" onClick={onCancel}>← Volver</button>
       <h3 className="el-pago-title">{paquete.label}</h3>
-      <PaymentElement options={{ layout: 'tabs' }} />
+      {!ready && <p style={{ fontSize: 13, color: '#999', margin: '12px 0' }}>Cargando formulario de pago…</p>}
+      <PaymentElement options={{ layout: 'tabs' }} onReady={() => setReady(true)} />
       {error && <p className="el-pago-error">{error}</p>}
-      <button className="el-pago-btn" onClick={handlePay} disabled={!stripe || paying}>
+      <button className="el-pago-btn" onClick={handlePay} disabled={!stripe || !ready || paying}>
         {paying ? 'Procesando…' : `Pagar ${paquete.precio}`}
       </button>
     </div>
