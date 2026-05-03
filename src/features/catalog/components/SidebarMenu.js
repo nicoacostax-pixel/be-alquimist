@@ -78,8 +78,7 @@ function SidebarMenu({ isOpen, onClose }) {
 
         <nav className="menu-list">
           <button className="menu-item" onClick={() => goTo('/')}>Laboratorio</button>
-          <button className="menu-item" onClick={closeAll}>Envío a domicilio</button>
-          <button className="menu-item has-arrow" onClick={() => setIsInsumosOpen(true)}>
+<button className="menu-item has-arrow" onClick={() => setIsInsumosOpen(true)}>
             <span>Insumos</span>
             <span className="menu-arrow">›</span>
           </button>

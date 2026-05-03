@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { NavLink, Outlet, Link } from 'react-router-dom';
+import { NavLink, Outlet, Link, Navigate } from 'react-router-dom';
 import { Menu, Search, ShoppingCart } from 'lucide-react';
 import { supabase } from '../../../shared/lib/supabaseClient';
 import { useCart } from '../../../shared/context/CartContext';
+import { useElementos } from '../../../shared/context/ElementosContext';
 import CartSidebar from '../../../shared/components/CartSidebar';
 import SidebarMenu from '../../catalog/components/SidebarMenu';
 import '../../../App.css';
@@ -14,11 +15,11 @@ function toCategoryPath(value = '') {
 const TABS = [
   { name: 'Comunidad',  path: '/comunidad' },
   { name: 'Calendario', path: '/comunidad/calendario' },
-  { name: 'Miembros',   path: '/comunidad/miembros' },
   { name: 'Marcadores', path: '/comunidad/marcadores' },
 ];
 
 export default function ComunidadLayout() {
+  const { isLoggedIn, isInitializing } = useElementos();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCartOpen, setIsCartOpen]       = useState(false);
   const [searchTerm, setSearchTerm]       = useState('');
@@ -75,6 +76,8 @@ export default function ComunidadLayout() {
       )}
     </div>
   );
+
+  if (!isInitializing && !isLoggedIn) return <Navigate to="/login" replace />;
 
   return (
     <div className={`insumos-container ${isSidebarOpen ? 'menu-visible' : ''}`}>
