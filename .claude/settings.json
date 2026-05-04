@@ -9,7 +9,13 @@
       "Bash(xxd)",
       "Bash(python3 -c ' *)",
       "Bash(git pull *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(curl -s -X POST https://bealquimist.com/api/send-welcome-email -H 'Content-Type: application/json' -d '{\"email\":\"nico.acosta.x@gmail.com\",\"nombre\":\"Nico\"}')",
+      "Bash(curl -s -X POST https://bealquimist.com/api/send-welcome-email -H 'Content-Type: application/json' -d '{\"email\":\"taller.organico.mx@gmail.com\",\"nombre\":\"Nico\"}')",
+      "Bash(node -e \"require\\('./api/send-welcome-email'\\)\")"
+    ],
+    "additionalDirectories": [
+      "/Users/nicoacosta/Downloads"
     ]
   }
 }
