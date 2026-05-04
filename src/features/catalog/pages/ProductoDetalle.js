@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import {
   ChevronRight,
   Minus,
@@ -131,6 +132,33 @@ function ProductoDetalle() {
 
   return (
     <div className={`insumos-container ${isSidebarOpen ? 'menu-visible' : ''}`}>
+      <Helmet>
+        <title>{`${producto.nombre} | Be Alquimist`}</title>
+        <meta name="description" content={`${(producto.descripcion || producto.nombre).slice(0, 155)} — Compra en Be Alquimist, insumos de cosmética natural con envío a México.`} />
+        <link rel="canonical" href={`https://bealquimist.com/insumos/${toCategoryPath(firstCategory(producto.categoria))}/${producto.slug}`} />
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={`${producto.nombre} | Be Alquimist`} />
+        <meta property="og:description" content={`${(producto.descripcion || producto.nombre).slice(0, 155)}`} />
+        <meta property="og:image" content={producto.imagen_url} />
+        <meta property="og:url" content={`https://bealquimist.com/insumos/${toCategoryPath(firstCategory(producto.categoria))}/${producto.slug}`} />
+        <meta property="og:locale" content="es_MX" />
+        <script type="application/ld+json">{JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: producto.nombre,
+          description: producto.descripcion || producto.nombre,
+          image: producto.imagen_url,
+          url: `https://bealquimist.com/insumos/${toCategoryPath(firstCategory(producto.categoria))}/${producto.slug}`,
+          brand: { '@type': 'Brand', name: 'Be Alquimist' },
+          offers: (producto.variantes || []).map(v => ({
+            '@type': 'Offer',
+            price: v.precio,
+            priceCurrency: 'MXN',
+            availability: 'https://schema.org/InStock',
+            seller: { '@type': 'Organization', name: 'Be Alquimist' },
+          })),
+        })}</script>
+      </Helmet>
       <SidebarMenu isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 

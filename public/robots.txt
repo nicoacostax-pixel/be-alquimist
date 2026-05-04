@@ -1,3 +1,8 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /cuenta
+Disallow: /checkout
+Disallow: /api/
+
+Sitemap: https://bealquimist.com/sitemap.xml

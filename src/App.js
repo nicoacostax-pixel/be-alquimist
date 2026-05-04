@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { CartProvider } from './shared/context/CartContext';
 import { ElementosProvider } from './shared/context/ElementosContext';
 import ErrorBoundary from './shared/components/ErrorBoundary';
@@ -51,6 +52,7 @@ function WhatsAppFab() {
 
 function App() {
   return (
+    <HelmetProvider>
     <ErrorBoundary>
     <CartProvider>
     <ElementosProvider>
@@ -94,6 +96,7 @@ function App() {
     </ElementosProvider>
     </CartProvider>
     </ErrorBoundary>
+    </HelmetProvider>
   );
 }
 

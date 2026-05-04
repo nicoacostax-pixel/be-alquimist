@@ -41,6 +41,7 @@ for (const name of API_ROUTES) {
 }
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
+app.get('/sitemap.xml', (req, res) => require('./api/sitemap')(req, res));
 
 // ── Serve React production build ───────────────────────────────────────────────
 const buildDir = path.join(__dirname, '..', 'build');

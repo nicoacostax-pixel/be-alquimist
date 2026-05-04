@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import {
   ChevronRight,
   Menu,
@@ -109,8 +110,25 @@ function Insumos() {
 
   if (loading) return <div className="loading-state">Cargando catálogo...</div>;
 
+  const catLabel = categoria ? categoria.replace(/-/g, ' ') : null;
+  const pageTitle = catLabel
+    ? `${catLabel.charAt(0).toUpperCase() + catLabel.slice(1)} para cosmética natural | Be Alquimist`
+    : 'Insumos de cosmética natural | Be Alquimist';
+  const pageDesc = catLabel
+    ? `Compra ${catLabel} de alta calidad para formular cosméticos naturales. Envío a todo México. Be Alquimist.`
+    : 'Insumos de cosmética natural: aceites, ceras, extractos, conservantes y más. Envío a todo México. Be Alquimist.';
+  const pageUrl = `https://bealquimist.com/insumos${categoria ? '/' + categoria : ''}`;
+
   return (
     <div className={`insumos-container ${isSidebarOpen ? 'menu-visible' : ''}`}>
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDesc} />
+        <link rel="canonical" href={pageUrl} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDesc} />
+        <meta property="og:url" content={pageUrl} />
+      </Helmet>
       <InsumoPopup />
       <SidebarMenu isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
