@@ -96,6 +96,11 @@ function Registro() {
           id: signUpData.user.id,
           telefono: formData.telefono.trim(),
         });
+        fetch('/api/send-welcome-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formData.email, nombre: formData.nombre }),
+        }).catch(() => {});
       }
       alert("¡Bienvenida al laboratorio!");
       navigate('/login');

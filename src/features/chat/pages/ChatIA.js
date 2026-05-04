@@ -11,6 +11,8 @@ const STORAGE_KEY = 'ba_free_recipes';
 
 function inlineFormat(str) {
   return str
+    .replace(/https?:\/\/[^\s<>"')]+/g, url =>
+      `<a href="${url}" target="_blank" rel="noopener noreferrer" class="chat-link">${url}</a>`)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g,     '<em>$1</em>')
     .replace(/`(.+?)`/g,       '<code>$1</code>');

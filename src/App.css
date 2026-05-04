@@ -128,6 +128,8 @@ body {
 .md-text strong { font-weight: 700; color: #4A3F35; }
 .md-text em     { font-style: italic; }
 .md-text code   { background: #F3EFE8; padding: 1px 5px; border-radius: 4px; font-size: 13px; font-family: monospace; }
+.chat-link { color: #B08968; font-weight: 600; text-decoration: underline; word-break: break-all; }
+.chat-link:hover { color: #9A7458; }
 
 /* ── Recipe card sections ── */
 .msg-bubble.ai:has(.chat-login-wall) {

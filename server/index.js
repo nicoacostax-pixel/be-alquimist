@@ -31,7 +31,7 @@ const API_ROUTES = [
   'resumir-receta',
   'leads',
   'recetas',
-  'email',
+  'send-welcome-email',
 ];
 
 for (const name of API_ROUTES) {

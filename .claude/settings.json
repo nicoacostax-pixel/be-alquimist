@@ -7,7 +7,9 @@
       "Bash(curl -s -X POST 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyDpW_u-GhCTRQqF9CGh0vasKVsOnBJEUtE' -H 'Content-Type: application/json' -d '{\"contents\":[{\"parts\":[{\"text\":\"Hola, responde en una palabra\"}]}]}')",
       "Bash(vercel env *)",
       "Bash(xxd)",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(git pull *)",
+      "Bash(git stash *)"
     ]
   }
 }
