@@ -483,11 +483,19 @@ function Comunidad() {
 
   const load = useCallback(() => {
     supabase.from('posts')
-      .select('id, titulo, contenido, categoria, created_at, usuario_id, perfiles(nombre)')
+      .select('id, titulo, contenido, categoria, created_at, usuario_id')
       .order('created_at', { ascending: false }).limit(50)
-      .then(({ data, error }) => {
-        if (error) setMsg('Error: ' + error.message);
-        else setPosts(data || []);
+      .then(async ({ data, error }) => {
+        if (error) { setMsg('Error: ' + error.message); setLoading(false); return; }
+        const posts = data || [];
+        // Fetch author names separately
+        const ids = [...new Set(posts.map(p => p.usuario_id).filter(Boolean))];
+        let nombresMap = {};
+        if (ids.length > 0) {
+          const { data: perfiles } = await supabase.from('perfiles').select('id, nombre').in('id', ids);
+          (perfiles || []).forEach(p => { nombresMap[p.id] = p.nombre; });
+        }
+        setPosts(posts.map(p => ({ ...p, autor: nombresMap[p.usuario_id] || '—' })));
         setLoading(false);
       });
   }, []);
@@ -510,7 +518,7 @@ function Comunidad() {
               {posts.map(p => (
                 <tr key={p.id}>
                   <td><strong>{p.titulo}</strong><br/><span className="adm-email">{p.contenido?.slice(0,70)}…</span></td>
-                  <td>{p.perfiles?.nombre || '—'}</td>
+                  <td>{p.autor || '—'}</td>
                   <td><span className="adm-badge">{p.categoria}</span></td>
                   <td className="adm-date">{new Date(p.created_at).toLocaleDateString('es-MX')}</td>
                   <td><button className="adm-btn-del" onClick={() => del(p.id)}>Eliminar</button></td>
