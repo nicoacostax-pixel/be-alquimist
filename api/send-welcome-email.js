@@ -1,5 +1,5 @@
 const { Resend } = require('resend');
-const { buildEmailHtml, getTemplate } = require('./_resend');
+const { buildEmailHtml, getTemplate, supabase } = require('./_resend');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
@@ -154,6 +154,12 @@ module.exports = async function handler(req, res) {
       subject,
       html,
     });
+
+    // Registrar en leads como usuario nuevo
+    await supabase.from('leads').upsert(
+      { email, tipo: 'usuario_nuevo' },
+      { onConflict: 'email,tipo', ignoreDuplicates: true }
+    );
 
     return res.json({ ok: true });
   } catch (err) {

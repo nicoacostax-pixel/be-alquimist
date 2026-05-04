@@ -936,7 +936,10 @@ function Contactos() {
 }
 
 /* ── LEADS ──────────────────────────────────────────────────── */
-const TIPO_LABELS = { 'aceite_de_regalo': '🎁 Aceite de regalo' };
+const TIPO_LABELS = {
+  'usuario_nuevo':   '🙋 Usuario nuevo',
+  'aceite_de_regalo':'🎁 Aceite de regalo',
+};
 
 function Leads() {
   const [leads,   setLeads]   = useState([]);
