@@ -162,7 +162,7 @@ function CartSidebar({ isOpen, onClose }) {
             <span>Total</span>
             <strong>{formatMoney(cartSubtotal)}</strong>
           </div>
-          <p>Impuestos incluidos. Costos de envío calculados al finalizar la compra.</p>
+          <p>Impuestos incluidos. {cartSubtotal >= 1999 ? '🚚 Tu pedido tiene envío gratuito.' : `Envío gratuito en compras mayores a $1,999 MXN.`}</p>
           <div className="cart-footer-buttons">
             <button type="button" className="cart-btn dark" onClick={onClose}>Seguir comprando</button>
             <button type="button" className="cart-btn light" onClick={() => { onClose(); navigate('/checkout'); }}>Finalizar compra</button>

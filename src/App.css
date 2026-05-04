@@ -3177,7 +3177,7 @@ body {
   padding: 0 20px;       /* Aire interno para que en móviles no toque los bordes */
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 120px);
+  min-height: auto;
 }
 
 /* Ajuste del Header para que también respete ese aire si lo deseas */
@@ -3195,9 +3195,8 @@ body {
 /* La ventana de chat debe ser flexible pero centrada */
 .chat-window {
   width: 100%;
-  flex: 1;
   overflow-y: auto;
-  padding: 20px 0; /* Aire arriba y abajo */
+  padding: 10px 0;
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -7682,7 +7681,7 @@ a.post-author-name.post-author-link:hover {
 }
 
 @media (max-width: 480px) {
-  .biblioteca-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .biblioteca-grid { grid-template-columns: 1fr; gap: 12px; }
   .bib-card-img-wrap { height: 120px; }
 }
 
@@ -7867,6 +7866,24 @@ a.post-author-name.post-author-link:hover {
   line-height: 1.7;
   margin: 0;
   white-space: pre-line;
+}
+
+.bib-block-figure {
+  margin: 14px 0;
+}
+.bib-block-image {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+.bib-block-caption {
+  font-size: 12px;
+  color: #9E9188;
+  text-align: center;
+  margin-top: 6px;
+  font-style: italic;
 }
 
 /* ── PRODUCT CARDS (Insumos grid) ───────────────────────────── */
@@ -8340,4 +8357,83 @@ a.post-author-name.post-author-link:hover {
   color: #9E9E9E;
   font-size: 16px;
   user-select: none;
+}
+
+/* ── Recetas home (semana + destacadas) ───────────────────── */
+.home-recetas-section {
+  margin: 28px 0 8px;
+  padding: 0 2px;
+}
+.home-recetas-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #4A3F35;
+  margin: 0 0 14px;
+  letter-spacing: 0.01em;
+}
+.home-recetas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 12px;
+}
+.home-receta-card {
+  background: #fff;
+  border: 1px solid #EDE0D4;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(176,137,104,0.07);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.home-receta-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(176,137,104,0.14);
+}
+.home-receta-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}
+.home-receta-img-placeholder {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #F5EDE3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+.home-receta-link-wrap {
+  display: block;
+}
+.home-receta-info {
+  padding: 10px 10px 12px;
+}
+.home-receta-nombre {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3A2F25;
+  margin: 0 0 4px;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.home-receta-meta {
+  font-size: 11px;
+  color: #9E9188;
+  font-family: 'Poppins', sans-serif;
+}
+.home-receta-desc {
+  font-size: 11px;
+  color: #7A6B60;
+  font-family: 'Poppins', sans-serif;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
 }

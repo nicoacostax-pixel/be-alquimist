@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { sendEmail, getTemplate } = require('./_resend');
 
 const supabase = createClient(
   process.env.REACT_APP_SUPABASE_URL || process.env.SUPABASE_URL,
@@ -13,6 +14,16 @@ module.exports = async function handler(req, res) {
 
   const { error } = await supabase.from('leads').insert({ telefono, email, tipo });
   if (error) return res.status(500).json({ error: error.message });
+
+  // Enviar email de bienvenida si existe la plantilla 'bienvenida'
+  try {
+    const tpl = await getTemplate('bienvenida');
+    if (tpl?.asunto && tpl?.bloques?.length) {
+      await sendEmail({ to: email, subject: tpl.asunto, bloques: tpl.bloques, fuente: tpl.fuente });
+    }
+  } catch (_) {
+    // No bloquear el registro si el email falla
+  }
 
   res.json({ ok: true });
 };

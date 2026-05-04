@@ -206,6 +206,8 @@ function Productos() {
   const [variantes, setVariantes] = useState([{ ...emptyVariante }]);
   const [imagen,    setImagen]    = useState(null); // { data, mimeType, previewUrl }
   const [saving,    setSaving]    = useState(false);
+  const [search,    setSearch]    = useState('');
+  const [catFiltro, setCatFiltro] = useState('');
 
   const load = useCallback(() => {
     supabase.from('productos').select('*').order('created_at', { ascending: false })
@@ -215,6 +217,13 @@ function Productos() {
         setLoading(false);
       });
   }, []);
+
+  const filtrados = useMemo(() => productos.filter(p => {
+    const matchSearch = !search || p.nombre?.toLowerCase().includes(search.toLowerCase());
+    const matchCat = !catFiltro || (p.categoria || '').split(',').map(c => c.trim()).includes(catFiltro);
+    return matchSearch && matchCat;
+  }), [productos, search, catFiltro]);
+
   useEffect(() => { load(); }, [load]);
 
   const resetForm = () => {
@@ -275,15 +284,35 @@ function Productos() {
   return (
     <div className="adm-section">
       {msg && <div className="adm-msg" onClick={() => setMsg('')}>{msg} ×</div>}
-      <div className="adm-toolbar">
+      <div className="adm-toolbar" style={{ flexWrap:'wrap', gap:8 }}>
         <div className="adm-tabs-mini">
           <button className={tab === 'list' ? 'active' : ''} onClick={() => { resetForm(); setTab('list'); }}>
-            Lista ({productos.length})
+            Lista ({filtrados.length}/{productos.length})
           </button>
           <button className={tab === 'form' && !editId ? 'active' : ''} onClick={() => { resetForm(); setTab('form'); }}>
             + Nuevo producto
           </button>
         </div>
+        {tab === 'list' && (
+          <>
+            <input
+              className="adm-search"
+              placeholder="Buscar por nombre…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ minWidth:160 }}
+            />
+            <select
+              className="adm-input"
+              value={catFiltro}
+              onChange={e => setCatFiltro(e.target.value)}
+              style={{ minWidth:140, padding:'6px 10px', fontSize:13 }}
+            >
+              <option value="">Todas las categorías</option>
+              {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </>
+        )}
         {editId && <span style={{ fontSize:13, color:'#B08968', fontWeight:600 }}>✏️ Editando producto</span>}
       </div>
 
@@ -293,7 +322,10 @@ function Productos() {
           <table className="adm-table">
             <thead><tr><th>Imagen</th><th>Nombre</th><th>Categoría</th><th>Variantes</th><th></th></tr></thead>
             <tbody>
-              {productos.map(p => (
+              {filtrados.length === 0 && (
+                <tr><td colSpan={5} style={{ textAlign:'center', color:'#999', padding:24 }}>Sin resultados</td></tr>
+              )}
+              {filtrados.map(p => (
                 <tr key={p.id}>
                   <td><img src={p.imagen_url} alt={p.nombre} className="adm-product-thumb" /></td>
                   <td><strong>{p.nombre}</strong><br/><span className="adm-email">{p.slug}</span></td>
@@ -607,6 +639,7 @@ function BlockEditor({ blocks, onChange }) {
           >
             <option value="h1">H1 — Título</option>
             <option value="text">Texto</option>
+            <option value="image">Imagen (URL)</option>
           </select>
 
           {/* Contenido */}
@@ -618,6 +651,29 @@ function BlockEditor({ blocks, onChange }) {
               onChange={e => update(i, 'content', e.target.value)}
               onPaste={e => handlePaste(e, i)}
             />
+          ) : block.type === 'image' ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <input
+                className="block-input block-input--h1"
+                placeholder="URL de la imagen…"
+                value={block.content}
+                onChange={e => update(i, 'content', e.target.value)}
+              />
+              <input
+                className="block-input block-input--h1"
+                placeholder="Descripción / caption (opcional)"
+                value={block.caption || ''}
+                onChange={e => update(i, 'caption', e.target.value)}
+                style={{ fontSize: 12, color: '#888' }}
+              />
+              {block.content && (
+                <img
+                  src={block.content}
+                  alt={block.caption || 'preview'}
+                  style={{ maxWidth: 220, maxHeight: 160, objectFit: 'cover', borderRadius: 8, border: '1px solid #EDE0D4' }}
+                />
+              )}
+            </div>
           ) : (
             <textarea
               className="block-input block-input--text"
@@ -641,6 +697,7 @@ function BlockEditor({ blocks, onChange }) {
       <div className="block-add-row">
         <button type="button" className="block-add-btn" onClick={() => add('h1')}>+ Título H1</button>
         <button type="button" className="block-add-btn" onClick={() => add('text')}>+ Texto</button>
+        <button type="button" className="block-add-btn" onClick={() => add('image')}>+ Imagen</button>
       </div>
     </div>
   );
@@ -964,6 +1021,564 @@ function RecetasAdmin() {
   );
 }
 
+/* ── RECETAS DESTACADAS ADMIN ───────────────────────────────── */
+const EMPTY_DEST_FORM = { titulo: '', categoria: '', imagen_url: '', orden: 0, activa: true };
+
+function destParseBlocks(desc) {
+  if (!desc) return [{ type: 'text', content: '' }];
+  try {
+    const p = JSON.parse(desc);
+    if (Array.isArray(p) && p.length > 0) return p;
+  } catch {}
+  return [{ type: 'text', content: desc }];
+}
+
+function RecetasDestacadasAdmin() {
+  const [lista,   setLista]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving,  setSaving]  = useState(false);
+  const [err,     setErr]     = useState('');
+  const [form,    setForm]    = useState(EMPTY_DEST_FORM);
+  const [blocks,  setBlocks]  = useState([{ type: 'text', content: '' }]);
+  const [editId,  setEditId]  = useState(null);
+
+  const cargar = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('recetas_destacadas')
+      .select('*')
+      .order('orden', { ascending: true });
+    if (error) {
+      if (error.code === '42P01') {
+        setErr('TABLA_FALTANTE');
+      } else {
+        setErr(error.message);
+      }
+    }
+    else setLista(data || []);
+    setLoading(false);
+  }, []);
+  useEffect(() => { cargar(); }, [cargar]);
+
+  const handleSave = async e => {
+    e.preventDefault();
+    if (!form.titulo.trim()) { setErr('El título es obligatorio.'); return; }
+    setSaving(true);
+    setErr('');
+    const descripcion = JSON.stringify(blocks.filter(b => b.content?.trim()));
+    const payload = { ...form, descripcion, orden: Number(form.orden) || 0 };
+    const { error } = editId
+      ? await supabase.from('recetas_destacadas').update(payload).eq('id', editId)
+      : await supabase.from('recetas_destacadas').insert(payload);
+    if (error) { setErr(error.message); setSaving(false); return; }
+    setErr(editId ? 'Receta actualizada ✓' : 'Receta agregada ✓');
+    setForm(EMPTY_DEST_FORM);
+    setBlocks([{ type: 'text', content: '' }]);
+    setEditId(null);
+    await cargar();
+    setSaving(false);
+  };
+
+  const handleEdit = r => {
+    setEditId(r.id);
+    setForm({ titulo: r.titulo || '', categoria: r.categoria || '', imagen_url: r.imagen_url || '', orden: r.orden ?? 0, activa: r.activa ?? true });
+    setBlocks(destParseBlocks(r.descripcion));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async id => {
+    if (!window.confirm('¿Eliminar esta receta?')) return;
+    const { error } = await supabase.from('recetas_destacadas').delete().eq('id', id);
+    if (error) { setErr(error.message); return; }
+    await cargar();
+  };
+
+  const handleCancel = () => {
+    setEditId(null);
+    setForm(EMPTY_DEST_FORM);
+    setBlocks([{ type: 'text', content: '' }]);
+    setErr('');
+  };
+
+  const toggleActiva = async r => {
+    await supabase.from('recetas_destacadas').update({ activa: !r.activa }).eq('id', r.id);
+    cargar();
+  };
+
+  // preview text for list
+  const previewText = r => {
+    try {
+      const b = JSON.parse(r.descripcion);
+      const first = Array.isArray(b) ? b.find(x => x.type === 'text')?.content : null;
+      return (first || r.descripcion || '').slice(0, 70);
+    } catch { return (r.descripcion || '').slice(0, 70); }
+  };
+
+  const SQL_TABLA = `create table if not exists recetas_destacadas (
+  id          uuid primary key default gen_random_uuid(),
+  titulo      text not null,
+  categoria   text,
+  descripcion text,
+  imagen_url  text,
+  orden       int default 0,
+  activa      boolean default true,
+  created_at  timestamptz default now()
+);
+alter table recetas_destacadas enable row level security;
+create policy "lectura publica" on recetas_destacadas for select using (true);
+create policy "admin escritura" on recetas_destacadas for all using (auth.role() = 'authenticated');`;
+
+  if (err === 'TABLA_FALTANTE') {
+    return (
+      <div className="adm-card" style={{ textAlign: 'center', padding: 32 }}>
+        <p style={{ fontSize: 28, marginBottom: 12 }}>🗄️</p>
+        <h3 style={{ marginBottom: 8 }}>La tabla aún no existe en Supabase</h3>
+        <p style={{ color: '#888', marginBottom: 20, fontSize: 14 }}>
+          Copia este SQL y ejecútalo en el{' '}
+          <a href={`https://supabase.com/dashboard/project/pxreruyfjpacnvhxmhlk/sql/new`}
+            target="_blank" rel="noopener noreferrer" style={{ color: '#B08968' }}>
+            SQL Editor de tu proyecto
+          </a>.
+        </p>
+        <pre style={{ background: '#F5F0EB', borderRadius: 10, padding: 16, fontSize: 12, textAlign: 'left', overflowX: 'auto', marginBottom: 16 }}>
+          {SQL_TABLA}
+        </pre>
+        <button className="adm-btn-primary"
+          onClick={() => { navigator.clipboard.writeText(SQL_TABLA); alert('SQL copiado ✓'); }}>
+          Copiar SQL
+        </button>
+        <button className="adm-btn-sec" onClick={() => { setErr(''); cargar(); }} style={{ marginLeft: 10 }}>
+          Ya lo ejecuté — Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* FORMULARIO */}
+      <div className="adm-card" style={{ marginBottom: 24 }}>
+        <h3 className="adm-section-title">{editId ? '✏️ Editar receta destacada' : '✨ Nueva receta destacada'}</h3>
+        {err && <div className="adm-msg" onClick={() => setErr('')}>{err} ×</div>}
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <input className="adm-input" placeholder="Título *"
+            value={form.titulo} onChange={e => setForm(f => ({ ...f, titulo: e.target.value }))} required />
+          <input className="adm-input" placeholder="Categoría (ej: Facial, Corporal, Capilar…)"
+            value={form.categoria} onChange={e => setForm(f => ({ ...f, categoria: e.target.value }))} />
+          <input className="adm-input" placeholder="URL de imagen de portada (https://…)"
+            value={form.imagen_url} onChange={e => setForm(f => ({ ...f, imagen_url: e.target.value }))} />
+          {form.imagen_url && (
+            <img src={form.imagen_url} alt="portada"
+              style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 10, border: '2px solid #B08968', marginTop: -6 }} />
+          )}
+
+          {/* Editor de bloques */}
+          <div>
+            <p style={{ fontSize: 12, color: '#888', margin: '4px 0 8px' }}>Contenido (bloques de texto, títulos e imágenes)</p>
+            <BlockEditor blocks={blocks} onChange={setBlocks} />
+          </div>
+
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <label style={{ fontSize: 12, color: '#888' }}>Orden</label>
+              <input className="adm-input" type="number" min={0} style={{ width: 80 }}
+                value={form.orden} onChange={e => setForm(f => ({ ...f, orden: e.target.value }))} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 18 }}>
+              <input type="checkbox" id="dest-activa" checked={form.activa}
+                onChange={e => setForm(f => ({ ...f, activa: e.target.checked }))}
+                style={{ width: 18, height: 18, cursor: 'pointer' }} />
+              <label htmlFor="dest-activa" style={{ fontSize: 14, cursor: 'pointer' }}>Visible en página principal</label>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+            <button type="submit" className="adm-btn-primary" disabled={saving}>
+              {saving ? 'Guardando…' : editId ? 'Guardar cambios' : 'Publicar receta'}
+            </button>
+            {editId && (
+              <button type="button" className="adm-btn-sec" onClick={handleCancel}>Cancelar</button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* LISTA */}
+      <div className="adm-card">
+        <h3 className="adm-section-title">Recetas publicadas ({lista.length})</h3>
+        {loading ? <div className="adm-loading">Cargando…</div> : (
+          <div className="adm-table-wrap">
+            <table className="adm-table">
+              <thead>
+                <tr><th>Orden</th><th>Portada</th><th>Título</th><th>Categoría</th><th>Vista previa</th><th>Visible</th><th></th></tr>
+              </thead>
+              <tbody>
+                {lista.length === 0 && (
+                  <tr><td colSpan={7} style={{ textAlign: 'center', color: '#999', padding: 24 }}>Sin recetas aún.</td></tr>
+                )}
+                {lista.map(r => (
+                  <tr key={r.id} style={{ background: editId === r.id ? '#FDF8F4' : undefined }}>
+                    <td style={{ textAlign: 'center', width: 50 }}>{r.orden}</td>
+                    <td style={{ width: 64 }}>
+                      {r.imagen_url
+                        ? <img src={r.imagen_url} alt={r.titulo} style={{ width: 52, height: 52, objectFit: 'cover', borderRadius: 8, border: '1px solid #EDE0D4' }} />
+                        : <div style={{ width: 52, height: 52, background: '#F5EDE3', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🌿</div>
+                      }
+                    </td>
+                    <td><strong>{r.titulo}</strong></td>
+                    <td><span className="adm-badge">{r.categoria || '—'}</span></td>
+                    <td className="adm-email" style={{ maxWidth: 200 }}>{previewText(r)}…</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <button
+                        onClick={() => toggleActiva(r)}
+                        style={{ cursor: 'pointer', border: 'none', background: r.activa ? '#E8F5E9' : '#FFF3E0', color: r.activa ? '#388E3C' : '#E65100', padding: '3px 10px', borderRadius: 20, fontSize: 12, fontFamily: 'inherit' }}
+                      >
+                        {r.activa ? 'Visible' : 'Oculta'}
+                      </button>
+                    </td>
+                    <td>
+                      <button className="adm-btn-edit" onClick={() => handleEdit(r)}>Editar</button>
+                      <button className="adm-btn-del" onClick={() => handleDelete(r.id)} style={{ marginLeft: 6 }}>Eliminar</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── EMAIL MARKETING ────────────────────────────────────────── */
+const FONTS = [
+  { label: 'Georgia (clásica)',   value: 'Georgia, serif' },
+  { label: 'Arial (moderna)',     value: 'Arial, sans-serif' },
+  { label: 'Helvetica (limpia)',  value: 'Helvetica Neue, Helvetica, Arial, sans-serif' },
+  { label: 'Palatino (elegante)', value: 'Palatino Linotype, Palatino, serif' },
+  { label: 'Trebuchet (amigable)',value: 'Trebuchet MS, sans-serif' },
+];
+
+const EMPTY_EMAIL = {
+  id: '', nombre: '', asunto: '', fuente: 'Georgia, serif',
+  bloques: [{ type: 'h1', content: '' }, { type: 'text', content: '' }],
+};
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildPreviewHtml(bloques, fuente) {
+  const blocks = bloques.map(b => {
+    switch (b.type) {
+      case 'h1':    return `<h1 style="font-family:${fuente};color:#4A3F35;font-size:26px;line-height:1.3;margin:20px 0 10px;">${esc(b.content)}</h1>`;
+      case 'h2':    return `<h2 style="font-family:${fuente};color:#6B5B4E;font-size:18px;margin:16px 0 6px;">${esc(b.content)}</h2>`;
+      case 'text':  return `<p style="font-family:${fuente};color:#4A3F35;font-size:14px;line-height:1.7;margin:0 0 14px;">${esc(b.content).replace(/\n/g,'<br/>')}</p>`;
+      case 'image': return `<img src="${esc(b.content)}" alt="${esc(b.caption||'')}" style="max-width:100%;border-radius:8px;display:block;margin:12px auto;"/>` + (b.caption ? `<p style="text-align:center;color:#9E9188;font-size:11px;margin:-4px 0 12px;">${esc(b.caption)}</p>` : '');
+      case 'button':return `<div style="text-align:center;margin:20px 0;"><a href="#" style="display:inline-block;background:${esc(b.color||'#B08968')};color:#fff;padding:11px 30px;border-radius:8px;text-decoration:none;font-family:${fuente};font-size:14px;font-weight:bold;">${esc(b.content||'Botón')}</a></div>`;
+      case 'divider':return `<hr style="border:none;border-top:1px solid #EDE0D4;margin:22px 0;"/>`;
+      default: return '';
+    }
+  }).join('');
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;background:#F9F5F0;font-family:${fuente};">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px;">
+<table width="560" style="max-width:560px;width:100%;background:#fff;border-radius:14px;overflow:hidden;" cellpadding="0" cellspacing="0">
+<tr><td style="background:#4A3F35;padding:22px 32px;text-align:center;"><p style="color:#F5EDE3;margin:0;font-family:Georgia,serif;font-size:18px;letter-spacing:3px;">⚗️ BE ALQUIMIST</p></td></tr>
+<tr><td style="padding:32px;">${blocks}</td></tr>
+<tr><td style="background:#F5EDE3;padding:16px 32px;text-align:center;"><p style="color:#9E9188;font-size:11px;font-family:Arial,sans-serif;margin:0;">© ${new Date().getFullYear()} Be Alquimist</p></td></tr>
+</table></td></tr></table></body></html>`;
+}
+
+function EmailBlockEditor({ bloques, onChange }) {
+  const update = (i, field, val) => onChange(bloques.map((b, idx) => idx === i ? { ...b, [field]: val } : b));
+  const add    = (type) => onChange([...bloques, type === 'button' ? { type, content: 'Visítanos', url: '', color: '#B08968' } : type === 'divider' ? { type, content: '' } : { type, content: '' }]);
+  const remove = (i)    => onChange(bloques.filter((_, idx) => idx !== i));
+  const move   = (i, d) => {
+    const next = [...bloques]; const to = i + d;
+    if (to < 0 || to >= next.length) return;
+    [next[i], next[to]] = [next[to], next[i]]; onChange(next);
+  };
+
+  return (
+    <div className="block-editor">
+      {bloques.map((b, i) => (
+        <div key={i} className={`block-row block-row--${b.type}`}>
+          <select className="block-type-select" value={b.type} onChange={e => update(i, 'type', e.target.value)}>
+            <option value="h1">H1 — Título grande</option>
+            <option value="h2">H2 — Subtítulo</option>
+            <option value="text">Párrafo</option>
+            <option value="image">Imagen (URL)</option>
+            <option value="button">Botón</option>
+            <option value="divider">Separador</option>
+          </select>
+
+          {b.type === 'divider' ? (
+            <div style={{ flex:1, display:'flex', alignItems:'center', padding:'0 8px' }}>
+              <hr style={{ flex:1, border:'none', borderTop:'2px dashed #EDE0D4' }} />
+            </div>
+          ) : b.type === 'image' ? (
+            <div style={{ flex:1, display:'flex', flexDirection:'column', gap:6 }}>
+              <input className="block-input block-input--h1" placeholder="URL de la imagen (https://…)" value={b.content} onChange={e => update(i,'content',e.target.value)} />
+              <input className="block-input block-input--h1" placeholder="Caption / descripción (opcional)" style={{ fontSize:12 }} value={b.caption||''} onChange={e => update(i,'caption',e.target.value)} />
+              {b.content && <img src={b.content} alt="" style={{ maxWidth:200, maxHeight:140, objectFit:'cover', borderRadius:8, border:'1px solid #EDE0D4' }} />}
+            </div>
+          ) : b.type === 'button' ? (
+            <div style={{ flex:1, display:'flex', flexDirection:'column', gap:6 }}>
+              <input className="block-input block-input--h1" placeholder="Texto del botón" value={b.content} onChange={e => update(i,'content',e.target.value)} />
+              <input className="block-input block-input--h1" placeholder="URL destino (https://…)" value={b.url||''} onChange={e => update(i,'url',e.target.value)} />
+              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                <label style={{ fontSize:12, color:'#888', flexShrink:0 }}>Color:</label>
+                <input type="color" value={b.color||'#B08968'} onChange={e => update(i,'color',e.target.value)} style={{ width:40, height:30, border:'none', borderRadius:6, cursor:'pointer', padding:2 }} />
+                <span style={{ fontSize:12, color:'#888' }}>{b.color||'#B08968'}</span>
+              </div>
+            </div>
+          ) : b.type === 'text' ? (
+            <textarea className="block-input block-input--text" placeholder="Párrafo de texto…" rows={3} value={b.content} onChange={e => update(i,'content',e.target.value)} />
+          ) : (
+            <input className="block-input block-input--h1" placeholder={b.type === 'h2' ? 'Subtítulo…' : 'Título principal…'} value={b.content} onChange={e => update(i,'content',e.target.value)} />
+          )}
+
+          <div className="block-actions">
+            <button type="button" className="block-btn" onClick={() => move(i,-1)} title="Subir">↑</button>
+            <button type="button" className="block-btn" onClick={() => move(i, 1)} title="Bajar">↓</button>
+            <button type="button" className="block-btn block-btn--del" onClick={() => remove(i)} title="Eliminar">✕</button>
+          </div>
+        </div>
+      ))}
+      <div className="block-add-row">
+        {['h1','h2','text','image','button','divider'].map(t => (
+          <button key={t} type="button" className="block-add-btn" onClick={() => add(t)}>
+            + {t === 'h1' ? 'Título' : t === 'h2' ? 'Subtítulo' : t === 'text' ? 'Párrafo' : t === 'image' ? 'Imagen' : t === 'button' ? 'Botón' : 'Separador'}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function EmailMarketing() {
+  const [templates, setTemplates] = useState([]);
+  const [form,      setForm]      = useState({ ...EMPTY_EMAIL, id: 'bienvenida', nombre: 'Bienvenida' });
+  const [msg,       setMsg]       = useState('');
+  const [loading,   setLoading]   = useState(true);
+  const [saving,    setSaving]    = useState(false);
+  const [testEmail, setTestEmail] = useState('');
+  const [preview,   setPreview]   = useState(false);
+  const [tablaMissing, setTablaMissing] = useState(false);
+
+  const callEmail = useCallback(async (action, extra = {}) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch('/api/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, token: session?.access_token, ...extra }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Error');
+    return json;
+  }, []);
+
+  const loadTemplates = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { templates: list } = await callEmail('listTemplates');
+      setTemplates(list || []);
+      if (list?.length > 0) {
+        const { template } = await callEmail('getTemplate', { id: list[0].id });
+        if (template) setForm({ ...template, bloques: template.bloques || EMPTY_EMAIL.bloques });
+      }
+    } catch (e) {
+      if (e.message?.includes('42P01') || e.message?.includes('does not exist')) setTablaMissing(true);
+      else setMsg('Error cargando: ' + e.message);
+    }
+    setLoading(false);
+  }, [callEmail]);
+
+  useEffect(() => { loadTemplates(); }, [loadTemplates]);
+
+  const selectTemplate = async (id) => {
+    try {
+      const { template } = await callEmail('getTemplate', { id });
+      if (template) setForm({ ...template, bloques: template.bloques || EMPTY_EMAIL.bloques });
+    } catch (e) { setMsg('Error: ' + e.message); }
+  };
+
+  const save = async () => {
+    if (!form.id.trim()) { setMsg('El ID de la plantilla es requerido'); return; }
+    setSaving(true);
+    try {
+      await callEmail('saveTemplate', form);
+      setMsg('Plantilla guardada ✓');
+      await loadTemplates();
+    } catch (e) { setMsg('Error: ' + e.message); }
+    setSaving(false);
+  };
+
+  const sendTest = async () => {
+    if (!testEmail) { setMsg('Ingresa un email para la prueba'); return; }
+    setSaving(true);
+    try {
+      await callEmail('sendTest', { ...form, to: testEmail });
+      setMsg(`Email de prueba enviado a ${testEmail} ✓`);
+    } catch (e) { setMsg('Error: ' + e.message); }
+    setSaving(false);
+  };
+
+  const sendCampaign = async () => {
+    if (!window.confirm('¿Enviar este email a TODOS los leads? Esta acción no se puede deshacer.')) return;
+    setSaving(true);
+    try {
+      const { total, failed } = await callEmail('sendCampaign', form);
+      setMsg(`Campaña enviada: ${total - failed} exitosos, ${failed} fallidos`);
+    } catch (e) { setMsg('Error: ' + e.message); }
+    setSaving(false);
+  };
+
+  const SQL_TABLA = `create table if not exists email_plantillas (
+  id         text primary key,
+  nombre     text,
+  asunto     text,
+  fuente     text default 'Georgia, serif',
+  bloques    jsonb default '[]'::jsonb,
+  updated_at timestamptz default now()
+);
+alter table email_plantillas enable row level security;
+create policy "solo autenticado" on email_plantillas for all using (auth.role() = 'authenticated');`;
+
+  if (tablaMissing) return (
+    <div className="adm-card" style={{ textAlign:'center', padding:32 }}>
+      <p style={{ fontSize:28, marginBottom:12 }}>📧</p>
+      <h3 style={{ marginBottom:8 }}>Falta la tabla en Supabase</h3>
+      <p style={{ color:'#888', marginBottom:20, fontSize:14 }}>
+        Ejecuta este SQL en el{' '}
+        <a href="https://supabase.com/dashboard/project/pxreruyfjpacnvhxmhlk/sql/new" target="_blank" rel="noopener noreferrer" style={{ color:'#B08968' }}>
+          SQL Editor
+        </a>.
+      </p>
+      <pre style={{ background:'#F5F0EB', borderRadius:10, padding:16, fontSize:12, textAlign:'left', overflowX:'auto', marginBottom:16 }}>{SQL_TABLA}</pre>
+      <button className="adm-btn-primary" onClick={() => { navigator.clipboard.writeText(SQL_TABLA); alert('SQL copiado ✓'); }}>Copiar SQL</button>
+      <button className="adm-btn-sec" onClick={() => { setTablaMissing(false); loadTemplates(); }} style={{ marginLeft:10 }}>Ya lo ejecuté — Reintentar</button>
+    </div>
+  );
+
+  if (loading) return <div className="adm-loading">Cargando…</div>;
+
+  return (
+    <div style={{ display:'flex', gap:24, alignItems:'flex-start', flexWrap:'wrap' }}>
+
+      {/* ── PANEL IZQUIERDO: EDITOR ── */}
+      <div style={{ flex:'1 1 380px', minWidth:320 }}>
+        {msg && <div className="adm-msg" onClick={() => setMsg('')}>{msg} ×</div>}
+
+        {/* Selector de plantillas */}
+        {templates.length > 0 && (
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:16 }}>
+            {templates.map(t => (
+              <button key={t.id}
+                className={form.id === t.id ? 'adm-btn-primary' : 'adm-btn-sec'}
+                style={{ fontSize:13, padding:'5px 14px' }}
+                onClick={() => selectTemplate(t.id)}>
+                {t.nombre || t.id}
+              </button>
+            ))}
+            <button className="adm-btn-sec" style={{ fontSize:13, padding:'5px 14px' }}
+              onClick={() => setForm({ ...EMPTY_EMAIL, id: '', nombre: 'Nueva plantilla' })}>
+              + Nueva
+            </button>
+          </div>
+        )}
+
+        <div className="adm-card" style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          <h3 className="adm-section-title" style={{ marginBottom:4 }}>✏️ Editor de email</h3>
+
+          <div style={{ display:'flex', gap:10 }}>
+            <div style={{ flex:1 }}>
+              <label className="adm-label">ID de plantilla</label>
+              <input className="adm-input" placeholder="ej: bienvenida" value={form.id}
+                onChange={e => setForm(f => ({ ...f, id: e.target.value.toLowerCase().replace(/\s+/g,'-') }))} />
+            </div>
+            <div style={{ flex:1 }}>
+              <label className="adm-label">Nombre</label>
+              <input className="adm-input" placeholder="Nombre descriptivo" value={form.nombre}
+                onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} />
+            </div>
+          </div>
+
+          <div>
+            <label className="adm-label">Asunto del email</label>
+            <input className="adm-input" placeholder="Ej: Bienvenida a Be Alquimist 🌿" value={form.asunto}
+              onChange={e => setForm(f => ({ ...f, asunto: e.target.value }))} />
+          </div>
+
+          <div>
+            <label className="adm-label">Tipo de letra</label>
+            <select className="adm-input" value={form.fuente} onChange={e => setForm(f => ({ ...f, fuente: e.target.value }))}>
+              {FONTS.map(fn => <option key={fn.value} value={fn.value}>{fn.label}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className="adm-label" style={{ marginBottom:8, display:'block' }}>Contenido del email</label>
+            <EmailBlockEditor bloques={form.bloques} onChange={bloques => setForm(f => ({ ...f, bloques }))} />
+          </div>
+
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginTop:4 }}>
+            <button className="adm-btn-primary" onClick={save} disabled={saving}>{saving ? 'Guardando…' : 'Guardar plantilla'}</button>
+            <button className="adm-btn-sec" onClick={() => setPreview(p => !p)}>{preview ? 'Ocultar vista previa' : 'Vista previa'}</button>
+          </div>
+        </div>
+
+        {/* Envíos */}
+        <div className="adm-card" style={{ marginTop:16 }}>
+          <h3 className="adm-section-title" style={{ marginBottom:12 }}>📤 Envíos</h3>
+
+          <div>
+            <label className="adm-label">Email de prueba</label>
+            <div style={{ display:'flex', gap:8 }}>
+              <input className="adm-input" type="email" placeholder="tu@email.com" style={{ flex:1 }}
+                value={testEmail} onChange={e => setTestEmail(e.target.value)} />
+              <button className="adm-btn-sec" onClick={sendTest} disabled={saving} style={{ whiteSpace:'nowrap' }}>Enviar prueba</button>
+            </div>
+          </div>
+
+          <div style={{ marginTop:16, paddingTop:16, borderTop:'1px solid #EDE0D4' }}>
+            <p style={{ fontSize:13, color:'#888', margin:'0 0 10px' }}>
+              Envía este email a <strong>todos los leads</strong> registrados.
+            </p>
+            <button onClick={sendCampaign} disabled={saving}
+              style={{ background:'#4A3F35', color:'#F5EDE3', border:'none', borderRadius:8, padding:'10px 24px', fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'inherit', opacity: saving ? 0.6 : 1 }}>
+              {saving ? 'Enviando…' : 'Enviar campaña a todos los leads'}
+            </button>
+          </div>
+
+          <p style={{ fontSize:11, color:'#aaa', marginTop:12, marginBottom:0 }}>
+            El email de bienvenida con ID <code>bienvenida</code> se envía automáticamente al registrarse un nuevo lead.
+          </p>
+        </div>
+      </div>
+
+      {/* ── PANEL DERECHO: VISTA PREVIA ── */}
+      {preview && (
+        <div style={{ flex:'1 1 360px', minWidth:300 }}>
+          <div className="adm-card" style={{ padding:0, overflow:'hidden' }}>
+            <div style={{ background:'#E8E0D8', padding:'10px 16px', fontSize:13, color:'#6B5B4E', fontWeight:600 }}>
+              Vista previa del email
+            </div>
+            <iframe
+              key={JSON.stringify(form)}
+              srcDoc={buildPreviewHtml(form.bloques, form.fuente)}
+              style={{ width:'100%', height:600, border:'none', display:'block' }}
+              title="Vista previa"
+              sandbox="allow-same-origin"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const TABS = [
   { id: 'dashboard',  label: '📊 Dashboard' },
   { id: 'usuarios',   label: '👥 Usuarios' },
@@ -973,6 +1588,8 @@ const TABS = [
   { id: 'biblioteca', label: '🌿 Biblioteca' },
   { id: 'leads',      label: '📧 Leads' },
   { id: 'recetas',    label: '🧪 Recetas IA' },
+  { id: 'destacadas', label: '✨ Destacadas' },
+  { id: 'email',      label: '📨 Email Marketing' },
 ];
 
 export default function AdminPanel() {
@@ -1016,6 +1633,8 @@ export default function AdminPanel() {
           {tab === 'biblioteca' && <BibliotecaAdmin />}
           {tab === 'leads'      && <Leads />}
           {tab === 'recetas'    && <RecetasAdmin />}
+          {tab === 'destacadas' && <RecetasDestacadasAdmin />}
+          {tab === 'email'      && <EmailMarketing />}
         </div>
       </main>
     </div>

@@ -144,8 +144,7 @@ export default function Checkout() {
     setForm(p => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const freeShipping = esPro || cartSubtotal >= 1999;
-  const shipping = !form.direccion.trim() ? null : freeShipping ? 0 : 99;
+  const shipping = (esPro || cartSubtotal >= 1999) ? 0 : form.direccion.trim() ? 99 : null;
   const total    = cartSubtotal + (shipping || 0);
 
   // Create PaymentIntent when moving to pay step

@@ -228,7 +228,7 @@ function Insumos() {
       <main className="insumos-page-content">
         <div className="promo-banner-full">
           <div className="promo-banner-inner">
-            <p>Envío gratuito a partir de <strong>$1,999 MXN</strong></p>
+            <p>🚚 Envío gratuito en compras mayores a <strong>$1,999 MXN</strong></p>
           </div>
         </div>
 

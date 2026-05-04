@@ -5,6 +5,7 @@ import SidebarMenu from '../../catalog/components/SidebarMenu';
 import { useElementos } from '../../../shared/context/ElementosContext';
 import ElementosModal from '../../../shared/components/ElementosModal';
 import ShareRecetaBtn from '../components/ShareRecetaBtn';
+import { supabase } from '../../../shared/lib/supabaseClient';
 
 const STORAGE_KEY = 'ba_free_recipes';
 
@@ -119,6 +120,168 @@ function LimitModal({ onClose }) {
         <Link to="/login" className="chat-login-btn">Iniciar sesión</Link>
         <button className="chat-modal-skip" onClick={onClose}>Ahora no</button>
       </div>
+    </div>
+  );
+}
+
+/* ── Top 5 recetas de la semana ─────────────────────────── */
+function RecetasSemana() {
+  const [recetas, setRecetas] = useState([]);
+
+  useEffect(() => {
+    async function load() {
+      const hace7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: likes } = await supabase
+        .from('post_likes')
+        .select('post_id')
+        .gte('created_at', hace7);
+
+      if (!likes || likes.length === 0) return;
+
+      const conteo = {};
+      likes.forEach(l => { conteo[l.post_id] = (conteo[l.post_id] || 0) + 1; });
+      const topIds = Object.entries(conteo)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([id]) => id);
+
+      const { data: posts } = await supabase
+        .from('posts')
+        .select('id, titulo, imagen_url, usuario_id, perfiles(nombre)')
+        .in('id', topIds)
+        .eq('categoria', 'Recetas');
+
+      if (!posts) return;
+      const ordenados = topIds
+        .map(id => posts.find(p => p.id === id))
+        .filter(Boolean)
+        .map(p => ({ ...p, _likes: conteo[p.id] || 0 }));
+      setRecetas(ordenados);
+    }
+    load();
+  }, []);
+
+  if (recetas.length === 0) return null;
+
+  return (
+    <div className="home-recetas-section">
+      <h3 className="home-recetas-title">🔥 Recetas de la semana</h3>
+      <div className="home-recetas-grid">
+        {recetas.map(r => (
+          <div key={r.id} className="home-receta-card">
+            {r.imagen_url
+              ? <img src={r.imagen_url} alt={r.titulo} className="home-receta-img" />
+              : <div className="home-receta-img-placeholder">🌿</div>
+            }
+            <div className="home-receta-info">
+              <p className="home-receta-nombre">{r.titulo}</p>
+              <span className="home-receta-meta">
+                {r.perfiles?.nombre && <span>{r.perfiles.nombre} · </span>}
+                ❤️ {r._likes}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const DEST_DEFAULT_IMG = 'https://via.placeholder.com/400x300/F3EFE8/B08968?text=🌿';
+
+function destParseBlocks(desc) {
+  if (!desc) return null;
+  try {
+    const p = JSON.parse(desc);
+    if (Array.isArray(p) && p.length > 0) return p;
+  } catch {}
+  return [{ type: 'text', content: desc }];
+}
+
+function DestRenderBlocks({ descripcion }) {
+  const blocks = destParseBlocks(descripcion);
+  if (!blocks) return null;
+  return (
+    <div className="bib-blocks">
+      {blocks.map((block, i) =>
+        block.type === 'h1'
+          ? <h3 key={i} className="bib-block-h1">{block.content}</h3>
+          : block.type === 'image'
+            ? (
+              <figure key={i} className="bib-block-figure">
+                <img src={block.content} alt={block.caption || ''} className="bib-block-image" />
+                {block.caption && <figcaption className="bib-block-caption">{block.caption}</figcaption>}
+              </figure>
+            )
+          : <p key={i} className="bib-block-text">{block.content}</p>
+      )}
+    </div>
+  );
+}
+
+/* ── Recetas destacadas (admin) ──────────────────────────── */
+function RecetasDestacadas() {
+  const [recetas,  setRecetas]  = useState([]);
+  const [selected, setSelected] = useState(null);
+
+  useEffect(() => {
+    supabase
+      .from('recetas_destacadas')
+      .select('id, titulo, categoria, descripcion, imagen_url, orden')
+      .eq('activa', true)
+      .order('orden', { ascending: true })
+      .then(({ data }) => { if (data) setRecetas(data); });
+  }, []);
+
+  if (recetas.length === 0) return null;
+
+  const previewText = r => {
+    try {
+      const b = JSON.parse(r.descripcion);
+      const first = Array.isArray(b) ? b.find(x => x.type === 'text')?.content : null;
+      return (first || r.descripcion || '').slice(0, 90);
+    } catch { return (r.descripcion || '').slice(0, 90); }
+  };
+
+  return (
+    <div className="home-recetas-section">
+      <h3 className="home-recetas-title">✨ Recetas destacadas de la semana</h3>
+      <div className="biblioteca-grid">
+        {recetas.map(r => (
+          <button key={r.id} className="bib-card" onClick={() => setSelected(r)}>
+            <div className="bib-card-img-wrap">
+              <img
+                src={r.imagen_url || DEST_DEFAULT_IMG}
+                alt={r.titulo}
+                className="bib-card-img"
+                onError={e => { e.target.src = DEST_DEFAULT_IMG; }}
+              />
+            </div>
+            <div className="bib-card-body">
+              {r.categoria && <span className="bib-card-cat">{r.categoria}</span>}
+              <h3 className="bib-card-name">{r.titulo}</h3>
+              <p className="bib-card-desc">{previewText(r)}…</p>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {selected && (
+        <div className="bib-modal-overlay" onClick={() => setSelected(null)}>
+          <div className="bib-modal" onClick={e => e.stopPropagation()}>
+            <button className="bib-modal-close" onClick={() => setSelected(null)}>✕</button>
+            {selected.imagen_url && (
+              <img src={selected.imagen_url} alt={selected.titulo} className="bib-modal-img"
+                onError={e => { e.target.src = DEST_DEFAULT_IMG; }} />
+            )}
+            <div className="bib-modal-body">
+              {selected.categoria && <span className="bib-card-cat">{selected.categoria}</span>}
+              <h2 className="bib-modal-name">{selected.titulo}</h2>
+              <DestRenderBlocks descripcion={selected.descripcion} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -515,13 +678,8 @@ function ChatIA() {
           </form>
         </div>
 
-        <div className="recipe-card-bottom">
-          <div className="image-placeholder"><span className="icon-leaf">🌿</span></div>
-          <div className="recipe-body">
-            <h2 className="recipe-title">Laboratorio Activo</h2>
-            <p className="recipe-description">Escribe arriba qué quieres crear para generar una fórmula completa.</p>
-          </div>
-        </div>
+        <RecetasSemana />
+        <RecetasDestacadas />
       </main>
       {isLoggedIn && !esPro && (
         <button className="pro-float-btn" onClick={() => navigate('/pro')}>

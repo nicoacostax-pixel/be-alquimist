@@ -240,6 +240,12 @@ function ProductoDetalle() {
       </div>
 
       <main className="producto-detalle-container">
+        <div className="promo-banner-full">
+          <div className="promo-banner-inner">
+            <p>🚚 Envío gratuito en compras mayores a <strong>$1,999 MXN</strong></p>
+          </div>
+        </div>
+
         <nav className="breadcrumb">
           <Link to="/insumos">Insumos</Link> <ChevronRight size={14} /> 
           <Link to={`/insumos/${toCategoryPath(firstCategory(producto.categoria))}`} className="breadcrumb-category capitalize">{firstCategory(producto.categoria)}</Link> <ChevronRight size={14} />

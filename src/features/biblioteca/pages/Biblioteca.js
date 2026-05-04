@@ -24,7 +24,14 @@ function RenderBlocks({ descripcion }) {
       {blocks.map((block, i) =>
         block.type === 'h1'
           ? <h3 key={i} className="bib-block-h1">{block.content}</h3>
-          : <p   key={i} className="bib-block-text">{block.content}</p>
+          : block.type === 'image'
+            ? (
+              <figure key={i} className="bib-block-figure">
+                <img src={block.content} alt={block.caption || ''} className="bib-block-image" />
+                {block.caption && <figcaption className="bib-block-caption">{block.caption}</figcaption>}
+              </figure>
+            )
+          : <p key={i} className="bib-block-text">{block.content}</p>
       )}
     </div>
   );
