@@ -181,11 +181,6 @@ function ChatIA() {
 
   const saludoAleatorio = useMemo(() => saludos[Math.floor(Math.random() * saludos.length)], [saludos]);
 
-  useEffect(() => {
-    if (mensajes.length > 0) {
-      scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [mensajes]);
 
   useEffect(() => {
     if (subIndex === palabras[index].length + 1 && !reversa) {
@@ -409,14 +404,17 @@ function ChatIA() {
 
   if (isInitializing) {
     return (
-      <div className="app-init-spinner">
-        <div className="spinner-ring" />
+      <div className="chat-init-loading">
+        <div className="chat-init-spinner" />
       </div>
     );
   }
 
   return (
     <>
+      {isLoggedIn && !esPro && (
+        <Link to="/pro" className="pro-float-btn">Únete a PRO ✨</Link>
+      )}
       {isLoggedIn && (
         <>
           <button className="elementos-banner" onClick={() => setShowElementosModal(true)}>
@@ -425,9 +423,9 @@ function ChatIA() {
               <span className="elementos-banner-text">
                 {esPro
                   ? '∞ Elementos ilimitados — Alquimista PRO'
-                  : elementos === 0
-                    ? 'Recarga elementos'
-                    : `${elementos} Elemento${elementos !== 1 ? 's' : ''} disponible${elementos !== 1 ? 's' : ''} para formular`}
+                  : elementos <= 0
+                  ? '⚠️ Recarga elementos para seguir formulando'
+                  : `${elementos} Elemento${elementos !== 1 ? 's' : ''} disponible${elementos !== 1 ? 's' : ''} para formular`}
               </span>
               <span className="elementos-banner-arrow">›</span>
             </div>

@@ -8220,3 +8220,124 @@ a.post-author-name.post-author-link:hover {
   .lead-left   { padding: 36px 22px 28px; }
   .lead-product { font-size: 34px; }
 }
+
+/* ── Chat init loading ── */
+.chat-init-loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FDFAF6;
+  z-index: 9999;
+}
+.chat-init-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #E8D5C2;
+  border-top-color: #B08968;
+  border-radius: 50%;
+  animation: chatSpinAnim 0.75s linear infinite;
+}
+@keyframes chatSpinAnim {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Floating PRO button ── */
+.pro-float-btn {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  background: #fff;
+  color: #B08968;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 28px;
+  border-radius: 50px;
+  box-shadow: 0 4px 18px rgba(176,137,104,0.25), 0 0 0 4px rgba(255,255,255,0.55);
+  text-decoration: none;
+  white-space: nowrap;
+  border: none;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.pro-float-btn:hover {
+  background: #B08968;
+  color: #fff;
+  box-shadow: 0 6px 24px rgba(176,137,104,0.35), 0 0 0 4px rgba(255,255,255,0.55);
+}
+
+/* ── Paginación ─────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 40px 0 24px;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  padding: 8px 20px;
+  border: 1.5px solid #B08968;
+  border-radius: 8px;
+  background: #fff;
+  color: #B08968;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.pagination-btn:hover:not(:disabled) {
+  background: #B08968;
+  color: #fff;
+}
+.pagination-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination-page {
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #4A3F35;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.pagination-page:hover {
+  border-color: #B08968;
+  color: #B08968;
+}
+.pagination-page.active {
+  background: #B08968;
+  color: #fff;
+  border-color: #B08968;
+  font-weight: 700;
+}
+
+.pagination-ellipsis {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9E9E9E;
+  font-size: 16px;
+  user-select: none;
+}

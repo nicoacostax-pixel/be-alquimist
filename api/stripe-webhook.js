@@ -48,6 +48,39 @@ module.exports = async function handler(req, res) {
           }
           break;
 
+        // PaymentIntent PRO confirmado → activar PRO y crear suscripción recurrente
+        case 'payment_intent.succeeded': {
+          const piObj  = event.data.object;
+          const piMeta = piObj.metadata || {};
+          if (piMeta.plan === 'pro' && piMeta.userId) {
+            // Activar PRO de inmediato
+            await sb.from('perfiles').update({ es_pro: true }).eq('id', piMeta.userId);
+            // Crear suscripción con trial 30 días (primer mes ya cobrado por este PI)
+            try {
+              const stripe2 = Stripe(process.env.STRIPE_SECRET_KEY);
+              const pm = piObj.payment_method;
+              if (pm && piMeta.priceId) {
+                await stripe2.customers.update(piObj.customer, {
+                  invoice_settings: { default_payment_method: pm },
+                });
+                const sub = await stripe2.subscriptions.create({
+                  customer:               piObj.customer,
+                  items:                  [{ price: piMeta.priceId }],
+                  default_payment_method: pm,
+                  trial_period_days:      30,
+                  metadata:               { userId: piMeta.userId },
+                });
+                await sb.from('perfiles')
+                  .update({ stripe_subscription_id: sub.id })
+                  .eq('id', piMeta.userId);
+              }
+            } catch (subErr) {
+              console.error('Error creando suscripción PRO recurrente:', subErr.message);
+            }
+          }
+          break;
+        }
+
         // Pago falló → revocar PRO
         case 'invoice.payment_failed':
           if (event.data.object.subscription) {

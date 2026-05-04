@@ -81,6 +81,11 @@ export default function ElementosModal({ onClose }) {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error);
+      if (json.alreadyActive) {
+        await activarPro();
+        onClose();
+        return;
+      }
       setClientSecret(json.clientSecret);
     } catch (e) {
       alert('Error al iniciar el pago: ' + e.message);

@@ -92,29 +92,27 @@ module.exports = async function handler(req, res) {
     // Obtener o crear el Price mensual de PRO
     const priceId = await getOrCreateProPrice(stripe);
 
-    // Crear suscripción con pago incompleto hasta confirmar tarjeta
-    const subscription = await stripe.subscriptions.create({
+    // Stripe API 2026+: el flujo invoice.payment_intent fue eliminado.
+    // Cobramos el primer mes con un PaymentIntent directo (setup_future_usage guarda la tarjeta).
+    // El webhook payment_intent.succeeded crea la suscripción con la tarjeta guardada.
+    const pi = await stripe.paymentIntents.create({
+      amount:   14900,
+      currency: 'mxn',
       customer: customer.id,
-      items: [{ price: priceId }],
-      payment_behavior: 'default_incomplete',
-      payment_settings: { save_default_payment_method: 'on_subscription' },
-      expand: ['latest_invoice.payment_intent'],
+      automatic_payment_methods: { enabled: true },
+      setup_future_usage: 'off_session',
+      metadata: { plan: 'pro', userId, priceId, customerEmail: email },
     });
 
-    // Guardar IDs de Stripe en la BD
+    // Guardar customer ID en la BD (subscription_id se añade en el webhook)
     const sbUrl = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
     const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (sbUrl && sbKey) {
       const sb = createClient(sbUrl, sbKey, { auth: { autoRefreshToken: false, persistSession: false } });
-      await sb.from('perfiles').update({
-        stripe_customer_id:    customer.id,
-        stripe_subscription_id: subscription.id,
-      }).eq('id', userId);
+      await sb.from('perfiles').update({ stripe_customer_id: customer.id }).eq('id', userId);
     }
 
-    return res.json({
-      clientSecret: subscription.latest_invoice.payment_intent.client_secret,
-    });
+    return res.json({ clientSecret: pi.client_secret });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

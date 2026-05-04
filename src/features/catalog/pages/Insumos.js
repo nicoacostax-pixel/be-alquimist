@@ -28,6 +28,17 @@ function pseudoRating(slug = '') {
   return { stars: 5, reviews };
 }
 
+const ITEMS_PER_PAGE = 12;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function Insumos() {
   const { categoria } = useParams();
   const [productos, setProductos] = useState([]);
@@ -38,6 +49,7 @@ function Insumos() {
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const { cartCount } = useCart();
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -56,12 +68,14 @@ function Insumos() {
             (p.categoria || '').split(',').some(c => c.trim().toLowerCase() === categoriaLabel)
           );
         }
-        setProductos(result);
+        setProductos(shuffle(result));
       }
       setLoading(false);
     }
     fetchProductos();
   }, [categoria]);
+
+  useEffect(() => { setCurrentPage(1); }, [categoria]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
@@ -232,7 +246,7 @@ function Insumos() {
           </header>
 
           <div className="productos-grid">
-            {productos.map((prod) => {
+            {productos.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((prod) => {
               const { stars, reviews } = pseudoRating(prod.slug);
               return (
                 <div key={prod.id} className="producto-card">
@@ -259,6 +273,51 @@ function Insumos() {
               );
             })}
           </div>
+
+          {Math.ceil(productos.length / ITEMS_PER_PAGE) > 1 && (
+            <div className="pagination">
+              <button
+                className="pagination-btn"
+                onClick={() => { setCurrentPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                disabled={currentPage === 1}
+              >
+                ← Anterior
+              </button>
+              <div className="pagination-pages">
+                {(() => {
+                  const total = Math.ceil(productos.length / ITEMS_PER_PAGE);
+                  const pages = [];
+                  for (let i = 1; i <= total; i++) {
+                    if (i === 1 || i === total || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                      pages.push(i);
+                    } else if (pages[pages.length - 1] !== '...') {
+                      pages.push('...');
+                    }
+                  }
+                  return pages.map((page, idx) =>
+                    page === '...'
+                      ? <span key={`ellipsis-${idx}`} className="pagination-ellipsis">…</span>
+                      : (
+                        <button
+                          key={page}
+                          className={`pagination-page ${page === currentPage ? 'active' : ''}`}
+                          onClick={() => { setCurrentPage(page); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                        >
+                          {page}
+                        </button>
+                      )
+                  );
+                })()}
+              </div>
+              <button
+                className="pagination-btn"
+                onClick={() => { setCurrentPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                disabled={currentPage === Math.ceil(productos.length / ITEMS_PER_PAGE)}
+              >
+                Siguiente →
+              </button>
+            </div>
+          )}
         </div>
       </main>
     </div>

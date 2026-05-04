@@ -2,7 +2,23 @@
   "permissions": {
     "allow": [
       "Bash(node -e ' *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(pm2 list *)",
+      "Bash(systemctl status *)",
+      "Bash(curl -s -X POST http://localhost:5050/api/gemini -H 'Content-Type: application/json' -d '{\"prompt\": \"hola\", \"history\": []}' --max-time 10)",
+      "Bash(pm2 logs *)",
+      "Read(//etc/nginx/sites-enabled/**)",
+      "Read(//etc/nginx/**)",
+      "Bash(pm2 show *)",
+      "Bash(nginx -t)",
+      "Bash(systemctl reload *)",
+      "Bash(curl -s -X POST http://207.244.243.205/api/gemini -H 'Content-Type: application/json' -d '{\"prompt\": \"hola\", \"history\": []}' --max-time 15)",
+      "Bash(pm2 delete *)",
+      "Bash(pm2 save *)",
+      "Bash(git pull *)",
+      "Bash(npm run *)",
+      "Bash(pm2 restart *)",
+      "Bash(git *)"
     ]
   }
 }

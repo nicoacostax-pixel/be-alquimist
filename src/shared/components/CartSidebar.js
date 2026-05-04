@@ -31,18 +31,63 @@ function CartSidebar({ isOpen, onClose }) {
     if (!isOpen) return;
 
     const loadRecommended = async () => {
-      const { data } = await supabase
-        .from('productos')
-        .select('id,nombre,categoria,slug,imagen_url,variantes')
-        .order('created_at', { ascending: false })
-        .limit(8);
+      let recs = [];
 
-      const filtered = (data || []).filter((item) => !cartIdSet.has(item.id)).slice(0, 2);
-      setRecommended(filtered);
+      if (cart.length > 0) {
+        const cartIds = cart.map((item) => item.id);
+
+        // Fetch categories from products currently in cart
+        const { data: cartProds } = await supabase
+          .from('productos')
+          .select('categoria')
+          .in('id', cartIds);
+
+        const categorias = new Set();
+        (cartProds || []).forEach((p) => {
+          (p.categoria || '').split(',').forEach((c) => {
+            const t = c.trim();
+            if (t) categorias.add(t);
+          });
+        });
+
+        if (categorias.size > 0) {
+          const orFilter = Array.from(categorias)
+            .map((c) => `categoria.ilike.%${c}%`)
+            .join(',');
+
+          const { data } = await supabase
+            .from('productos')
+            .select('id,nombre,categoria,slug,imagen_url,variantes')
+            .or(orFilter)
+            .limit(30);
+
+          recs = (data || [])
+            .filter((item) => !cartIdSet.has(item.id))
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 2);
+        }
+      }
+
+      // Fallback: fill remaining slots with random products
+      if (recs.length < 2) {
+        const { data } = await supabase
+          .from('productos')
+          .select('id,nombre,categoria,slug,imagen_url,variantes')
+          .limit(50);
+
+        const filled = (data || [])
+          .filter((item) => !cartIdSet.has(item.id) && !recs.some((r) => r.id === item.id))
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 2 - recs.length);
+
+        recs = [...recs, ...filled];
+      }
+
+      setRecommended(recs);
     };
 
     loadRecommended();
-  }, [isOpen, cartIdSet]);
+  }, [isOpen, cartIdSet, cart]);
 
   return (
     <>

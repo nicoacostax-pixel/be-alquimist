@@ -49,7 +49,7 @@ export function ElementosProvider({ children }) {
       const uid = data?.session?.user?.id || null;
       setUserId(uid);
       setIsLoggedIn(!!uid);
-      if (uid) sincronizar(uid).catch(console.error);
+      if (uid) sincronizar(uid).catch(console.error).finally(() => setIsInitializing(false));
       else setIsInitializing(false);
     }).catch(() => setIsInitializing(false));
 
