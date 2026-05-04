@@ -41,7 +41,13 @@ for (const name of API_ROUTES) {
 }
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
-app.get('/sitemap.xml', (req, res) => require('../api/sitemap')(req, res));
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    await require('../api/sitemap')(req, res);
+  } catch (err) {
+    res.status(500).type('text/plain').send('Sitemap error: ' + err.message);
+  }
+});
 
 // ── Serve React production build ───────────────────────────────────────────────
 const buildDir = path.join(__dirname, '..', 'build');
