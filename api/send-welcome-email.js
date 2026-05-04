@@ -1,4 +1,5 @@
 const { Resend } = require('resend');
+const { buildEmailHtml, getTemplate } = require('./_resend');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
@@ -13,11 +14,23 @@ module.exports = async function handler(req, res) {
   const firstName = (nombre || 'Alquimista').split(' ')[0];
 
   try {
-    await resend.emails.send({
-      from: 'Be Alquimist <hola@bealquimist.com>',
-      to: email,
-      subject: '¡Bienvenida al laboratorio, Alquimista! 🌿',
-      html: `
+    // Usar plantilla de BD si existe (id = 'bienvenida')
+    const template = await getTemplate('bienvenida').catch(() => null);
+
+    let html;
+    let subject;
+
+    if (template?.bloques?.length) {
+      const personalizedBlocks = template.bloques.map(b => ({
+        ...b,
+        content: (b.content || '').replace(/\{\{nombre\}\}/g, firstName),
+        caption: (b.caption || '').replace(/\{\{nombre\}\}/g, firstName),
+      }));
+      html    = buildEmailHtml(personalizedBlocks, template.fuente);
+      subject = (template.asunto || '¡Bienvenida al laboratorio! 🌿').replace(/\{\{nombre\}\}/g, firstName);
+    } else {
+      subject = '¡Bienvenida al laboratorio, Alquimista! 🌿';
+      html = `
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -132,7 +145,14 @@ module.exports = async function handler(req, res) {
   </table>
 </body>
 </html>
-      `,
+      `;
+    }
+
+    await resend.emails.send({
+      from: 'Be Alquimist <hola@bealquimist.com>',
+      to: email,
+      subject,
+      html,
     });
 
     return res.json({ ok: true });

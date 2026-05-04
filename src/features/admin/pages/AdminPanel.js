@@ -852,6 +852,89 @@ function BibliotecaAdmin() {
   );
 }
 
+/* ── CONTACTOS ──────────────────────────────────────────────── */
+function exportCSV(users) {
+  const header = ['Nombre', 'Email', 'PRO', 'Elementos', 'Registro'];
+  const rows = users.map(u => [
+    u.nombre || '',
+    u.email || '',
+    u.es_pro ? 'Sí' : 'No',
+    u.es_pro ? '∞' : (u.elementos ?? ''),
+    u.created_at ? new Date(u.created_at).toLocaleDateString('es-MX') : '',
+  ]);
+  const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'contactos_bealquimist.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function Contactos() {
+  const [users,   setUsers]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search,  setSearch]  = useState('');
+  const [msg,     setMsg]     = useState('');
+
+  useEffect(() => {
+    callAdmin('getUsers')
+      .then(d => { setUsers(d.users || []); setLoading(false); })
+      .catch(e => { setMsg('Error: ' + e.message); setLoading(false); });
+  }, []);
+
+  const filtered = users.filter(u =>
+    !search ||
+    u.email?.toLowerCase().includes(search.toLowerCase()) ||
+    u.nombre?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="adm-section">
+      {msg && <div className="adm-msg" onClick={() => setMsg('')}>{msg} ×</div>}
+      <div className="adm-toolbar">
+        <input
+          className="adm-search"
+          placeholder="Buscar por nombre o email…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+        <span className="adm-count">{filtered.length} de {users.length} contactos</span>
+        <button
+          className="adm-btn-sec"
+          style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}
+          onClick={() => exportCSV(filtered)}
+          disabled={loading || filtered.length === 0}
+        >
+          ⬇ Exportar CSV
+        </button>
+      </div>
+      {loading ? <div className="adm-loading">Cargando…</div> : (
+        <div className="adm-table-wrap">
+          <table className="adm-table">
+            <thead>
+              <tr><th>Nombre</th><th>Email</th><th>PRO</th><th>Elementos</th><th>Registro</th></tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 && (
+                <tr><td colSpan={5} style={{ textAlign: 'center', color: '#999', padding: 24 }}>Sin resultados</td></tr>
+              )}
+              {filtered.map(u => (
+                <tr key={u.id}>
+                  <td><strong>{u.nombre || '—'}</strong></td>
+                  <td><span className="adm-email">{u.email}</span></td>
+                  <td>{u.es_pro ? <span className="adm-pro-tag">PRO</span> : '—'}</td>
+                  <td><span className="adm-badge">{u.es_pro ? '∞' : u.elementos}</span></td>
+                  <td className="adm-date">{u.created_at ? new Date(u.created_at).toLocaleDateString('es-MX') : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── LEADS ──────────────────────────────────────────────────── */
 const TIPO_LABELS = { 'aceite_de_regalo': '🎁 Aceite de regalo' };
 
@@ -1553,7 +1636,8 @@ create policy "solo autenticado" on email_plantillas for all using (auth.role() 
           </div>
 
           <p style={{ fontSize:11, color:'#aaa', marginTop:12, marginBottom:0 }}>
-            El email de bienvenida con ID <code>bienvenida</code> se envía automáticamente al registrarse un nuevo lead.
+            La plantilla con ID <code>bienvenida</code> se envía automáticamente cuando un usuario se registra.
+            Usa <code>{"{{nombre}}"}</code> en el texto para personalizar con el nombre del usuario.
           </p>
         </div>
       </div>
@@ -1581,6 +1665,7 @@ create policy "solo autenticado" on email_plantillas for all using (auth.role() 
 
 const TABS = [
   { id: 'dashboard',  label: '📊 Dashboard' },
+  { id: 'contactos',  label: '📋 Contactos' },
   { id: 'usuarios',   label: '👥 Usuarios' },
   { id: 'productos',  label: '📦 Productos' },
   { id: 'pedidos',    label: '🛒 Pedidos' },
@@ -1626,6 +1711,7 @@ export default function AdminPanel() {
         </header>
         <div className="adm-content">
           {tab === 'dashboard'  && <Dashboard />}
+          {tab === 'contactos'  && <Contactos />}
           {tab === 'usuarios'   && <Usuarios />}
           {tab === 'productos'  && <Productos />}
           {tab === 'pedidos'    && <Pedidos />}
