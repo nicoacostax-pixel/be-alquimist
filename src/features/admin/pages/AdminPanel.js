@@ -961,8 +961,12 @@ function Leads() {
       .catch(e => { setMsg('Error: ' + e.message); setLoading(false); });
   }, []);
 
-  const tipos = useMemo(() => [...new Set(leads.map(l => l.tipo).filter(Boolean))], [leads]);
   const filtrados = filtro === 'todos' ? leads : leads.filter(l => l.tipo === filtro);
+  const tiposExtra = useMemo(() => {
+    const enDatos = new Set(leads.map(l => l.tipo).filter(Boolean));
+    const predefinidos = Object.keys(TIPO_LABELS);
+    return [...new Set([...predefinidos, ...enDatos])];
+  }, [leads]);
 
   return (
     <div className="adm-section">
@@ -972,9 +976,9 @@ function Leads() {
           <button className={filtro === 'todos' ? 'active' : ''} onClick={() => setFiltro('todos')}>
             Todos ({leads.length})
           </button>
-          {tipos.map(t => (
+          {tiposExtra.map(t => (
             <button key={t} className={filtro === t ? 'active' : ''} onClick={() => setFiltro(t)}>
-              {TIPO_LABELS[t] || t}
+              {TIPO_LABELS[t] || t} ({leads.filter(l => l.tipo === t).length})
             </button>
           ))}
         </div>
