@@ -31,6 +31,7 @@ const API_ROUTES = [
   'resumir-receta',
   'leads',
   'recetas',
+  'distribuidoras',
   'send-welcome-email',
 ];
 
