@@ -6,6 +6,46 @@ import '../../../App.css';
 const ADMIN_EMAIL = process.env.REACT_APP_ADMIN_EMAIL;
 const emptyVariante = { nombre: '', precio: '', peso: '' };
 
+function buildWARecetaMsg(receta) {
+  const texto = receta.contenido || '';
+
+  // Extraer sección Fórmula
+  const formulaMatch = texto.match(/## Fórmula[^\n]*\n([\s\S]*?)(?=\n## |$)/i);
+  // Extraer sección Dónde comprar
+  const compraMatch  = texto.match(/## Dónde comprar[^\n]*\n([\s\S]*?)(?=\n## |$)/i);
+
+  let msg = `🌿 *Receta: ${receta.nombre || 'Tu receta'}*\n\n`;
+
+  if (formulaMatch) {
+    msg += '📋 *Ingredientes:*\n';
+    formulaMatch[1].split('\n').forEach(line => {
+      const m = line.match(/[-*]\s*\*{0,2}([^:*\n]+)\*{0,2}\s*[:\-–]\s*(\d[\d.,]*\s*%)/);
+      if (m) msg += `• ${m[1].trim()} — ${m[2].trim()}\n`;
+    });
+    msg += '\n';
+  }
+
+  if (compraMatch) {
+    msg += '🛒 *Dónde comprar en Be Alquimist:*\n';
+    compraMatch[1].split('\n').forEach(line => {
+      const clean = line.replace(/\*\*/g, '').replace(/^[-*]\s*/, '').trim();
+      if (clean) msg += `• ${clean}\n`;
+    });
+    msg += '\n';
+  }
+
+  msg += '_Formulado con Be Alquimist IA_ ⚗️\nhttps://bealquimist.com';
+  return msg;
+}
+
+function waRecetaUrl(receta) {
+  // Normalizar teléfono: quitar todo excepto dígitos, agregar 52 si empieza con 10 dígitos
+  let tel = (receta.telefono || '').replace(/\D/g, '');
+  if (tel.length === 10) tel = '52' + tel;
+  if (!tel) return null;
+  return `https://wa.me/${tel}?text=${encodeURIComponent(buildWARecetaMsg(receta))}`;
+}
+
 const CATEGORIAS = [
   'Aceites','Aceites Esenciales','Aditamentos','Hidrolatos y Aguas florales',
   'Aromas','Antioxidantes','Bases de Jabón','Ceras y mantecas','Conservantes',
@@ -1160,10 +1200,23 @@ function RecetasAdmin() {
                         </span>
                       </td>
                       <td>
-                        <button className="adm-btn-sec" style={{ fontSize: 12, padding: '3px 10px' }}
-                          onClick={() => setVistaReceta(r)}>
-                          Leer
-                        </button>
+                        <div className="adm-actions">
+                          <button className="adm-btn-sec" style={{ fontSize: 12, padding: '3px 10px' }}
+                            onClick={() => setVistaReceta(r)}>
+                            Leer
+                          </button>
+                          {waRecetaUrl(r) && (
+                            <a
+                              href={waRecetaUrl(r)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="adm-btn-wa"
+                              title={`Enviar ingredientes a ${r.nombre_usuario} por WhatsApp`}
+                            >
+                              WA
+                            </a>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

@@ -7088,6 +7088,8 @@ a.post-author-name.post-author-link:hover {
 .adm-btn-edit { background: #EDF4FF; color: #2B6CB0; border: 1px solid #BEE3F8; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
 .adm-btn-del { background: #FFF5F5; color: #E53E3E; border: 1px solid #FED7D7; border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
 .adm-btn-del:hover { background: #FED7D7; }
+.adm-btn-wa { background: #25D366; color: #fff; border: none; border-radius: 6px; padding: 5px 10px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; font-family: inherit; }
+.adm-btn-wa:hover { background: #1DA851; }
 
 /* Modal */
 .adm-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; }
