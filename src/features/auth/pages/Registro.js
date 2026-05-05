@@ -8,7 +8,7 @@ function Registro() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate('/cuenta');
+      if (session) navigate('/');
     });
   }, [navigate]);
 

@@ -16,7 +16,7 @@ function Login() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         // Si el usuario ya está logueado, lo mandamos a cuenta de inmediato
-        navigate('/cuenta'); 
+        navigate('/'); 
       }
     };
 
@@ -37,7 +37,7 @@ function Login() {
       if (error) {
         alert("Error: " + error.message);
       } else if (data.user) {
-        navigate('/cuenta');
+        navigate('/');
       }
     } catch (error) {
       alert("Ocurrió un error inesperado.");
