@@ -1124,6 +1124,91 @@ function Leads() {
   );
 }
 
+/* ── DISTRIBUIDORAS ─────────────────────────────────────────── */
+const Q_LABELS = ['Canal de venta', 'Inversión inicial', 'Ya vende', 'Clientes/seguidores', 'Primer pedido'];
+const Q_KEYS   = ['q1_comercializacion', 'q2_inversion', 'q3_vende_actualmente', 'q4_clientes', 'q5_cuando'];
+
+function DistribuidorasAdmin() {
+  const [lista,   setLista]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [msg,     setMsg]     = useState('');
+  const [selected, setSelected] = useState(null);
+
+  useEffect(() => {
+    callAdmin('getDistribuidoras')
+      .then(d => { setLista(d.distribuidoras); setLoading(false); })
+      .catch(e => { setMsg('Error: ' + e.message); setLoading(false); });
+  }, []);
+
+  function exportarCSV() {
+    const header = ['Nombre', 'Extension', 'Teléfono', 'Email', ...Q_LABELS, 'Fecha'];
+    const rows = lista.map(d => [
+      d.nombre, d.extension, d.telefono, d.email,
+      d.q1_comercializacion, d.q2_inversion, d.q3_vende_actualmente, d.q4_clientes, d.q5_cuando,
+      new Date(d.created_at).toLocaleDateString('es-MX'),
+    ]);
+    const csv = [header, ...rows].map(r => r.map(v => `"${(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'distribuidoras_bealquimist.csv'; a.click();
+  }
+
+  return (
+    <div className="adm-section">
+      {msg && <div className="adm-msg" onClick={() => setMsg('')}>{msg} ×</div>}
+      <div className="adm-toolbar">
+        <span className="adm-count">{lista.length} distribuidoras registradas</span>
+        <button className="adm-btn-secondary" onClick={exportarCSV}>⬇ Exportar CSV</button>
+      </div>
+      {loading ? <div className="adm-loading">Cargando…</div> : (
+        <div className="adm-table-wrap">
+          <table className="adm-table">
+            <thead>
+              <tr>
+                <th>Nombre</th><th>Teléfono</th><th>Email</th><th>Canal de venta</th><th>Inversión</th><th>Fecha</th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {lista.length === 0 && (
+                <tr><td colSpan={7} style={{ textAlign:'center', color:'#999', padding:24 }}>Sin registros aún</td></tr>
+              )}
+              {lista.map(d => (
+                <tr key={d.id}>
+                  <td><strong>{d.nombre}</strong></td>
+                  <td>{d.extension} {d.telefono || '—'}</td>
+                  <td>{d.email}</td>
+                  <td>{d.q1_comercializacion || '—'}</td>
+                  <td>{d.q2_inversion || '—'}</td>
+                  <td className="adm-date">{new Date(d.created_at).toLocaleDateString('es-MX')}</td>
+                  <td>
+                    <button className="adm-btn-sm" onClick={() => setSelected(d)}>Ver encuesta</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {selected && (
+        <div className="adm-modal-overlay" onClick={() => setSelected(null)}>
+          <div className="adm-modal" onClick={e => e.stopPropagation()}>
+            <button className="adm-modal-close" onClick={() => setSelected(null)}>✕</button>
+            <h3 style={{ marginBottom: 16, color: '#4A3F35' }}>Encuesta — {selected.nombre}</h3>
+            {Q_KEYS.map((k, i) => (
+              <div key={k} style={{ marginBottom: 12 }}>
+                <p style={{ fontSize: 12, color: '#999', marginBottom: 2 }}>{Q_LABELS[i]}</p>
+                <p style={{ fontWeight: 600, color: '#4A3F35' }}>{selected[k] || '—'}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── RECETAS IA ─────────────────────────────────────────────── */
 function RecetasAdmin() {
   const [recetas,       setRecetas]       = useState([]);
@@ -1815,7 +1900,8 @@ const TABS = [
   { id: 'pedidos',    label: '🛒 Pedidos' },
   { id: 'comunidad',  label: '💬 Comunidad' },
   { id: 'biblioteca', label: '🌿 Biblioteca' },
-  { id: 'leads',      label: '📧 Leads' },
+  { id: 'leads',         label: '📧 Leads' },
+  { id: 'distribuidoras',label: '🚀 Distribuidoras' },
   { id: 'recetas',    label: '🧪 Recetas IA' },
   { id: 'destacadas', label: '✨ Destacadas' },
   { id: 'email',      label: '📨 Email Marketing' },
@@ -1861,7 +1947,8 @@ export default function AdminPanel() {
           {tab === 'pedidos'    && <Pedidos />}
           {tab === 'comunidad'  && <Comunidad />}
           {tab === 'biblioteca' && <BibliotecaAdmin />}
-          {tab === 'leads'      && <Leads />}
+          {tab === 'leads'         && <Leads />}
+          {tab === 'distribuidoras' && <DistribuidorasAdmin />}
           {tab === 'recetas'    && <RecetasAdmin />}
           {tab === 'destacadas' && <RecetasDestacadasAdmin />}
           {tab === 'email'      && <EmailMarketing />}

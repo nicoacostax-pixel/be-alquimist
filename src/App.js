@@ -24,6 +24,8 @@ import Footer from './shared/components/Footer';
 import PoliticasDeCompra from './features/legal/PoliticasDeCompra';
 import Privacidad from './features/legal/Privacidad';
 import AvisoLegal from './features/legal/AvisoLegal';
+import Distribuidoras from './features/distribuidoras/pages/Distribuidoras';
+import DistribuidorasGracias from './features/distribuidoras/pages/DistribuidorasGracias';
 
 // Importaciones de Comunidad
 import ComunidadLayout from './features/comunidad/components/ComunidadLayout';
@@ -87,6 +89,8 @@ function App() {
           <Route path="/politicas-de-compra" element={<PoliticasDeCompra />} />
           <Route path="/privacidad"           element={<Privacidad />} />
           <Route path="/aviso-legal"          element={<AvisoLegal />} />
+          <Route path="/distribuidoras"        element={<Distribuidoras />} />
+          <Route path="/distribuidoras/gracias" element={<DistribuidorasGracias />} />
 
           {/* --- RUTAS DE COMUNIDAD (TIPO SKOOL) --- */}
           <Route path="/comunidad" element={<ComunidadLayout />}>

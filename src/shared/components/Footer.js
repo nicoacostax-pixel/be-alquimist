@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-const HIDDEN_ON = ['/', '/login', '/registro', '/admin', '/checkout', '/checkout/gracias'];
+const HIDDEN_ON = ['/', '/login', '/registro', '/admin', '/checkout', '/checkout/gracias', '/distribuidoras', '/distribuidoras/gracias'];
 
 export default function Footer() {
   const { pathname } = useLocation();

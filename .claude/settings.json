@@ -12,7 +12,10 @@
       "Bash(git stash *)",
       "Bash(curl -s -X POST https://bealquimist.com/api/send-welcome-email -H 'Content-Type: application/json' -d '{\"email\":\"nico.acosta.x@gmail.com\",\"nombre\":\"Nico\"}')",
       "Bash(curl -s -X POST https://bealquimist.com/api/send-welcome-email -H 'Content-Type: application/json' -d '{\"email\":\"taller.organico.mx@gmail.com\",\"nombre\":\"Nico\"}')",
-      "Bash(node -e \"require\\('./api/send-welcome-email'\\)\")"
+      "Bash(node -e \"require\\('./api/send-welcome-email'\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(sed -i '' \"s/navigate\\('\\\\/cuenta'\\)/navigate\\('\\\\/'\\)/g\" /Users/nicoacosta/bealquimist-web/src/features/auth/pages/Login.js)",
+      "Bash(sed -i '' \"s/navigate\\('\\\\/cuenta'\\)/navigate\\('\\\\/'\\)/g\" /Users/nicoacosta/bealquimist-web/src/features/auth/pages/Registro.js)"
     ],
     "additionalDirectories": [
       "/Users/nicoacosta/Downloads"

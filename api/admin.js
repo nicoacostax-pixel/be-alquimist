@@ -265,6 +265,11 @@ module.exports = async function handler(req, res) {
       return res.json({ recetas });
     }
 
+    if (action === 'getDistribuidoras') {
+      const { data } = await sb.from('distribuidoras').select('*').order('created_at', { ascending: false }).limit(500);
+      return res.json({ distribuidoras: data || [] });
+    }
+
     return res.status(400).json({ error: 'Acción desconocida' });
   } catch (err) {
     return res.status(500).json({ error: err.message });
