@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function CheckoutGracias() {
+  useEffect(() => {
+    if (window.fbq) window.fbq('track', 'Purchase', { currency: 'MXN', value: 0 });
+  }, []);
+
   return (
     <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'Poppins, sans-serif', padding: '40px 20px', textAlign: 'center' }}>
       <div style={{ fontSize: 56, marginBottom: 16 }}>🌿</div>

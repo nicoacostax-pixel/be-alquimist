@@ -101,6 +101,7 @@ function Registro() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: formData.email, nombre: formData.nombre }),
         }).catch(() => {});
+        if (window.fbq) window.fbq('track', 'CompleteRegistration');
       }
       alert("¡Bienvenida al laboratorio!");
       navigate('/login');
