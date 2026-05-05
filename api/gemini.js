@@ -83,7 +83,7 @@ const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-async function streamModel(modelName, contents, apiKey, onChunk) {
+async function streamModel(modelName, contents, apiKey, onChunk, systemInstruction) {
   const url = `${GEMINI_BASE}/${modelName}:streamGenerateContent?key=${apiKey}&alt=sse`;
 
   const body = {
@@ -194,7 +194,7 @@ module.exports = async function handler(req, res) {
         await streamModel(modelName, contents, apiKey, (text) => {
           sse({ text });
           dataSent = true;
-        });
+        }, systemInstruction);
         sse({ done: true, model: modelName });
         return res.end();
       } catch (e) {
