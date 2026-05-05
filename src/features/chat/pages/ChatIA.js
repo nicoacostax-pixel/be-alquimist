@@ -76,15 +76,18 @@ function ComprarButtons({ content }) {
   content.split('\n').forEach(line => {
     const url  = line.match(/https?:\/\/[^\s)>\]]+/);
     const name = line.match(/\*{1,2}([^*\n]+)\*{1,2}/);
-    if (url && name) items.push({ nombre: name[1].trim(), url: url[0] });
+    if (url && name) items.push({ nombre: name[1].replace(/:$/, '').trim(), url: url[0] });
   });
   if (items.length === 0) return <MarkdownText text={content} />;
   return (
-    <div className="comprar-btns">
+    <div className="comprar-list">
       {items.map((item, i) => (
-        <a key={i} href={item.url} target="_blank" rel="noopener noreferrer" className="comprar-btn">
-          🛒 {item.nombre}
-        </a>
+        <div key={i} className="comprar-row">
+          <span className="comprar-nombre">{item.nombre}</span>
+          <a href={item.url} target="_blank" rel="noopener noreferrer" className="comprar-btn-tienda">
+            Ver en Tienda →
+          </a>
+        </div>
       ))}
     </div>
   );
