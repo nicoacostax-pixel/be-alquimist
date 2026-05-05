@@ -20,6 +20,10 @@ import PerfilUsuario from './features/comunidad/pages/PerfilUsuario';
 import ProLanding from './features/pro/pages/ProLanding';
 import Cursos from './features/cursos/pages/Cursos';
 import Biblioteca from './features/biblioteca/pages/Biblioteca';
+import Footer from './shared/components/Footer';
+import PoliticasDeCompra from './features/legal/PoliticasDeCompra';
+import Privacidad from './features/legal/Privacidad';
+import AvisoLegal from './features/legal/AvisoLegal';
 
 // Importaciones de Comunidad
 import ComunidadLayout from './features/comunidad/components/ComunidadLayout';
@@ -80,6 +84,9 @@ function App() {
           <Route path="/pro" element={<ProLanding />} />
           <Route path="/cursos" element={<Cursos />} />
           <Route path="/biblioteca" element={<Biblioteca />} />
+          <Route path="/politicas-de-compra" element={<PoliticasDeCompra />} />
+          <Route path="/privacidad"           element={<Privacidad />} />
+          <Route path="/aviso-legal"          element={<AvisoLegal />} />
 
           {/* --- RUTAS DE COMUNIDAD (TIPO SKOOL) --- */}
           <Route path="/comunidad" element={<ComunidadLayout />}>
@@ -91,6 +98,7 @@ function App() {
           </Route>
 
         </Routes>
+        <Footer />
         <SocialProofPopup />
       </Router>
     </ElementosProvider>
