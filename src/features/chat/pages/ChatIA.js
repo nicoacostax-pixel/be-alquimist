@@ -5,6 +5,7 @@ import SidebarMenu from '../../catalog/components/SidebarMenu';
 import { useElementos } from '../../../shared/context/ElementosContext';
 import ElementosModal from '../../../shared/components/ElementosModal';
 import ShareRecetaBtn from '../components/ShareRecetaBtn';
+import WhatsAppRecetaBtn from '../components/WhatsAppRecetaBtn';
 import { supabase } from '../../../shared/lib/supabaseClient';
 
 const STORAGE_KEY = 'ba_free_recipes';
@@ -639,7 +640,10 @@ function ChatIA() {
                   : m.texto
                 }
                 {isLast && parseSections(m.texto).length >= 1 && parseSections(recetaCompleta).length >= 2 && (
-                  <ShareRecetaBtn recetaCompleta={recetaCompleta} />
+                  <div className="receta-actions">
+                    <ShareRecetaBtn recetaCompleta={recetaCompleta} />
+                    <WhatsAppRecetaBtn recetaCompleta={recetaCompleta} />
+                  </div>
                 )}
               </div>
             );
