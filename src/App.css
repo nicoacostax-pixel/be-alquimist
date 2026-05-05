@@ -200,6 +200,15 @@ body {
   letter-spacing: 0.6px;
 }
 .recipe-sec-body { font-size: 14px; }
+.comprar-btns { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0; }
+.comprar-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #4A3F35; color: #F5EDE3;
+  border-radius: 20px; padding: 8px 16px;
+  font-size: 13px; font-weight: 600; font-family: 'Poppins', sans-serif;
+  text-decoration: none; transition: background .15s;
+}
+.comprar-btn:hover { background: #B08968; }
 .recipe-sec-body .md-p  { margin-bottom: 6px; font-size: 14px; }
 .recipe-sec-body .md-ol,
 .recipe-sec-body .md-ul { font-size: 14px; margin: 4px 0 4px 16px; }

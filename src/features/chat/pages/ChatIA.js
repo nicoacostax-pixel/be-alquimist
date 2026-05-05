@@ -71,6 +71,25 @@ function parseSections(text) {
   return sections;
 }
 
+function ComprarButtons({ content }) {
+  const items = [];
+  content.split('\n').forEach(line => {
+    const url  = line.match(/https?:\/\/[^\s)>\]]+/);
+    const name = line.match(/\*{1,2}([^*\n]+)\*{1,2}/);
+    if (url && name) items.push({ nombre: name[1].trim(), url: url[0] });
+  });
+  if (items.length === 0) return <MarkdownText text={content} />;
+  return (
+    <div className="comprar-btns">
+      {items.map((item, i) => (
+        <a key={i} href={item.url} target="_blank" rel="noopener noreferrer" className="comprar-btn">
+          🛒 {item.nombre}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 function RecipeCard({ text }) {
   const sections = parseSections(text);
   if (sections.length === 0) return <MarkdownText text={text} />;
@@ -82,6 +101,7 @@ function RecipeCard({ text }) {
           sec.title.toLowerCase().includes(k.toLowerCase().slice(0, 8))
         );
         const { icon, color, border } = meta?.[1] || { icon: '•', color: '#F9F9F9', border: '#B08968' };
+        const isComprar = sec.title.toLowerCase().includes('comprar');
         return (
           <div key={i} className="recipe-sec" style={{ background: color, borderLeftColor: border }}>
             <div className="recipe-sec-header">
@@ -89,7 +109,10 @@ function RecipeCard({ text }) {
               <span className="recipe-sec-title">{sec.title}</span>
             </div>
             <div className="recipe-sec-body">
-              <MarkdownText text={sec.content} />
+              {isComprar
+                ? <ComprarButtons content={sec.content} />
+                : <MarkdownText text={sec.content} />
+              }
             </div>
           </div>
         );
