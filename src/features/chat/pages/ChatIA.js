@@ -74,16 +74,22 @@ function parseSections(text) {
 function ComprarButtons({ content }) {
   const items = [];
   content.split('\n').forEach(line => {
-    const url  = line.match(/https?:\/\/[^\s)>\]]+/);
-    const name = line.match(/\*{1,2}([^*\n]+)\*{1,2}/);
-    if (url && name) items.push({ nombre: name[1].replace(/:$/, '').trim(), url: url[0] });
+    const url = line.match(/https?:\/\/[^\s)>\]]+/);
+    if (!url) return;
+    // intenta capturar nombre en negrita (**Nombre**) o antes de ":"
+    const bold = line.match(/\*{1,2}([^*\n]+?)\*{1,2}/);
+    let nombre = bold
+      ? bold[1].replace(/:$/, '').trim()
+      : line.replace(/https?:\/\/\S+/g, '').replace(/^[\s\-*]+/, '').replace(/:$/, '').trim();
+    if (!nombre) return;
+    items.push({ nombre, url: url[0] });
   });
   if (items.length === 0) return <MarkdownText text={content} />;
   return (
     <div className="comprar-list">
       {items.map((item, i) => (
         <div key={i} className="comprar-row">
-          <span className="comprar-nombre">{item.nombre}</span>
+          <p className="comprar-nombre">{item.nombre}</p>
           <a href={item.url} target="_blank" rel="noopener noreferrer" className="comprar-btn-tienda">
             Ver en Tienda →
           </a>

@@ -207,8 +207,9 @@ body {
   padding: 10px 14px;
 }
 .comprar-nombre {
-  font-size: 14px; font-weight: 600; color: #4A3F35;
-  font-family: 'Poppins', sans-serif; flex: 1; min-width: 0;
+  font-size: 14px; font-weight: 600; color: #4A3F35 !important;
+  font-family: 'Poppins', sans-serif; flex: 1; margin: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .comprar-btn-tienda {
   display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
