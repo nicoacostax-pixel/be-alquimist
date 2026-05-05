@@ -136,16 +136,33 @@ module.exports = async function handler(req, res) {
       if (!stripeKey) return res.json({ pedidos: [] });
       const stripe = Stripe(stripeKey);
       const intents = await stripe.paymentIntents.list({ limit: 50 });
+
+      // Merge con estados de fulfillment guardados en Supabase
+      const ids = intents.data.map(pi => pi.id);
+      const { data: estados } = await sb.from('pedidos_estado').select('id, estado').in('id', ids);
+      const estadoMap = {};
+      (estados || []).forEach(e => { estadoMap[e.id] = e.estado; });
+
       const pedidos = intents.data.map(pi => ({
         id: pi.id,
         amount: pi.amount,
         currency: pi.currency,
         status: pi.status,
+        estado: estadoMap[pi.id] || 'procesando',
         created: new Date(pi.created * 1000).toISOString(),
         email: pi.receipt_email || '',
         metadata: pi.metadata,
       }));
       return res.json({ pedidos });
+    }
+
+    if (action === 'updatePedidoEstado') {
+      const { id, estado } = req.body;
+      const ESTADOS = ['procesando', 'enviado', 'completado'];
+      if (!id || !ESTADOS.includes(estado)) return res.status(400).json({ error: 'Datos inválidos' });
+      const { error } = await sb.from('pedidos_estado').upsert({ id, estado, updated_at: new Date().toISOString() });
+      if (error) return res.status(500).json({ error: error.message });
+      return res.json({ ok: true });
     }
 
     // ── COMUNIDAD ──────────────────────────────────────────────────

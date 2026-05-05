@@ -439,34 +439,110 @@ function Productos() {
 }
 
 /* ── PEDIDOS ────────────────────────────────────────────── */
-function Pedidos() {
-  const [pedidos, setPedidos] = useState([]);
-  const [loading, setLoading] = useState(true);
+const ESTADOS_ENVIO = [
+  { value: 'procesando', label: 'Procesando', color: '#EF5350', bg: '#FFEBEE' },
+  { value: 'enviado',    label: 'Enviado',    color: '#E6A800', bg: '#FFF8E1' },
+  { value: 'completado', label: 'Completado', color: '#43A047', bg: '#E8F5E9' },
+];
 
-  useEffect(() => {
-    callAdmin('getPedidos').then(d => { setPedidos(d.pedidos); setLoading(false); }).catch(() => setLoading(false));
+function Pedidos() {
+  const [pedidos,  setPedidos]  = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [updating, setUpdating] = useState(null);
+  const [msg,      setMsg]      = useState('');
+
+  const load = useCallback(() => {
+    setLoading(true);
+    callAdmin('getPedidos')
+      .then(d => { setPedidos(d.pedidos || []); setLoading(false); })
+      .catch(e => { setMsg('Error: ' + e.message); setLoading(false); });
   }, []);
 
-  const statusColor = s => ({ succeeded:'#4CAF50', requires_payment_method:'#EF5350', processing:'#E6B800', canceled:'#9E9E9E' }[s] || '#9E9E9E');
+  useEffect(() => { load(); }, [load]);
+
+  const cambiarEstado = async (pedidoId, nuevoEstado) => {
+    setUpdating(pedidoId);
+    try {
+      await callAdmin('updatePedidoEstado', { id: pedidoId, estado: nuevoEstado });
+      setPedidos(prev => prev.map(p => p.id === pedidoId ? { ...p, estado: nuevoEstado } : p));
+    } catch (e) { setMsg('Error: ' + e.message); }
+    setUpdating(null);
+  };
+
+  const pagoColor = s => ({ succeeded:'#43A047', requires_payment_method:'#EF5350', processing:'#E6A800', canceled:'#9E9E9E' }[s] || '#9E9E9E');
   const fmt = (amount, currency) => `$${(amount/100).toFixed(2)} ${(currency||'mxn').toUpperCase()}`;
+
+  const soloTienda = pedidos.filter(p => !p.metadata?.paquete);
 
   return (
     <div className="adm-section">
+      {msg && <div className="adm-msg" onClick={() => setMsg('')}>{msg} ×</div>}
       {loading ? <div className="adm-loading">Cargando pedidos…</div> : (
         <div className="adm-table-wrap">
           <table className="adm-table">
-            <thead><tr><th>ID</th><th>Monto</th><th>Estado</th><th>Tipo</th><th>Fecha</th></tr></thead>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Monto</th>
+                <th>Pago</th>
+                <th>Envío</th>
+                <th>Tipo</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
             <tbody>
-              {pedidos.length === 0 && <tr><td colSpan={5} style={{ textAlign:'center', color:'#999', padding:24 }}>Sin pedidos aún</td></tr>}
-              {pedidos.map(p => (
-                <tr key={p.id}>
-                  <td><span className="adm-email">{p.id.slice(-10)}</span></td>
-                  <td><strong>{fmt(p.amount, p.currency)}</strong></td>
-                  <td><span className="adm-status-dot" style={{ background: statusColor(p.status) }} />{p.status}</td>
-                  <td>{p.metadata?.paquete ? `Elementos ×${p.metadata.elementos === '-1' ? '∞ PRO' : p.metadata.elementos}` : 'Tienda'}</td>
-                  <td className="adm-date">{new Date(p.created).toLocaleDateString('es-MX')}</td>
-                </tr>
-              ))}
+              {pedidos.length === 0 && (
+                <tr><td colSpan={7} style={{ textAlign:'center', color:'#999', padding:24 }}>Sin pedidos aún</td></tr>
+              )}
+              {pedidos.map(p => {
+                const estadoEnvio = ESTADOS_ENVIO.find(e => e.value === (p.estado || 'procesando')) || ESTADOS_ENVIO[0];
+                const esTienda = !p.metadata?.paquete;
+                return (
+                  <tr key={p.id}>
+                    <td><span className="adm-email">{p.id.slice(-10)}</span></td>
+                    <td><span className="adm-email">{p.email || '—'}</span></td>
+                    <td><strong>{fmt(p.amount, p.currency)}</strong></td>
+                    <td>
+                      <span style={{ display:'inline-flex', alignItems:'center', gap:5, fontSize:12 }}>
+                        <span style={{ width:8, height:8, borderRadius:'50%', background: pagoColor(p.status), display:'inline-block' }} />
+                        {p.status === 'succeeded' ? 'Pagado' : p.status}
+                      </span>
+                    </td>
+                    <td>
+                      {esTienda ? (
+                        <div style={{ display:'flex', gap:4 }}>
+                          {ESTADOS_ENVIO.map(e => (
+                            <button
+                              key={e.value}
+                              onClick={() => cambiarEstado(p.id, e.value)}
+                              disabled={updating === p.id}
+                              style={{
+                                padding: '3px 10px',
+                                fontSize: 11,
+                                fontWeight: 600,
+                                border: 'none',
+                                borderRadius: 20,
+                                cursor: updating === p.id ? 'wait' : 'pointer',
+                                fontFamily: 'inherit',
+                                background: p.estado === e.value ? e.color : '#F0EBE5',
+                                color:      p.estado === e.value ? '#fff'   : '#999',
+                                transition: 'all .15s',
+                              }}
+                            >
+                              {e.label}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <span style={{ fontSize:12, color:'#aaa' }}>N/A</span>
+                      )}
+                    </td>
+                    <td>{p.metadata?.paquete ? `Elementos ×${p.metadata.elementos === '-1' ? '∞ PRO' : p.metadata.elementos}` : 'Tienda'}</td>
+                    <td className="adm-date">{new Date(p.created).toLocaleDateString('es-MX')}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
