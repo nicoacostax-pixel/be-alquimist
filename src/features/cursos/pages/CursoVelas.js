@@ -112,6 +112,80 @@ export default function CursoVelas() {
           </a>
         </div>
 
+        {/* SOCIAL PROOF */}
+        <div className="cv-social">
+
+          {/* Encabezado */}
+          <div style={{ background: '#B08968', padding: '22px 32px', textAlign: 'center' }}>
+            <h2 style={{ color: '#F3EFE8', fontSize: 22, fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif' }}>
+              Lo que dicen nuestras alumnas
+            </h2>
+          </div>
+
+          {/* Stats */}
+          <div className="cv-stats">
+            {[
+              { n: '+340', label: 'Alumnas activas' },
+              { n: '4.9★', label: 'Calificación' },
+              { n: '98%', label: 'Lo recomiendan' },
+            ].map(({ n, label }) => (
+              <div key={label} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 900, color: '#B08968' }}>{n}</div>
+                <div style={{ fontSize: 12, color: '#7A6A5A', fontWeight: 600, marginTop: 2 }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Testimonios tipo tarjeta */}
+          <div className="cv-reviews">
+            {[
+              { nombre: 'Valeria M.', ciudad: 'Guadalajara', stars: 5, texto: 'Nunca había hecho velas y con este curso en dos semanas ya estaba vendiendo. Los manuales son clarísimos y la instructora explica todo paso a paso. ¡100% recomendado!' },
+              { nombre: 'Daniela R.', ciudad: 'CDMX', stars: 5, texto: 'Lo que más me gustó fue que el acceso es de por vida. Puedo regresar a ver los videos cuando quiero. Las velas me quedaron increíbles desde el módulo 3.' },
+              { nombre: 'Sofía L.', ciudad: 'Monterrey', stars: 5, texto: 'Compré el kit completo y fue la mejor decisión. Llegaron todos los materiales y ya tenía todo listo para empezar. Ahora hago velas para regalar y vender.' },
+              { nombre: 'Mariana T.', ciudad: 'Puebla', stars: 5, texto: 'El grupo de asesoría es un plus enorme. Subí mis dudas y me contestaron en menos de una hora. Me sentí muy acompañada durante todo el proceso.' },
+            ].map(({ nombre, ciudad, stars, texto }) => (
+              <div key={nombre} className="cv-review-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+                  <div style={{
+                    width: 42, height: 42, borderRadius: '50%', background: '#B08968',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#fff', fontWeight: 800, fontSize: 16, flexShrink: 0,
+                  }}>
+                    {nombre[0]}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#4A3F35', fontSize: 14 }}>{nombre}</div>
+                    <div style={{ fontSize: 12, color: '#9E9188' }}>{ciudad}</div>
+                  </div>
+                  <div style={{ marginLeft: 'auto', color: '#B08968', fontSize: 15 }}>{'★'.repeat(stars)}</div>
+                </div>
+                <p style={{ fontSize: 13, color: '#7A6A5A', lineHeight: 1.7, margin: 0 }}>{texto}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Mensajes estilo WhatsApp */}
+          <div style={{ padding: '8px 20px 32px' }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#9E9188', textAlign: 'center', letterSpacing: 1, marginBottom: 16, textTransform: 'uppercase' }}>
+              Mensajes reales de alumnas 💬
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { nombre: 'Karen G.', msg: 'Acabo de terminar mi primera vela de flores y me quedó HERMOSA 😭🌸 Gracias por el curso, es lo mejor que he comprado este año', hora: '10:42 a.m.' },
+                { nombre: 'Lucía P.', msg: 'Ya vendí 12 velas esta semana!! Con el kit tuve todo lo necesario y mis clientas están encantadas 🕯️✨', hora: '3:15 p.m.' },
+                { nombre: 'Andrea F.', msg: 'Los videos son súper claros, incluso yo que soy primeriza entendí todo perfectamente. El módulo de aromas fue mi favorito 🥰', hora: 'ayer' },
+              ].map(({ nombre, msg, hora }) => (
+                <div key={nombre} style={{ background: '#E8F5E9', borderRadius: '0 12px 12px 12px', padding: '12px 14px', maxWidth: '90%', position: 'relative' }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#B08968', marginBottom: 4 }}>{nombre}</div>
+                  <p style={{ fontSize: 13, color: '#3A3A3A', margin: 0, lineHeight: 1.6 }}>{msg}</p>
+                  <div style={{ fontSize: 11, color: '#9E9188', textAlign: 'right', marginTop: 4 }}>{hora} ✓✓</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
         {/* SECCIÓN PRECIO */}
         <div id="precio">
           <div style={{ background: '#B08968', padding: '22px 32px', textAlign: 'center' }}>

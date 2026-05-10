@@ -55,6 +55,29 @@
 /* El botón suelto debajo solo se ve en móvil */
 .cv-wrapper > .cv-cta-wrap { display: block; }
 
+/* Stats row */
+.cv-stats {
+  display: flex;
+  justify-content: space-around;
+  padding: 28px 20px;
+  border-bottom: 1px solid #F0E8DE;
+}
+
+/* Reviews grid: columna en móvil */
+.cv-reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px 20px 8px;
+}
+
+.cv-review-card {
+  background: #FAF7F2;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #EDE0D4;
+}
+
 /* ── DESKTOP ── */
 @media (min-width: 768px) {
   .cv-wrapper { max-width: 1100px; }
@@ -83,6 +106,12 @@
   .cv-cta-wrap { padding: 28px 40px 56px; }
   .cv-info .cv-cta-wrap { display: block; margin-top: 20px; }
   .cv-wrapper > .cv-cta-wrap { display: none; }
+
+  /* Reviews 2 columnas en desktop */
+  .cv-reviews { flex-direction: row; flex-wrap: wrap; padding: 24px 40px 8px; }
+  .cv-review-card { flex: 1 1 calc(50% - 7px); }
+  .cv-social .cv-stats { padding: 28px 40px; }
+  .cv-social > div:last-child { padding-left: 40px; padding-right: 40px; }
 
   /* Cards lado a lado */
   .cv-cards {
