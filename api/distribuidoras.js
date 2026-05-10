@@ -25,5 +25,9 @@ module.exports = async function handler(req, res) {
   });
 
   if (error) return res.status(500).json({ error: error.message });
+
+  // Registrar en leads como distribuidora
+  await supabase.from('leads').insert({ email, telefono: telefono || '', tipo: 'distribuidora' });
+
   res.json({ ok: true });
 };
