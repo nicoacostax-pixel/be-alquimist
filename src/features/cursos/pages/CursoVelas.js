@@ -78,7 +78,7 @@ export default function CursoVelas() {
         <div className="cv-intro">
           <div className="cv-img-wrap">
             <img
-              src={`${process.env.PUBLIC_URL}/Velas.jpg`}
+              src="/Velas.jpg"
               alt="Curso de Velas de Soya"
             />
           </div>
