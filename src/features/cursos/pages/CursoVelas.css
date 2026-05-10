@@ -35,6 +35,37 @@
 
 .cv-info { padding: 28px 32px 8px; }
 
+/* Info chips grid */
+.cv-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.cv-info-chip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #FAF7F2;
+  border: 1px solid #EDE0D4;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.cv-info-chip-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.cv-info-chip-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #B08968;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 2px;
+}
+.cv-info-chip-value {
+  font-size: 12px;
+  color: #4A3F35;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 .cv-cta-wrap { padding: 24px 32px 48px; text-align: center; }
 
 /* Cards de precio: columna en móvil */

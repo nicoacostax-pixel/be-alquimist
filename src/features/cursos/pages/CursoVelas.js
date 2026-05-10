@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import './CursoVelas.css';
 
 const INFO = [
-  { label: 'CONTENIDO',       value: '+10 videos y +10 manuales descargables' },
-  { label: 'TIEMPO',          value: '1 Mes de aprendizaje' },
-  { label: 'DIPLOMA',         value: 'Al aprobar los 9 módulos' },
-  { label: 'MÓDULOS',         value: '9 Módulos' },
-  { label: 'RITMO DEL CURSO', value: 'Avanza a tu propio ritmo' },
-  { label: 'MODALIDAD',       value: 'ONLINE' },
-  { label: 'DURACIÓN',        value: 'Tendrás acceso al curso para siempre' },
-  { label: 'ASESORÍA',        value: 'Acceso a grupo de ayuda' },
+  { icon: '🎬', label: 'Contenido',        value: '+20 videos y +10 manuales' },
+  { icon: '📅', label: 'Duración',         value: '1 mes de aprendizaje' },
+  { icon: '🎓', label: 'Diploma',          value: 'Al aprobar los 9 módulos' },
+  { icon: '📚', label: 'Módulos',          value: '9 módulos completos' },
+  { icon: '⏱️', label: 'Ritmo',            value: 'A tu propio ritmo' },
+  { icon: '💻', label: 'Modalidad',        value: 'Online, 100% digital' },
+  { icon: '♾️', label: 'Acceso',           value: 'De por vida, para siempre' },
+  { icon: '💬', label: 'Asesoría',         value: 'Grupo exclusivo de ayuda' },
 ];
 
 const MODULOS = [
@@ -117,39 +117,47 @@ export default function CursoVelas() {
 
         {/* HEADER */}
         <div className="cv-header">
-          <p style={{ color: '#F3EFE8', fontSize: 12, fontWeight: 700, letterSpacing: 3, margin: '0 0 12px', textTransform: 'uppercase' }}>
+          <p style={{ color: '#F3EFE8', fontSize: 11, fontWeight: 700, letterSpacing: 4, margin: '0 0 14px', textTransform: 'uppercase', opacity: 0.85 }}>
             ⚗️ Be Alquimist
           </p>
           <h1 style={{
-            color: '#F3EFE8', fontSize: 28, fontWeight: 900, lineHeight: 1.25,
-            margin: 0, textTransform: 'uppercase', letterSpacing: 2, fontFamily: 'Georgia, serif',
+            color: '#F3EFE8', fontSize: 32, fontWeight: 900, lineHeight: 1.2,
+            margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif',
           }}>
             Curso de Velas<br />de Soya
           </h1>
+          <p style={{ color: '#F3EFE8', fontSize: 14, fontWeight: 400, margin: 0, opacity: 0.9, lineHeight: 1.6 }}>
+            Aprende a formular velas únicas desde cero y conviértelo en tu negocio
+          </p>
         </div>
 
         {/* IMAGEN + INFO */}
         <div className="cv-intro">
           <div className="cv-img-wrap">
-            <img
-              src="/Velas.jpg"
-              alt="Curso de Velas de Soya"
-            />
+            <img src="/Velas.jpg" alt="Curso de Velas de Soya" />
           </div>
           <div className="cv-info">
-            {INFO.map(({ label, value }) => (
-              <p key={label} style={{ fontSize: 14, color: '#7A6A5A', marginBottom: 12, lineHeight: 1.7 }}>
-                <strong style={{ color: '#4A3F35', fontWeight: 800 }}>{label}:</strong>{' '}
-                {value}
-              </p>
-            ))}
-            <div className="cv-cta-wrap" style={{ padding: 0, marginTop: 8 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 800, color: '#4A3F35', textTransform: 'uppercase', letterSpacing: 1.5, margin: '0 0 18px' }}>
+              Detalles del curso
+            </h2>
+            <div className="cv-info-grid">
+              {INFO.map(({ icon, label, value }) => (
+                <div key={label} className="cv-info-chip">
+                  <span className="cv-info-chip-icon">{icon}</span>
+                  <div>
+                    <div className="cv-info-chip-label">{label}</div>
+                    <div className="cv-info-chip-value">{value}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="cv-cta-wrap" style={{ padding: 0, marginTop: 24 }}>
               <a href="#precio" style={{
                 display: 'inline-block', background: '#B08968', color: '#fff',
                 fontWeight: 700, fontSize: 14, padding: '14px 44px', borderRadius: 30,
                 textDecoration: 'none', letterSpacing: 2, textTransform: 'uppercase',
               }}>
-                Ver Temario
+                Ver precios
               </a>
             </div>
           </div>
