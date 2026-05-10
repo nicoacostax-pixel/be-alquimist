@@ -14,8 +14,12 @@ import '../../../App.css';
 import SidebarMenu from '../components/SidebarMenu';
 import InsumoPopup from '../components/InsumoPopup';
 
+function deaccent(str = '') {
+  return str.normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
 function toCategoryPath(value = '') {
-  return value.toLowerCase().replace(/\s+/g, '-');
+  return deaccent(value.toLowerCase()).replace(/\s+/g, '-');
 }
 
 function firstCategory(categoria = '') {
@@ -64,9 +68,9 @@ function Insumos() {
       if (!error) {
         let result = data || [];
         if (categoria && categoria !== 'todos') {
-          const categoriaLabel = categoria.replace(/-/g, ' ').toLowerCase();
+          const categoriaLabel = deaccent(categoria.replace(/-/g, ' ').toLowerCase());
           result = result.filter(p =>
-            (p.categoria || '').split(',').some(c => c.trim().toLowerCase() === categoriaLabel)
+            (p.categoria || '').split(',').some(c => deaccent(c.trim().toLowerCase()) === categoriaLabel)
           );
         }
         setProductos(shuffle(result));
