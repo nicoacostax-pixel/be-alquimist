@@ -179,10 +179,10 @@ export default function CursoVelas() {
         <div>
           {/* Encabezado */}
           <div style={{ background: '#B08968', padding: '28px 32px 20px', textAlign: 'center' }}>
-            <h2 style={{ color: '#fff', fontSize: 22, fontWeight: 900, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 2, fontFamily: 'Georgia, serif' }}>
+            <h2 style={{ color: '#F3EFE8', fontSize: 22, fontWeight: 900, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 2, fontFamily: 'Georgia, serif' }}>
               Información del Curso
             </h2>
-            <p style={{ color: '#fff', fontSize: 12, fontWeight: 600, margin: 0, letterSpacing: 2, textTransform: 'uppercase', opacity: 0.85 }}>
+            <p style={{ color: '#F3EFE8', fontSize: 12, fontWeight: 600, margin: 0, letterSpacing: 2, textTransform: 'uppercase', opacity: 0.85 }}>
               Curso de Velas de Soya
             </p>
           </div>
@@ -219,7 +219,7 @@ export default function CursoVelas() {
 
           {/* Encabezado */}
           <div style={{ background: '#B08968', padding: '22px 32px', textAlign: 'center' }}>
-            <h2 style={{ color: '#fff', fontSize: 22, fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif' }}>
+            <h2 style={{ color: '#F3EFE8', fontSize: 22, fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif' }}>
               Lo que dicen nuestras alumnas
             </h2>
           </div>
@@ -292,7 +292,7 @@ export default function CursoVelas() {
         <div id="precio">
           <div style={{ background: '#B08968', padding: '22px 32px', textAlign: 'center' }}>
             <h2 style={{
-              color: '#fff', fontSize: 24, fontWeight: 900, margin: 0,
+              color: '#F3EFE8', fontSize: 24, fontWeight: 900, margin: 0,
               textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif',
             }}>
               Precio
@@ -396,7 +396,7 @@ export default function CursoVelas() {
         {/* TEMARIO ACORDEÓN */}
         <div>
           <div style={{ background: '#B08968', padding: '22px 32px', textAlign: 'center' }}>
-            <h2 style={{ color: '#fff', fontSize: 22, fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif' }}>
+            <h2 style={{ color: '#F3EFE8', fontSize: 22, fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif' }}>
               Temario
             </h2>
           </div>
@@ -552,10 +552,10 @@ export default function CursoVelas() {
         {/* PREGUNTAS FRECUENTES */}
         <div>
           <div style={{ background: '#B08968', padding: '28px 32px', textAlign: 'center' }}>
-            <h2 style={{ color: '#fff', fontSize: 24, fontWeight: 900, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif' }}>
+            <h2 style={{ color: '#F3EFE8', fontSize: 24, fontWeight: 900, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif' }}>
               Preguntas Frecuentes
             </h2>
-            <p style={{ color: '#fff', fontSize: 12, fontWeight: 600, margin: 0, letterSpacing: 2, textTransform: 'uppercase', opacity: 0.85 }}>
+            <p style={{ color: '#F3EFE8', fontSize: 12, fontWeight: 600, margin: 0, letterSpacing: 2, textTransform: 'uppercase', opacity: 0.85 }}>
               Curso de Velas de Soya
             </p>
           </div>
