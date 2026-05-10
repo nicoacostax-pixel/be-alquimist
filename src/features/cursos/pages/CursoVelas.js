@@ -444,12 +444,12 @@ export default function CursoVelas() {
 
         {/* TESTIMONIO + BENEFICIOS */}
         {/* Testimonio */}
-        <div className="cv-testimonio" style={{ background: '#EEF0E8' }}>
-          <p style={{ fontStyle: 'italic', fontSize: 15, color: '#3A3A2A', lineHeight: 1.8, margin: '0 0 20px', textAlign: 'justify' }}>
+        <div className="cv-testimonio" style={{ background: '#F3EFE8' }}>
+          <p style={{ fontStyle: 'italic', fontSize: 15, color: '#4A3F35', lineHeight: 1.8, margin: '0 0 20px', textAlign: 'justify' }}>
             "Durante el último año, he gastado una gran cantidad de dinero estudiando con otras personas y tomando varios cursos de forma online y presencial, pero nunca me sentí satisfecha con mi comprensión de los ingredientes, los métodos de formulación o la enseñanza de la cosmética natural. Tan pronto como adquirí el primer Manual de Be Alquimist, supe que había llegado al lugar correcto, la forma en la que explicaban el porque de cada ingrediente en una formulación me encanto, así que en cuanto vi este curso no dude ni un momento en adquirirlo, después de tomarlo puedo decir que es simplemente increíble. El equipo de Be Alquimist, además de ser unos excelentes profesores, son Biotecnólogos expertos en los que puede confiar, no son aficionados que hayan aprendido todo su conocimiento de Google o los rumores que circulan en los cientos de videos que hay por YouTube.{' '}
             <strong>No pierdas el tiempo estudiando con nadie más. Be Alquimist debe de ser tu única opción si deseas aprender todo lo relacionado a la Cosmética Natural y Artesanal".</strong>
           </p>
-          <p style={{ textAlign: 'right', fontWeight: 700, fontSize: 15, color: '#3A3A2A', margin: 0 }}>
+          <p style={{ textAlign: 'right', fontWeight: 700, fontSize: 15, color: '#4A3F35', margin: 0 }}>
             – Fernanda Galván, &nbsp;México
           </p>
         </div>
@@ -478,7 +478,7 @@ export default function CursoVelas() {
 
         {/* BONUS DEL CURSO */}
         <div>
-          <div style={{ background: '#F5D9D0', padding: '40px 32px', textAlign: 'center' }}>
+          <div style={{ background: '#F3EFE8', padding: '40px 32px', textAlign: 'center' }}>
             <h2 style={{ fontSize: 26, fontWeight: 900, color: '#4A3F35', textTransform: 'uppercase', letterSpacing: 2, margin: '0 0 16px', fontFamily: 'Georgia, serif' }}>
               Bonus del Curso
             </h2>
@@ -503,7 +503,7 @@ export default function CursoVelas() {
         </div>
 
         {/* PARA TI SI */}
-        <div style={{ background: '#E8EDDF' }}>
+        <div style={{ background: '#F3EFE8' }}>
           <div className="cv-paratiif">
             {/* Imagen */}
             <div className="cv-paratiif-img">
@@ -511,10 +511,10 @@ export default function CursoVelas() {
             </div>
             {/* Lista */}
             <div className="cv-paratiif-text">
-              <p style={{ fontStyle: 'italic', fontSize: 13, color: '#5A6644', margin: '0 0 10px' }}>
+              <p style={{ fontStyle: 'italic', fontSize: 13, color: '#7A6A5A', margin: '0 0 10px' }}>
                 ¿Porqué inscribirte en Be Alquimist?
               </p>
-              <h2 style={{ fontSize: 22, fontWeight: 900, color: '#2E3320', textTransform: 'uppercase', margin: '0 0 24px', letterSpacing: 0.5 }}>
+              <h2 style={{ fontSize: 22, fontWeight: 900, color: '#4A3F35', textTransform: 'uppercase', margin: '0 0 24px', letterSpacing: 0.5 }}>
                 Este curso es para ti si:
               </h2>
               {[
@@ -526,7 +526,7 @@ export default function CursoVelas() {
               ].map(item => (
                 <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
                   <span style={{ fontSize: 18, flexShrink: 0, marginTop: 1 }}>🤍</span>
-                  <p style={{ fontSize: 14, color: '#3A3F2A', lineHeight: 1.6, margin: 0 }}>{item}</p>
+                  <p style={{ fontSize: 14, color: '#4A3F35', lineHeight: 1.6, margin: 0 }}>{item}</p>
                 </div>
               ))}
             </div>
@@ -534,7 +534,7 @@ export default function CursoVelas() {
 
           {/* CTA final */}
           <div style={{ textAlign: 'center', padding: '40px 32px 56px' }}>
-            <h2 style={{ fontSize: 28, fontWeight: 700, color: '#2E3320', margin: '0 0 24px', fontFamily: 'Georgia, serif' }}>
+            <h2 style={{ fontSize: 28, fontWeight: 700, color: '#4A3F35', margin: '0 0 24px', fontFamily: 'Georgia, serif' }}>
               ¿Deseas inscribirte?
             </h2>
             <a href="https://wa.me/524921291547?text=Quiero%20inscribirme%20al%20Curso%20Velas%20de%20Soya" target="_blank" rel="noreferrer"
