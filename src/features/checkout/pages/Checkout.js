@@ -20,7 +20,9 @@ const ESTADOS_MX = [
 
 function fmt(v) { return `$${Number(v || 0).toFixed(2)}`; }
 
-function OrderSummary({ cart, cartSubtotal, shipping, total, descuento, setDescuento }) {
+const CUPONES = { '300DES': 300 };
+
+function OrderSummary({ cart, cartSubtotal, shipping, total, descuento, setDescuento, couponDiscount, onApplyCoupon, couponMsg }) {
   return (
     <>
       <div className="co-items">
@@ -41,13 +43,23 @@ function OrderSummary({ cart, cartSubtotal, shipping, total, descuento, setDescu
       <div className="co-discount-row">
         <input type="text" placeholder="Código de descuento" value={descuento}
           onChange={e => setDescuento(e.target.value)} className="co-input co-discount-input" />
-        <button type="button" className="co-apply-btn">Aplicar</button>
+        <button type="button" className="co-apply-btn" onClick={onApplyCoupon}>Aplicar</button>
       </div>
+      {couponMsg && (
+        <p style={{ fontSize: 12, margin: '4px 16px 0', color: couponDiscount > 0 ? '#2e7d32' : '#c0392b', fontWeight: 600 }}>
+          {couponMsg}
+        </p>
+      )}
       <div className="co-totals">
         <div className="co-total-line"><span>Subtotal</span><span>{fmt(cartSubtotal)}</span></div>
+        {couponDiscount > 0 && (
+          <div className="co-total-line" style={{ color: '#2e7d32' }}>
+            <span>Descuento (300DES)</span><span>-{fmt(couponDiscount)}</span>
+          </div>
+        )}
         <div className="co-total-line">
           <span>Envío</span>
-          <span className={shipping === null ? 'co-muted' : shipping === 0 ? 'co-free-shipping' : ''}>
+          <span className={shipping === 0 ? 'co-free-shipping' : shipping === null ? 'co-muted' : ''}>
             {shipping === 0 ? '🚚 Gratis' : shipping !== null ? fmt(shipping) : 'Introducir dirección de envío'}
           </span>
         </div>
@@ -132,20 +144,35 @@ export default function Checkout() {
     direccion: '', apartamento: '', cp: '', ciudad: '',
     estado: 'Ciudad de México', telefono: '',
   });
-  const [descuento,    setDescuento]    = useState('');
-  const [summaryOpen,  setSummaryOpen]  = useState(false);
-  const [clientSecret, setClientSecret] = useState('');
-  const [piError,      setPiError]      = useState('');
-  const [loadingPI,    setLoadingPI]    = useState(false);
-  const [step,         setStep]         = useState('info'); // 'info' | 'pay'
+  const [descuento,      setDescuento]      = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponMsg,      setCouponMsg]      = useState('');
+  const [summaryOpen,    setSummaryOpen]    = useState(false);
+  const [clientSecret,   setClientSecret]   = useState('');
+  const [piError,        setPiError]        = useState('');
+  const [loadingPI,      setLoadingPI]      = useState(false);
+  const [step,           setStep]           = useState('info');
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm(p => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const shipping = (esPro || cartSubtotal >= 1999) ? 0 : form.direccion.trim() ? 99 : null;
-  const total    = cartSubtotal + (shipping || 0);
+  const hasKit = cart.some(i => i.sku === 'kit-velas-soya-estandar');
+  const shipping = (esPro || hasKit || cartSubtotal >= 1999) ? 0 : form.direccion.trim() ? 99 : null;
+  const total    = Math.max(0, cartSubtotal - couponDiscount + (shipping || 0));
+
+  function onApplyCoupon() {
+    const code = descuento.trim().toUpperCase();
+    const disc = CUPONES[code];
+    if (disc) {
+      setCouponDiscount(disc);
+      setCouponMsg(`✓ Cupón aplicado: -$${disc} de descuento`);
+    } else {
+      setCouponDiscount(0);
+      setCouponMsg('Cupón inválido o expirado.');
+    }
+  }
 
   // Create PaymentIntent when moving to pay step
   async function handleContinueToPay(e) {
@@ -220,7 +247,8 @@ export default function Checkout() {
           <div className="co-mobile-summary">
             <OrderSummary cart={cart} cartSubtotal={cartSubtotal}
               shipping={shipping} total={total}
-              descuento={descuento} setDescuento={setDescuento} />
+              descuento={descuento} setDescuento={setDescuento}
+              couponDiscount={couponDiscount} onApplyCoupon={onApplyCoupon} couponMsg={couponMsg} />
           </div>
         )}
 
@@ -305,7 +333,7 @@ export default function Checkout() {
                       <input type="radio" name="envio" defaultChecked readOnly />
                       <span>Envío estándar (3–5 días hábiles)</span>
                     </div>
-                    <strong>$99.00 MXN</strong>
+                    <strong className={shipping === 0 ? 'co-free-shipping' : ''}>{shipping === 0 ? '🚚 Gratis' : '$99.00 MXN'}</strong>
                   </label>
                 </div>
               )}
@@ -356,7 +384,8 @@ export default function Checkout() {
       <aside className="co-summary">
         <OrderSummary cart={cart} cartSubtotal={cartSubtotal}
           shipping={shipping} total={total}
-          descuento={descuento} setDescuento={setDescuento} />
+          descuento={descuento} setDescuento={setDescuento}
+              couponDiscount={couponDiscount} onApplyCoupon={onApplyCoupon} couponMsg={couponMsg} />
       </aside>
     </div>
   );
