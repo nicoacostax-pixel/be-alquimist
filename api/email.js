@@ -65,10 +65,12 @@ module.exports = async function handler(req, res) {
       return res.json({ ok: true });
     }
 
-    // ── Enviar campaña a todos los leads ───────────────────────────
+    // ── Enviar campaña a leads (por lista o todos) ─────────────────
     if (action === 'sendCampaign') {
-      const { asunto, fuente, bloques } = req.body;
-      const { data: leads, error: leadsErr } = await supabase.from('leads').select('email');
+      const { asunto, fuente, bloques, lista } = req.body;
+      let query = supabase.from('leads').select('email');
+      if (lista && lista !== 'todos') query = query.eq('tipo', lista);
+      const { data: leads, error: leadsErr } = await query;
       if (leadsErr) return res.status(500).json({ error: leadsErr.message });
 
       const emails = [...new Set(leads.map(l => l.email).filter(Boolean))];

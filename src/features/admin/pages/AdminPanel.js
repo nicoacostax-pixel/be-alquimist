@@ -1671,6 +1671,14 @@ function EmailBlockEditor({ bloques, onChange }) {
   );
 }
 
+const LISTAS_ENVIO = [
+  { value: 'todos',                  label: 'Todos los leads' },
+  { value: 'usuario_nuevo',          label: '🙋 Usuarios nuevos' },
+  { value: 'aceite_de_regalo',       label: '🎁 Aceite de regalo' },
+  { value: 'distribuidora',          label: '🚀 Distribuidoras' },
+  { value: 'distribuidora_existente',label: '🔄 Distribuidoras (ya registradas)' },
+];
+
 function EmailMarketing() {
   const [templates, setTemplates] = useState([]);
   const [form,      setForm]      = useState({ ...EMPTY_EMAIL, id: 'bienvenida', nombre: 'Bienvenida' });
@@ -1680,6 +1688,7 @@ function EmailMarketing() {
   const [testEmail, setTestEmail] = useState('');
   const [preview,   setPreview]   = useState(false);
   const [tablaMissing, setTablaMissing] = useState(false);
+  const [lista,     setLista]     = useState('todos');
 
   const callEmail = useCallback(async (action, extra = {}) => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -1740,11 +1749,12 @@ function EmailMarketing() {
   };
 
   const sendCampaign = async () => {
-    if (!window.confirm('¿Enviar este email a TODOS los leads? Esta acción no se puede deshacer.')) return;
+    const listaLabel = LISTAS_ENVIO.find(l => l.value === lista)?.label || lista;
+    if (!window.confirm(`¿Enviar este email a "${listaLabel}"? Esta acción no se puede deshacer.`)) return;
     setSaving(true);
     try {
-      const { total, failed } = await callEmail('sendCampaign', form);
-      setMsg(`Campaña enviada: ${total - failed} exitosos, ${failed} fallidos`);
+      const { total, failed } = await callEmail('sendCampaign', { ...form, lista });
+      setMsg(`Campaña enviada a ${listaLabel}: ${total - failed} exitosos, ${failed} fallidos`);
     } catch (e) { setMsg('Error: ' + e.message); }
     setSaving(false);
   };
@@ -1857,12 +1867,15 @@ create policy "solo autenticado" on email_plantillas for all using (auth.role() 
           </div>
 
           <div style={{ marginTop:16, paddingTop:16, borderTop:'1px solid #EDE0D4' }}>
-            <p style={{ fontSize:13, color:'#888', margin:'0 0 10px' }}>
-              Envía este email a <strong>todos los leads</strong> registrados.
-            </p>
+            <label className="adm-label">Lista de destinatarios</label>
+            <select className="adm-input" style={{ marginBottom:12 }} value={lista} onChange={e => setLista(e.target.value)}>
+              {LISTAS_ENVIO.map(l => (
+                <option key={l.value} value={l.value}>{l.label}</option>
+              ))}
+            </select>
             <button onClick={sendCampaign} disabled={saving}
               style={{ background:'#4A3F35', color:'#F5EDE3', border:'none', borderRadius:8, padding:'10px 24px', fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'inherit', opacity: saving ? 0.6 : 1 }}>
-              {saving ? 'Enviando…' : 'Enviar campaña a todos los leads'}
+              {saving ? 'Enviando…' : `Enviar campaña → ${LISTAS_ENVIO.find(l => l.value === lista)?.label}`}
             </button>
           </div>
 
