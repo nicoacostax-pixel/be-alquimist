@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './CursoVelas.css';
+import CursoVelasPopup from './CursoVelasPopup';
 
 const INFO = [
   { icon: '🎬', label: 'Contenido',        value: '+20 videos y +10 manuales' },
@@ -105,6 +106,7 @@ export default function CursoVelas() {
 
   return (
     <div className="cv-page">
+      <CursoVelasPopup />
 
       {/* NAV */}
       <nav className="cv-nav">
