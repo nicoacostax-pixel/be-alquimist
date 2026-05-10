@@ -352,6 +352,38 @@ export default function CursoVelas() {
           </div>
         </div>
 
+        {/* COUNTDOWN */}
+        <div className="cv-countdown">
+          <h2 style={{ color: '#F3EFE8', fontSize: 22, fontWeight: 800, margin: '0 0 24px', lineHeight: 1.3 }}>
+            Tiempo para que<br />termine la promoción
+          </h2>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
+            {[
+              { val: pad(d), label: 'días' },
+              { val: pad(h), label: 'horas' },
+              { val: pad(m), label: 'min' },
+              { val: pad(s), label: 'seg' },
+            ].map(({ val, label }, i, arr) => (
+              <React.Fragment key={label}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{
+                    background: '#F3EFE8', color: '#4A3F35', fontWeight: 900,
+                    fontSize: 32, borderRadius: 10, padding: '10px 14px', minWidth: 56, lineHeight: 1,
+                  }}>
+                    {val}
+                  </div>
+                  <div style={{ color: '#F3EFE8', fontSize: 11, fontWeight: 600, marginTop: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
+                    {label}
+                  </div>
+                </div>
+                {i < arr.length - 1 && (
+                  <span style={{ color: '#F3EFE8', fontSize: 28, fontWeight: 900, alignSelf: 'flex-start', paddingTop: 10 }}>:</span>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
         {/* TEMARIO ACORDEÓN */}
         <div>
           <div style={{ background: '#B08968', padding: '22px 32px', textAlign: 'center' }}>
@@ -399,38 +431,6 @@ export default function CursoVelas() {
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        {/* COUNTDOWN */}
-        <div className="cv-countdown">
-          <h2 style={{ color: '#F3EFE8', fontSize: 22, fontWeight: 800, margin: '0 0 24px', lineHeight: 1.3 }}>
-            Tiempo para que<br />termine la promoción
-          </h2>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
-            {[
-              { val: pad(d), label: 'días' },
-              { val: pad(h), label: 'horas' },
-              { val: pad(m), label: 'min' },
-              { val: pad(s), label: 'seg' },
-            ].map(({ val, label }, i, arr) => (
-              <React.Fragment key={label}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{
-                    background: '#F3EFE8', color: '#4A3F35', fontWeight: 900,
-                    fontSize: 32, borderRadius: 10, padding: '10px 14px', minWidth: 56, lineHeight: 1,
-                  }}>
-                    {val}
-                  </div>
-                  <div style={{ color: '#F3EFE8', fontSize: 11, fontWeight: 600, marginTop: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
-                    {label}
-                  </div>
-                </div>
-                {i < arr.length - 1 && (
-                  <span style={{ color: '#F3EFE8', fontSize: 28, fontWeight: 900, alignSelf: 'flex-start', paddingTop: 10 }}>:</span>
-                )}
-              </React.Fragment>
-            ))}
           </div>
         </div>
 
