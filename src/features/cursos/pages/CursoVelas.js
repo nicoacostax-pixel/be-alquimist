@@ -376,13 +376,14 @@ export default function CursoVelas() {
                     {item}
                   </p>
                 ))}
-                <a href="https://wa.me/524921291547?text=Quiero%20inscribirme%20al%20Curso%20Velas%20de%20Soya" target="_blank" rel="noreferrer"
+                <button onClick={() => navigate('/cursos/velas-de-soya/checkout')}
                   style={{
                     display: 'inline-block', marginTop: 16, background: '#4A3F35', color: '#fff',
-                    fontWeight: 700, fontSize: 15, padding: '14px 36px', borderRadius: 30, textDecoration: 'none',
+                    fontWeight: 700, fontSize: 15, padding: '14px 36px', borderRadius: 30,
+                    border: 'none', cursor: 'pointer', width: '100%',
                   }}>
                   Inscríbete Aquí
-                </a>
+                </button>
                 {NOTA}
               </div>
             </div>

@@ -27,6 +27,7 @@ import AvisoLegal from './features/legal/AvisoLegal';
 import Distribuidoras from './features/distribuidoras/pages/Distribuidoras';
 import DistribuidorasGracias from './features/distribuidoras/pages/DistribuidorasGracias';
 import CursoVelas from './features/cursos/pages/CursoVelas';
+import CursoVelasCheckout from './features/cursos/pages/CursoVelasCheckout';
 
 // Importaciones de Comunidad
 import ComunidadLayout from './features/comunidad/components/ComunidadLayout';
@@ -87,6 +88,7 @@ function App() {
           <Route path="/pro" element={<ProLanding />} />
           <Route path="/cursos" element={<Cursos />} />
           <Route path="/cursos/velas-de-soya" element={<CursoVelas />} />
+          <Route path="/cursos/velas-de-soya/checkout" element={<CursoVelasCheckout />} />
           <Route path="/biblioteca" element={<Biblioteca />} />
           <Route path="/politicas-de-compra" element={<PoliticasDeCompra />} />
           <Route path="/privacidad"           element={<Privacidad />} />
