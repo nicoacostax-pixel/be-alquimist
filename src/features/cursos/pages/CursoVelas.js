@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './CursoVelas.css';
 import CursoVelasPopup from './CursoVelasPopup';
+import { useCart } from '../../../shared/context/CartContext';
+
+const KIT_PRODUCTO = { id: 'kit-de-velas-de-soya', nombre: 'Kit de Velas de Soya', imagen_url: '/KIT.jpg' };
+const KIT_VARIANTE = { nombre: 'Estándar', precio: 1499, sku: 'kit-velas-soya-estandar' };
 
 const INFO = [
   { icon: '🎬', label: 'Contenido',        value: '+20 videos y +10 manuales' },
@@ -108,6 +112,14 @@ export default function CursoVelas() {
   const { d, h, m, s } = useCountdown(DEADLINE);
   const [openModulo, setOpenModulo] = useState(null);
   const [openFaq, setOpenFaq] = useState(0);
+  const { addToCart, clearCart } = useCart();
+  const navigate = useNavigate();
+
+  function comprarKit() {
+    clearCart();
+    addToCart(KIT_PRODUCTO, KIT_VARIANTE, 1);
+    navigate('/checkout');
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -337,13 +349,14 @@ export default function CursoVelas() {
                     {item}
                   </p>
                 ))}
-                <a href="https://wa.me/524921291547?text=Quiero%20inscribirme%20al%20Kit%20Velas%20de%20Soya" target="_blank" rel="noreferrer"
+                <button onClick={comprarKit}
                   style={{
                     display: 'inline-block', marginTop: 16, background: '#4A3F35', color: '#fff',
-                    fontWeight: 700, fontSize: 15, padding: '14px 36px', borderRadius: 30, textDecoration: 'none',
+                    fontWeight: 700, fontSize: 15, padding: '14px 36px', borderRadius: 30,
+                    border: 'none', cursor: 'pointer', width: '100%',
                   }}>
                   Inscríbete Aquí
-                </a>
+                </button>
                 {NOTA}
               </div>
             </div>
