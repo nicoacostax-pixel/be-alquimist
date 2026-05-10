@@ -88,11 +88,10 @@
 }
 
 .cv-info-col-img {
-  width: 100%;
+  max-width: 100%;
+  height: auto;
   border-radius: 12px;
   display: block;
-  object-fit: cover;
-  max-height: 300px;
 }
 
 /* Stats row */
@@ -151,7 +150,7 @@
   .cv-info-cols { flex-direction: row; align-items: flex-start; }
   .cv-info-col { flex: 1; padding: 48px 40px; border-bottom: none; border-right: 1px solid #F0E8DE; }
   .cv-info-col:last-child { border-right: none; }
-  .cv-info-col-img { max-height: 360px; }
+  .cv-info-col-img { max-height: none; }
 
   /* Reviews 2 columnas en desktop */
   .cv-reviews { flex-direction: row; flex-wrap: wrap; padding: 24px 40px 8px; }
