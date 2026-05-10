@@ -1,10 +1,49 @@
 const { createClient } = require('@supabase/supabase-js');
-const { sendEmail, getTemplate } = require('./_resend');
+const { sendEmail } = require('./_resend');
 
 const supabase = createClient(
   process.env.REACT_APP_SUPABASE_URL || process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+const BLOQUES_ACEITE_REGALO = [
+  {
+    type: 'h1',
+    content: '¡Tu aceite esencial gratuito te está esperando! 🌿',
+  },
+  {
+    type: 'text',
+    content: 'Gracias por registrarte. Tienes reservado un aceite esencial de regalo con tu primer pedido en Be Alquimist.',
+  },
+  {
+    type: 'divider',
+  },
+  {
+    type: 'h2',
+    content: '¿Por qué hacer tu primer pedido hoy?',
+  },
+  {
+    type: 'text',
+    content: '✅ Más de 200 insumos naturales para cosmética\n✅ Envío a todo México\n✅ Ingredientes de primera calidad al mejor precio\n✅ Tu aceite esencial gratis incluido en el paquete',
+  },
+  {
+    type: 'button',
+    content: 'Ver catálogo y reclamar mi regalo',
+    url: 'https://bealquimist.com/insumos',
+    color: '#B08968',
+  },
+  {
+    type: 'divider',
+  },
+  {
+    type: 'text',
+    content: 'Si tienes dudas sobre qué ingredientes necesitas para tus fórmulas, nuestra IA te ayuda a crear recetas personalizadas. Solo visita el chat en bealquimist.com.',
+  },
+  {
+    type: 'text',
+    content: 'Con cariño,\nEl equipo de Be Alquimist 🌸',
+  },
+];
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
@@ -15,12 +54,12 @@ module.exports = async function handler(req, res) {
   const { error } = await supabase.from('leads').insert({ telefono, email, tipo });
   if (error) return res.status(500).json({ error: error.message });
 
-  // Enviar email de bienvenida si existe la plantilla 'bienvenida'
   try {
-    const tpl = await getTemplate('bienvenida');
-    if (tpl?.asunto && tpl?.bloques?.length) {
-      await sendEmail({ to: email, subject: tpl.asunto, bloques: tpl.bloques, fuente: tpl.fuente });
-    }
+    await sendEmail({
+      to: email,
+      subject: '🌿 Tu aceite esencial gratuito te está esperando',
+      bloques: BLOQUES_ACEITE_REGALO,
+    });
   } catch (_) {
     // No bloquear el registro si el email falla
   }
