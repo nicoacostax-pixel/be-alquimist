@@ -1,5 +1,16 @@
 .cv-page { min-height: 100vh; background: #F3EFE8; font-family: Poppins, sans-serif; }
 
+/* Scroll reveal */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+[data-reveal].cv-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .cv-nav {
   background: #fff;
   padding: 14px 24px;

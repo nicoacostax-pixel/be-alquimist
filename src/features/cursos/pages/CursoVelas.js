@@ -99,10 +99,24 @@ const NOTA = (
   </p>
 );
 
+function scrollToPrecio(e) {
+  e.preventDefault();
+  document.getElementById('precio')?.scrollIntoView({ behavior: 'smooth' });
+}
+
 export default function CursoVelas() {
   const { d, h, m, s } = useCountdown(DEADLINE);
   const [openModulo, setOpenModulo] = useState(null);
   const [openFaq, setOpenFaq] = useState(0);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('cv-revealed'); }),
+      { threshold: 0.1 }
+    );
+    document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="cv-page">
@@ -155,12 +169,12 @@ export default function CursoVelas() {
               ))}
             </div>
             <div className="cv-cta-wrap" style={{ padding: 0, marginTop: 24 }}>
-              <a href="#precio" style={{
+              <a href="#precio" onClick={scrollToPrecio} style={{
                 display: 'inline-block', background: '#B08968', color: '#fff',
                 fontWeight: 700, fontSize: 14, padding: '14px 44px', borderRadius: 30,
                 textDecoration: 'none', letterSpacing: 2, textTransform: 'uppercase',
               }}>
-                Ver precios
+                Inscríbete ahora
               </a>
             </div>
           </div>
@@ -168,17 +182,17 @@ export default function CursoVelas() {
 
         {/* CTA móvil (oculto en desktop via CSS) */}
         <div className="cv-cta-wrap">
-          <a href="#precio" style={{
+          <a href="#precio" onClick={scrollToPrecio} style={{
             display: 'inline-block', background: '#B08968', color: '#fff',
             fontWeight: 700, fontSize: 14, padding: '14px 44px', borderRadius: 30,
             textDecoration: 'none', letterSpacing: 2, textTransform: 'uppercase',
           }}>
-            Ver Temario
+            Inscríbete ahora
           </a>
         </div>
 
         {/* INFORMACIÓN DEL CURSO */}
-        <div>
+        <div data-reveal>
           {/* Encabezado */}
           <div style={{ background: '#B08968', padding: '28px 32px 20px', textAlign: 'center' }}>
             <h2 style={{ color: '#F3EFE8', fontSize: 22, fontWeight: 900, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 2, fontFamily: 'Georgia, serif' }}>
@@ -217,7 +231,7 @@ export default function CursoVelas() {
         </div>
 
         {/* SOCIAL PROOF */}
-        <div className="cv-social">
+        <div className="cv-social" data-reveal>
 
           {/* Encabezado */}
           <div style={{ background: '#B08968', padding: '22px 32px', textAlign: 'center' }}>
@@ -291,7 +305,7 @@ export default function CursoVelas() {
         </div>
 
         {/* SECCIÓN PRECIO */}
-        <div id="precio">
+        <div id="precio" data-reveal>
           <div style={{ background: '#B08968', padding: '22px 32px', textAlign: 'center' }}>
             <h2 style={{
               color: '#F3EFE8', fontSize: 24, fontWeight: 900, margin: 0,
@@ -364,7 +378,7 @@ export default function CursoVelas() {
         </div>
 
         {/* COUNTDOWN */}
-        <div className="cv-countdown">
+        <div className="cv-countdown" data-reveal>
           <h2 style={{ color: '#F3EFE8', fontSize: 22, fontWeight: 800, margin: '0 0 24px', lineHeight: 1.3 }}>
             Tiempo para que<br />termine la promoción
           </h2>
@@ -396,7 +410,7 @@ export default function CursoVelas() {
         </div>
 
         {/* TEMARIO ACORDEÓN */}
-        <div>
+        <div data-reveal>
           <div style={{ background: '#C9A882', padding: '22px 32px', textAlign: 'center' }}>
             <h2 style={{ color: '#F3EFE8', fontSize: 22, fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif' }}>
               Temario
@@ -447,7 +461,7 @@ export default function CursoVelas() {
 
         {/* TESTIMONIO + BENEFICIOS */}
         {/* Testimonio */}
-        <div className="cv-testimonio" style={{ background: '#F3EFE8' }}>
+        <div className="cv-testimonio" style={{ background: '#F3EFE8' }} data-reveal>
           <p style={{ fontStyle: 'italic', fontSize: 15, color: '#4A3F35', lineHeight: 1.8, margin: '0 0 20px', textAlign: 'justify' }}>
             "Durante el último año, he gastado una gran cantidad de dinero estudiando con otras personas y tomando varios cursos de forma online y presencial, pero nunca me sentí satisfecha con mi comprensión de los ingredientes, los métodos de formulación o la enseñanza de la cosmética natural. Tan pronto como adquirí el primer Manual de Be Alquimist, supe que había llegado al lugar correcto, la forma en la que explicaban el porque de cada ingrediente en una formulación me encanto, así que en cuanto vi este curso no dude ni un momento en adquirirlo, después de tomarlo puedo decir que es simplemente increíble. El equipo de Be Alquimist, además de ser unos excelentes profesores, son Biotecnólogos expertos en los que puede confiar, no son aficionados que hayan aprendido todo su conocimiento de Google o los rumores que circulan en los cientos de videos que hay por YouTube.{' '}
             <strong>No pierdas el tiempo estudiando con nadie más. Be Alquimist debe de ser tu única opción si deseas aprender todo lo relacionado a la Cosmética Natural y Artesanal".</strong>
@@ -480,7 +494,7 @@ export default function CursoVelas() {
         </div>
 
         {/* BONUS DEL CURSO */}
-        <div>
+        <div data-reveal>
           <div style={{ background: '#F3EFE8', padding: '40px 32px', textAlign: 'center' }}>
             <h2 style={{ fontSize: 26, fontWeight: 900, color: '#4A3F35', textTransform: 'uppercase', letterSpacing: 2, margin: '0 0 16px', fontFamily: 'Georgia, serif' }}>
               Bonus del Curso
@@ -506,7 +520,7 @@ export default function CursoVelas() {
         </div>
 
         {/* PARA TI SI */}
-        <div style={{ background: '#F3EFE8' }}>
+        <div style={{ background: '#F3EFE8' }} data-reveal>
           <div className="cv-paratiif">
             {/* Imagen */}
             <div className="cv-paratiif-img">
@@ -552,7 +566,7 @@ export default function CursoVelas() {
         </div>
 
         {/* PREGUNTAS FRECUENTES */}
-        <div>
+        <div data-reveal>
           <div style={{ background: '#B08968', padding: '28px 32px', textAlign: 'center' }}>
             <h2 style={{ color: '#F3EFE8', fontSize: 24, fontWeight: 900, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif' }}>
               Preguntas Frecuentes
