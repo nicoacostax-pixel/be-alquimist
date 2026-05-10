@@ -101,6 +101,11 @@ function Registro() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: formData.email, nombre: formData.nombre }),
         }).catch(() => {});
+        fetch('/api/leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formData.email, telefono: formData.telefono, tipo: 'usuario_nuevo' }),
+        }).catch(() => {});
         if (window.fbq) window.fbq('track', 'CompleteRegistration');
       }
       alert("¡Bienvenida al laboratorio!");

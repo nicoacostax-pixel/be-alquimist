@@ -12,6 +12,18 @@ module.exports = async function handler(req, res) {
   const { nombre, extension, telefono, email, q1, q2, q3, q4, q5 } = req.body || {};
   if (!nombre || !email) return res.status(400).json({ error: 'Nombre y correo son requeridos' });
 
+  // Verificar si el correo ya existe en distribuidoras
+  const { data: existente } = await supabase
+    .from('distribuidoras')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (existente) {
+    await supabase.from('leads').insert({ email, telefono: telefono || '', tipo: 'distribuidora_existente' });
+    return res.json({ ok: true, yaExiste: true });
+  }
+
   const { error } = await supabase.from('distribuidoras').insert({
     nombre,
     extension: extension || '+52',

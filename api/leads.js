@@ -54,14 +54,16 @@ module.exports = async function handler(req, res) {
   const { error } = await supabase.from('leads').insert({ telefono, email, tipo });
   if (error) return res.status(500).json({ error: error.message });
 
-  try {
-    await sendEmail({
-      to: email,
-      subject: '🌿 Tu aceite esencial gratuito te está esperando',
-      bloques: BLOQUES_ACEITE_REGALO,
-    });
-  } catch (_) {
-    // No bloquear el registro si el email falla
+  if (tipo === 'aceite_de_regalo') {
+    try {
+      await sendEmail({
+        to: email,
+        subject: '🌿 Tu aceite esencial gratuito te está esperando',
+        bloques: BLOQUES_ACEITE_REGALO,
+      });
+    } catch (_) {
+      // No bloquear el registro si el email falla
+    }
   }
 
   res.json({ ok: true });

@@ -1061,8 +1061,10 @@ function Contactos() {
 
 /* ── LEADS ──────────────────────────────────────────────────── */
 const TIPO_LABELS = {
-  'usuario_nuevo':   '🙋 Usuario nuevo',
-  'aceite_de_regalo':'🎁 Aceite de regalo',
+  'usuario_nuevo':          '🙋 Usuario nuevo',
+  'aceite_de_regalo':       '🎁 Aceite de regalo',
+  'distribuidora':          '🚀 Distribuidora',
+  'distribuidora_existente':'🔄 Distribuidora (ya registrada)',
 };
 
 function Leads() {
