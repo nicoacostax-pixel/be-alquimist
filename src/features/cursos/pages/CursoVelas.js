@@ -395,7 +395,7 @@ export default function CursoVelas() {
 
         {/* TEMARIO ACORDEÓN */}
         <div>
-          <div style={{ background: '#B08968', padding: '22px 32px', textAlign: 'center' }}>
+          <div style={{ background: '#C9A882', padding: '22px 32px', textAlign: 'center' }}>
             <h2 style={{ color: '#F3EFE8', fontSize: 22, fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif' }}>
               Temario
             </h2>
