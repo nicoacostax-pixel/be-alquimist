@@ -165,7 +165,7 @@ export default function CursoVelas() {
           </div>
 
           {/* Mensajes estilo WhatsApp */}
-          <div style={{ padding: '8px 20px 32px' }}>
+          <div style={{ padding: '8px 28px 36px' }}>
             <p style={{ fontSize: 13, fontWeight: 700, color: '#9E9188', textAlign: 'center', letterSpacing: 1, marginBottom: 16, textTransform: 'uppercase' }}>
               Mensajes reales de alumnas 💬
             </p>

@@ -22,7 +22,7 @@
   flex-direction: column;
 }
 
-.cv-img-wrap { padding: 28px 24px 0; }
+.cv-img-wrap { padding: 28px 28px 0; }
 .cv-img-wrap img {
   width: 100%;
   border-radius: 12px;
@@ -31,13 +31,13 @@
   max-height: 340px;
 }
 
-.cv-info { padding: 28px 28px 8px; }
+.cv-info { padding: 28px 32px 8px; }
 
-.cv-cta-wrap { padding: 24px 28px 48px; text-align: center; }
+.cv-cta-wrap { padding: 24px 32px 48px; text-align: center; }
 
 /* Cards de precio: columna en móvil */
 .cv-cards {
-  padding: 28px 20px;
+  padding: 28px 28px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -46,7 +46,7 @@
 /* Countdown: padding en móvil */
 .cv-countdown {
   background: #B08968;
-  padding: 32px 28px 40px;
+  padding: 32px 36px 40px;
   text-align: center;
 }
 
@@ -59,7 +59,7 @@
 .cv-stats {
   display: flex;
   justify-content: space-around;
-  padding: 28px 20px;
+  padding: 28px 32px;
   border-bottom: 1px solid #F0E8DE;
 }
 
@@ -68,7 +68,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 24px 20px 8px;
+  padding: 24px 28px 8px;
 }
 
 .cv-review-card {
