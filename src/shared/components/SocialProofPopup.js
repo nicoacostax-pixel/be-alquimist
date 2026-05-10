@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 
 const NOMBRES_POOL = [
@@ -41,13 +42,22 @@ function randomItem(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+const CURSOS_PRODUCTOS = [
+  'el Kit de Velas de Soya',
+  'el Curso de Velas de Soya',
+];
+
 function SocialProofPopup() {
+  const { pathname } = useLocation();
+  const isCursoVelas = pathname === '/cursos/velas-de-soya';
+
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [productosPool, setProductosPool] = useState(FALLBACK_PRODUCTOS);
   const [data, setData] = useState({ nombre: '', ciudad: '', producto: '', tiempo: 1 });
 
   useEffect(() => {
+    if (isCursoVelas) return;
     let cancelled = false;
 
     async function loadProductos() {
@@ -67,21 +77,22 @@ function SocialProofPopup() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isCursoVelas]);
 
   const showRandomPopup = useMemo(
     () => () => {
+      const pool = isCursoVelas ? CURSOS_PRODUCTOS : productosPool;
       setData({
         nombre: randomItem(NOMBRES_POOL),
         ciudad: randomItem(CIUDADES_POOL),
-        producto: randomItem(productosPool),
+        producto: randomItem(pool),
         tiempo: Math.floor(Math.random() * 10) + 1,
       });
 
       setVisible(true);
       window.setTimeout(() => setVisible(false), 5000);
     },
-    [productosPool]
+    [productosPool, isCursoVelas]
   );
 
   useEffect(() => {
@@ -106,7 +117,8 @@ function SocialProofPopup() {
       <button className="gsp-close" onClick={() => setDismissed(true)} aria-label="Cerrar">✕</button>
       <div className="gsp-badge">Actividad reciente</div>
       <p className="gsp-message">
-        <strong>{data.nombre}</strong> de <strong>{data.ciudad}</strong> compro{' '}
+        <strong>{data.nombre}</strong> de <strong>{data.ciudad}</strong>{' '}
+        {isCursoVelas ? 'adquirió' : 'compro'}{' '}
         <strong>{data.producto}</strong>
       </p>
       <p className="gsp-time">hace {data.tiempo} min</p>
