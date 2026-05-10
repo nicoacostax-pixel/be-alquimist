@@ -107,10 +107,10 @@ export default function CursoVelas() {
 
       {/* NAV */}
       <nav className="cv-nav">
-        <Link to="/" style={{ color: '#F3EFE8', fontWeight: 700, textDecoration: 'none', fontSize: 15 }}>
+        <Link to="/" style={{ color: '#B08968', fontWeight: 700, textDecoration: 'none', fontSize: 15 }}>
           ← Be Alquimist
         </Link>
-        <span style={{ color: '#F3EFE8', fontSize: 13, fontWeight: 600, letterSpacing: 1 }}>CURSOS</span>
+        <span style={{ color: '#B08968', fontSize: 13, fontWeight: 600, letterSpacing: 1 }}>CURSOS</span>
       </nav>
 
       <div className="cv-wrapper">
