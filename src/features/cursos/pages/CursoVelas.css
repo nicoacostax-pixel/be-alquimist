@@ -137,6 +137,14 @@
 .cv-testimonio { padding: 40px 28px; }
 .cv-beneficios { padding: 32px 28px 8px; }
 
+/* Bonus grid */
+.cv-bonus-grid {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #F0E8DE;
+}
+.cv-bonus-grid > div { border-bottom: 1px solid #F0E8DE; }
+
 /* Para ti si */
 .cv-paratiif {
   display: flex;
@@ -220,6 +228,11 @@
     padding: 48px 40px;
   }
   .cv-testimonio { padding: 48px 40px; }
+
+  /* Bonus: 3 columnas en desktop */
+  .cv-bonus-grid { flex-direction: row; }
+  .cv-bonus-grid > div { flex: 1; border-bottom: none; border-right: 1px solid #F0E8DE; }
+  .cv-bonus-grid > div:last-child { border-right: none; }
 
   /* Para ti si: 2 columnas en desktop */
   .cv-paratiif {

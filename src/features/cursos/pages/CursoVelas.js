@@ -476,6 +476,32 @@ export default function CursoVelas() {
           ))}
         </div>
 
+        {/* BONUS DEL CURSO */}
+        <div>
+          <div style={{ background: '#F5D9D0', padding: '40px 32px', textAlign: 'center' }}>
+            <h2 style={{ fontSize: 26, fontWeight: 900, color: '#4A3F35', textTransform: 'uppercase', letterSpacing: 2, margin: '0 0 16px', fontFamily: 'Georgia, serif' }}>
+              Bonus del Curso
+            </h2>
+            <p style={{ fontSize: 15, color: '#5A4A40', lineHeight: 1.7, margin: 0, maxWidth: 620, marginLeft: 'auto', marginRight: 'auto' }}>
+              Cuando estudias en Be Alquimist, te conviertes en una persona muy importante dentro de nuestra comunidad de estudiantes y graduados en toda Latinoamérica. Te apoyaremos en todos tus estudios y más allá para que puedas consolidar tu marca.
+            </p>
+          </div>
+
+          <div className="cv-bonus-grid">
+            {[
+              { icon: '🏷️', title: 'Descuentos Exclusivos', desc: 'Como alumno de Be Alquimist podrás acceder a increíbles descuentos en todos nuestros insumos, manuales y cursos.' },
+              { icon: '🏠', title: 'Comunidad de Alumnos', desc: 'Recibe apoyo de tus compañeros, haz preguntas, comparte fotos, soluciona problemas de formulaciones.' },
+              { icon: '👥', title: 'Sesiones en Vivo', desc: 'Recibe apoyo en sesiones en vivo junto a todos tus compañeros, donde podrás aclarar todas tus dudas.' },
+            ].map(({ icon, title, desc }) => (
+              <div key={title} style={{ textAlign: 'center', padding: '36px 24px' }}>
+                <div style={{ fontSize: 52, marginBottom: 16 }}>{icon}</div>
+                <h3 style={{ fontSize: 15, fontWeight: 900, color: '#4A3F35', textTransform: 'uppercase', letterSpacing: 1, margin: '0 0 12px' }}>{title}</h3>
+                <p style={{ fontSize: 14, color: '#7A6A5A', lineHeight: 1.7, margin: 0 }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* PARA TI SI */}
         <div style={{ background: '#E8EDDF' }}>
           <div className="cv-paratiif">
