@@ -10,11 +10,10 @@ async function main() {
   const { data, error } = await supabase.from('productos').insert({
     nombre: 'Curso de Velas de Soya',
     slug: 'curso-de-velas-de-soya',
-    precio: 200,
     categoria: '',
     imagen_url: '/Velas2.jpg',
     descripcion: 'Aprende a formular velas de soya desde cero con el equipo de Be Alquimist.',
-    variantes: [],
+    variantes: [{ nombre: 'Estándar', precio: 200, peso: 1 }],
   }).select();
 
   if (error) {
