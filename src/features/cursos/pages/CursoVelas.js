@@ -14,70 +14,86 @@ const INFO = [
 
 export default function CursoVelas() {
   return (
-    <div style={{ minHeight: '100vh', background: '#F2EDE8', fontFamily: 'Poppins, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#F3EFE8', fontFamily: 'Poppins, sans-serif' }}>
 
       {/* NAV */}
-      <nav style={{ background: '#fff', padding: '14px 24px', display: 'flex', alignItems: 'center', borderBottom: '1px solid #EDE0D4' }}>
-        <Link to="/" style={{ color: '#4A3F35', fontWeight: 700, textDecoration: 'none', fontSize: 16 }}>
+      <nav style={{
+        background: '#4A3F35',
+        padding: '14px 24px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}>
+        <Link to="/" style={{ color: '#F3EFE8', fontWeight: 700, textDecoration: 'none', fontSize: 15 }}>
           ← Be Alquimist
         </Link>
+        <span style={{ color: '#B08968', fontSize: 13, fontWeight: 600, letterSpacing: 1 }}>CURSOS</span>
       </nav>
 
-      <div style={{ maxWidth: 480, margin: '0 auto', background: '#fff', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 500, margin: '0 auto', background: '#fff' }}>
 
         {/* HEADER */}
         <div style={{
-          background: '#F2C9BE',
-          padding: '36px 32px 28px',
+          background: '#4A3F35',
+          padding: '40px 32px 32px',
           textAlign: 'center',
         }}>
+          <p style={{ color: '#B08968', fontSize: 12, fontWeight: 700, letterSpacing: 3, margin: '0 0 12px', textTransform: 'uppercase' }}>
+            ⚗️ Be Alquimist
+          </p>
           <h1 style={{
-            color: '#2D4A2D',
-            fontSize: 30,
+            color: '#F3EFE8',
+            fontSize: 28,
             fontWeight: 900,
-            lineHeight: 1.2,
+            lineHeight: 1.25,
             margin: 0,
             textTransform: 'uppercase',
-            letterSpacing: 1,
+            letterSpacing: 2,
             fontFamily: 'Georgia, serif',
           }}>
-            Curso de Velas de Soya
+            Curso de Velas<br />de Soya
           </h1>
         </div>
 
         {/* IMAGEN */}
         <div style={{ padding: '28px 24px 0' }}>
           <img
-            src="/Velas.jpg"
+            src={`${process.env.PUBLIC_URL}/Velas.jpg`}
             alt="Curso de Velas de Soya"
-            style={{ width: '100%', borderRadius: 16, display: 'block', objectFit: 'cover' }}
+            style={{
+              width: '100%',
+              borderRadius: 12,
+              display: 'block',
+              objectFit: 'cover',
+              maxHeight: 340,
+            }}
           />
         </div>
 
         {/* INFO */}
-        <div style={{ padding: '28px 24px 8px' }}>
+        <div style={{ padding: '28px 28px 8px' }}>
           {INFO.map(({ label, value }) => (
-            <p key={label} style={{ fontSize: 15, color: '#555', marginBottom: 10, lineHeight: 1.6 }}>
-              <strong style={{ color: '#2D4A2D', fontWeight: 800 }}>{label}:</strong>{' '}
+            <p key={label} style={{ fontSize: 14, color: '#7A6A5A', marginBottom: 12, lineHeight: 1.7 }}>
+              <strong style={{ color: '#4A3F35', fontWeight: 800 }}>{label}:</strong>{' '}
               {value}
             </p>
           ))}
         </div>
 
         {/* CTA */}
-        <div style={{ padding: '20px 24px 40px', textAlign: 'center' }}>
+        <div style={{ padding: '24px 28px 48px', textAlign: 'center' }}>
           <a
             href="#temario"
             style={{
               display: 'inline-block',
-              background: '#F2C9BE',
-              color: '#2D4A2D',
+              background: '#B08968',
+              color: '#fff',
               fontWeight: 700,
-              fontSize: 15,
-              padding: '14px 40px',
+              fontSize: 14,
+              padding: '14px 44px',
               borderRadius: 30,
               textDecoration: 'none',
-              letterSpacing: 1,
+              letterSpacing: 2,
               textTransform: 'uppercase',
             }}
           >
@@ -85,7 +101,7 @@ export default function CursoVelas() {
           </a>
         </div>
 
-        {/* SECCIONES ADICIONALES — se agregan debajo */}
+        {/* SECCIONES ADICIONALES */}
         <div id="temario" />
 
       </div>
