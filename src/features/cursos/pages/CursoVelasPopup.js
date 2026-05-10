@@ -55,7 +55,17 @@ export default function CursoVelasPopup() {
           <p className="lead-sub">*Deja tus datos y te contactamos</p>
 
           {sent ? (
-            <p className="lead-thanks">¡Listo! Te contactaremos pronto 🕯️</p>
+            <div>
+              <p className="lead-thanks">¡Listo! Usa este cupón al hacer tu pedido 🕯️</p>
+              <div style={{
+                background: '#F3EFE8', border: '2px dashed #B08968', borderRadius: 10,
+                padding: '14px 20px', textAlign: 'center', marginTop: 12,
+              }}>
+                <p style={{ fontSize: 11, color: '#7A6A5A', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: 1 }}>Tu cupón de descuento</p>
+                <p style={{ fontSize: 26, fontWeight: 900, color: '#4A3F35', margin: 0, letterSpacing: 3 }}>300DES</p>
+                <p style={{ fontSize: 11, color: '#B08968', margin: '4px 0 0' }}>$300 de descuento en tu inscripción</p>
+              </div>
+            </div>
           ) : (
             <form className="lead-form" onSubmit={enviar}>
               <div className="lead-phone-wrap">
