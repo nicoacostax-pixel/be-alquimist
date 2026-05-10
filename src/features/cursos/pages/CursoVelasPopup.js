@@ -34,7 +34,7 @@ export default function CursoVelasPopup() {
         body: JSON.stringify({ telefono, email, tipo: 'descuento_curso_velas' }),
       });
       setSent(true);
-      setTimeout(cerrar, 2200);
+      setTimeout(cerrar, 7000);
     } catch {}
     setSending(false);
   };
@@ -64,6 +64,7 @@ export default function CursoVelasPopup() {
                 <p style={{ fontSize: 11, color: '#7A6A5A', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: 1 }}>Tu cupón de descuento</p>
                 <p style={{ fontSize: 26, fontWeight: 900, color: '#4A3F35', margin: 0, letterSpacing: 3 }}>300DES</p>
                 <p style={{ fontSize: 11, color: '#B08968', margin: '4px 0 0' }}>$300 de descuento en tu inscripción</p>
+                <p style={{ fontSize: 11, color: '#C0392B', fontWeight: 700, margin: '8px 0 0', letterSpacing: 0.5 }}>⏳ Válido solo los próximos 5 minutos</p>
               </div>
             </div>
           ) : (
