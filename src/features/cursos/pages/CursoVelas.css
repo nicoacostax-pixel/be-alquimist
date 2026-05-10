@@ -102,6 +102,10 @@
   border-bottom: 1px solid #F0E8DE;
 }
 
+/* Testimonio + beneficios */
+.cv-testimonio { padding: 40px 28px; }
+.cv-beneficios { padding: 32px 28px 8px; }
+
 /* Reviews grid: columna en móvil */
 .cv-reviews {
   display: flex;
@@ -166,4 +170,13 @@
     gap: 24px;
   }
   .cv-cards > div { flex: 1; }
+
+  /* Beneficios: grilla 3 columnas en desktop */
+  .cv-beneficios {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0 32px;
+    padding: 48px 40px;
+  }
+  .cv-testimonio { padding: 48px 40px; }
 }
