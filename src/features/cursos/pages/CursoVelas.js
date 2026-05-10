@@ -468,6 +468,52 @@ export default function CursoVelas() {
           ))}
         </div>
 
+        {/* PARA TI SI */}
+        <div style={{ background: '#E8EDDF' }}>
+          <div className="cv-paratiif">
+            {/* Imagen */}
+            <div className="cv-paratiif-img">
+              <img src="/KIT.jpg" alt="Kit Velas de Soya" style={{ maxWidth: '100%', height: 'auto', borderRadius: 12, display: 'block' }} />
+            </div>
+            {/* Lista */}
+            <div className="cv-paratiif-text">
+              <p style={{ fontStyle: 'italic', fontSize: 13, color: '#5A6644', margin: '0 0 10px' }}>
+                ¿Porqué inscribirte en Be Alquimist?
+              </p>
+              <h2 style={{ fontSize: 22, fontWeight: 900, color: '#2E3320', textTransform: 'uppercase', margin: '0 0 24px', letterSpacing: 0.5 }}>
+                Este curso es para ti si:
+              </h2>
+              {[
+                'Deseas iniciar tu propia marca de Velas de Soya en cualquier parte del mundo.',
+                'Has estado haciendo velas de soya de forma casera y quieres convertir tu pasatiempo en un negocio.',
+                'Quieres aprender a formular productos de cosmética natural de calidad profesional.',
+                'Quieres inscribirte a la escuela de cosmética natural más profesional de forma online.',
+                'Quieres aprender de un equipo de Biotecnólogos especialistas en el área de la cosmética.',
+              ].map(item => (
+                <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
+                  <span style={{ fontSize: 18, flexShrink: 0, marginTop: 1 }}>🤍</span>
+                  <p style={{ fontSize: 14, color: '#3A3F2A', lineHeight: 1.6, margin: 0 }}>{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA final */}
+          <div style={{ textAlign: 'center', padding: '40px 32px 56px' }}>
+            <h2 style={{ fontSize: 28, fontWeight: 700, color: '#2E3320', margin: '0 0 24px', fontFamily: 'Georgia, serif' }}>
+              ¿Deseas inscribirte?
+            </h2>
+            <a href="https://wa.me/524921291547?text=Quiero%20inscribirme%20al%20Curso%20Velas%20de%20Soya" target="_blank" rel="noreferrer"
+              style={{
+                display: 'inline-block', background: '#B08968', color: '#fff',
+                fontWeight: 700, fontSize: 15, padding: '16px 48px', borderRadius: 30,
+                textDecoration: 'none', letterSpacing: 0.5,
+              }}>
+              ¡Sí! Deseo inscribirme
+            </a>
+          </div>
+        </div>
+
       </div>
     </div>
   );
