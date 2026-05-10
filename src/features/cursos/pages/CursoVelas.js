@@ -101,6 +101,7 @@ const NOTA = (
 export default function CursoVelas() {
   const { d, h, m, s } = useCountdown(DEADLINE);
   const [openModulo, setOpenModulo] = useState(null);
+  const [openFaq, setOpenFaq] = useState(0);
 
   return (
     <div className="cv-page">
@@ -544,6 +545,69 @@ export default function CursoVelas() {
                 textDecoration: 'none', letterSpacing: 0.5,
               }}>
               ¡Sí! Deseo inscribirme
+            </a>
+          </div>
+        </div>
+
+        {/* PREGUNTAS FRECUENTES */}
+        <div>
+          <div style={{ background: '#B08968', padding: '28px 32px', textAlign: 'center' }}>
+            <h2 style={{ color: '#F3EFE8', fontSize: 24, fontWeight: 900, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif' }}>
+              Preguntas Frecuentes
+            </h2>
+            <p style={{ color: '#F3EFE8', fontSize: 12, fontWeight: 600, margin: 0, letterSpacing: 2, textTransform: 'uppercase', opacity: 0.85 }}>
+              Curso de Velas de Soya
+            </p>
+          </div>
+
+          <div style={{ padding: '28px 28px 16px' }}>
+            {[
+              {
+                q: '¿Incluye los materiales?',
+                a: <>No, <strong>los materiales no están incluidos en el coste del curso,</strong> pero te obsequiaremos descuentos permanentes en todos nuestros insumos para que puedas adquirirlos a un super precio. Puedes comprar grandes cantidades para economizar gastos o compartir tu pedido con algún otro estudiante de tu ciudad.</>,
+              },
+              { q: '¿Y si no tengo experiencia en velas de soya?', a: 'No te preocupes, este curso es ideal si deseas comenzar a formar parte de la Cosmética Natural.' },
+              { q: '¿Se puede realizar desde cualquier lugar?', a: '¡Sí! El curso es 100% online.' },
+              { q: '¿Los productos que aprenderé a hacer son naturales?', a: '¡Sí! Todos los productos que aprenderás a realizar en el curso son 100% naturales.' },
+              { q: '¿Me darán un certificado?', a: 'Al finalizar tu curso serás acreedor a un Diploma donde acreditamos tu formación en nuestra Academia.' },
+            ].map(({ q, a }, i) => {
+              const isOpen = openFaq === i;
+              return (
+                <div key={i} style={{ marginBottom: 12, borderRadius: 10, overflow: 'hidden', border: '1px solid #EDE0D4' }}>
+                  <button
+                    onClick={() => setOpenFaq(isOpen ? null : i)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      background: isOpen ? '#fff' : '#FAF7F2',
+                      border: 'none', padding: '16px 20px', cursor: 'pointer', textAlign: 'left',
+                    }}
+                  >
+                    <span style={{ fontWeight: 700, fontSize: 14, color: '#4A3F35', lineHeight: 1.4 }}>{q}</span>
+                    <span style={{
+                      width: 28, height: 28, borderRadius: '50%', background: '#4A3F35',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#fff', fontSize: 18, fontWeight: 700, flexShrink: 0, marginLeft: 12,
+                      transform: isOpen ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s',
+                    }}>+</span>
+                  </button>
+                  {isOpen && (
+                    <div style={{ background: '#fff', padding: '14px 20px 18px', borderTop: '1px solid #F0E8DE' }}>
+                      <p style={{ fontSize: 14, color: '#7A6A5A', lineHeight: 1.7, margin: 0 }}>{a}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ textAlign: 'center', padding: '16px 32px 56px' }}>
+            <a href="https://wa.me/524921291547?text=Quiero%20inscribirme%20al%20Curso%20Velas%20de%20Soya" target="_blank" rel="noreferrer"
+              style={{
+                display: 'inline-block', background: '#B08968', color: '#fff',
+                fontWeight: 700, fontSize: 14, padding: '14px 48px', borderRadius: 30,
+                textDecoration: 'none', letterSpacing: 2, textTransform: 'uppercase',
+              }}>
+              Inscribirme Ahora
             </a>
           </div>
         </div>
