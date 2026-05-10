@@ -1,0 +1,95 @@
+.cv-page { min-height: 100vh; background: #F3EFE8; font-family: Poppins, sans-serif; }
+
+.cv-nav {
+  background: #B08968;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cv-wrapper { max-width: 500px; margin: 0 auto; background: #fff; }
+
+.cv-header {
+  background: #B08968;
+  padding: 40px 32px 32px;
+  text-align: center;
+}
+
+/* Sección imagen + info: columna en móvil */
+.cv-intro {
+  display: flex;
+  flex-direction: column;
+}
+
+.cv-img-wrap { padding: 28px 24px 0; }
+.cv-img-wrap img {
+  width: 100%;
+  border-radius: 12px;
+  display: block;
+  object-fit: cover;
+  max-height: 340px;
+}
+
+.cv-info { padding: 28px 28px 8px; }
+
+.cv-cta-wrap { padding: 24px 28px 48px; text-align: center; }
+
+/* Cards de precio: columna en móvil */
+.cv-cards {
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Countdown: padding en móvil */
+.cv-countdown {
+  background: #B08968;
+  padding: 32px 28px 40px;
+  text-align: center;
+}
+
+/* El botón dentro de cv-info solo se ve en desktop */
+.cv-info .cv-cta-wrap { display: none; }
+/* El botón suelto debajo solo se ve en móvil */
+.cv-wrapper > .cv-cta-wrap { display: block; }
+
+/* ── DESKTOP ── */
+@media (min-width: 768px) {
+  .cv-wrapper { max-width: 1100px; }
+
+  /* Imagen a la izquierda, info a la derecha */
+  .cv-intro {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 40px 40px 0;
+    gap: 40px;
+  }
+  .cv-img-wrap {
+    padding: 0;
+    flex: 0 0 52%;
+  }
+  .cv-img-wrap img { max-height: 460px; }
+
+  .cv-info {
+    padding: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .cv-cta-wrap { padding: 28px 40px 56px; }
+  .cv-info .cv-cta-wrap { display: block; margin-top: 20px; }
+  .cv-wrapper > .cv-cta-wrap { display: none; }
+
+  /* Cards lado a lado */
+  .cv-cards {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 36px 40px;
+    gap: 24px;
+  }
+  .cv-cards > div { flex: 1; }
+}
