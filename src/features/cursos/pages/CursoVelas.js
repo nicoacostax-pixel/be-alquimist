@@ -112,6 +112,45 @@ export default function CursoVelas() {
           </a>
         </div>
 
+        {/* INFORMACIÓN DEL CURSO */}
+        <div>
+          {/* Encabezado */}
+          <div style={{ background: '#B08968', padding: '28px 32px 20px', textAlign: 'center' }}>
+            <h2 style={{ color: '#F3EFE8', fontSize: 22, fontWeight: 900, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 2, fontFamily: 'Georgia, serif' }}>
+              Información del Curso
+            </h2>
+            <p style={{ color: '#F3EFE8', fontSize: 12, fontWeight: 600, margin: 0, letterSpacing: 2, textTransform: 'uppercase', opacity: 0.85 }}>
+              Curso de Velas de Soya
+            </p>
+          </div>
+
+          {/* Dos columnas */}
+          <div className="cv-info-cols">
+
+            <div className="cv-info-col">
+              <h3 className="cv-info-col-title">
+                Conviértete en un formulador<br />
+                <span style={{ fontSize: 13 }}>(no un seguidor de recetas)</span>
+              </h3>
+              <p className="cv-info-col-text">
+                Te enseñamos la manera correcta de crear tus propias fórmulas de Velas de Soya partiendo desde cero, permitiéndote diferenciarte de cientos de formuladores que solo siguen recetas. Te enseñaremos a crear e innovar tus propias Velas de Soya únicas y maravillosas que reflejen toda tu personalidad y contengan tus ingredientes favoritos.
+              </p>
+              <img src="/Velas1.jpg" alt="Velas artesanales" className="cv-info-col-img" />
+            </div>
+
+            <div className="cv-info-col">
+              <h3 className="cv-info-col-title">
+                Estudia la ciencia<br />de la cosmética natural
+              </h3>
+              <p className="cv-info-col-text">
+                Aprende y domina el lenguaje correcto de la ciencia detrás de los productos de la Cosmética Artesanal. Estudia cómo formular — verás que es súper sencillo y divertido. Comprenderás todo lo necesario sobre la formulación para convertir tu negocio de Velas de Soya en el negocio de tus sueños, con toda una gama de productos que se adapten a ti.
+              </p>
+              <img src="/Velas2.jpg" alt="Velas de flores" className="cv-info-col-img" />
+            </div>
+
+          </div>
+        </div>
+
         {/* SOCIAL PROOF */}
         <div className="cv-social">
 

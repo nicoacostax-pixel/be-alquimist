@@ -57,6 +57,44 @@
 /* El botón suelto debajo solo se ve en móvil */
 .cv-wrapper > .cv-cta-wrap { display: block; }
 
+/* Información del curso */
+.cv-info-cols {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.cv-info-col {
+  padding: 36px 32px 32px;
+  border-bottom: 1px solid #F0E8DE;
+}
+
+.cv-info-col-title {
+  font-size: 16px;
+  font-weight: 900;
+  color: #4A3F35;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 14px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.cv-info-col-text {
+  font-size: 14px;
+  color: #7A6A5A;
+  line-height: 1.8;
+  margin: 0 0 20px;
+}
+
+.cv-info-col-img {
+  width: 100%;
+  border-radius: 12px;
+  display: block;
+  object-fit: cover;
+  max-height: 300px;
+}
+
 /* Stats row */
 .cv-stats {
   display: flex;
@@ -108,6 +146,12 @@
   .cv-cta-wrap { padding: 28px 40px 56px; }
   .cv-info .cv-cta-wrap { display: block; margin-top: 20px; }
   .cv-wrapper > .cv-cta-wrap { display: none; }
+
+  /* Info del curso: 2 columnas en desktop */
+  .cv-info-cols { flex-direction: row; align-items: flex-start; }
+  .cv-info-col { flex: 1; padding: 48px 40px; border-bottom: none; border-right: 1px solid #F0E8DE; }
+  .cv-info-col:last-child { border-right: none; }
+  .cv-info-col-img { max-height: 360px; }
 
   /* Reviews 2 columnas en desktop */
   .cv-reviews { flex-direction: row; flex-wrap: wrap; padding: 24px 40px 8px; }
