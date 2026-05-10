@@ -5565,21 +5565,32 @@ body, #root {
   padding-bottom: 24px;
   border-bottom: 1px solid #D0C8BF;
 }
-.co-discount-input { flex: 1; }
+.co-discount-input {
+  flex: 1;
+  background: #fff !important;
+  border: 2px solid #B08968 !important;
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 11px 14px;
+  color: #1A1A1A;
+  outline: none;
+  font-family: inherit;
+}
+.co-discount-input::placeholder { color: #9E8E80; }
 .co-apply-btn {
-  padding: 12px 16px;
-  background: #fff;
-  border: 1.5px solid #D0C8BF;
+  padding: 12px 18px;
+  background: #B08968;
+  border: none;
   border-radius: 6px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  color: #4A3F35;
+  color: #fff;
   white-space: nowrap;
   font-family: inherit;
   transition: background 0.15s;
 }
-.co-apply-btn:hover { background: #F5F0EA; }
+.co-apply-btn:hover { background: #9A7558; }
 
 /* ── Totales ── */
 .co-totals {}
