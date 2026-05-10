@@ -23,6 +23,8 @@
 }
 
 .cv-img-wrap { padding: 28px 28px 0; }
+
+.cv-intro { padding-bottom: 40px; }
 .cv-img-wrap img {
   width: 100%;
   border-radius: 12px;
