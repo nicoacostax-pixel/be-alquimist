@@ -11,7 +11,6 @@ async function main() {
     nombre: 'Curso de Velas de Soya',
     slug: 'curso-de-velas-de-soya',
     precio: 200,
-    peso: 1,
     categoria: '',
     imagen_url: '/Velas2.jpg',
     descripcion: 'Aprende a formular velas de soya desde cero con el equipo de Be Alquimist.',
