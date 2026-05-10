@@ -22,7 +22,7 @@ function fmt(v) { return `$${Number(v || 0).toFixed(2)}`; }
 
 const CUPONES = { '300DES': 300 };
 
-function OrderSummary({ cart, cartSubtotal, shipping, total, descuento, setDescuento, couponDiscount, onApplyCoupon, couponMsg }) {
+function OrderSummary({ cart, cartSubtotal, shipping, total, couponDiscount }) {
   return (
     <>
       <div className="co-items">
@@ -40,16 +40,6 @@ function OrderSummary({ cart, cartSubtotal, shipping, total, descuento, setDescu
           </div>
         ))}
       </div>
-      <div className="co-discount-row">
-        <input type="text" placeholder="Código de descuento" value={descuento}
-          onChange={e => setDescuento(e.target.value)} className="co-input co-discount-input" />
-        <button type="button" className="co-apply-btn" onClick={onApplyCoupon}>Aplicar</button>
-      </div>
-      {couponMsg && (
-        <p style={{ fontSize: 12, margin: '4px 16px 0', color: couponDiscount > 0 ? '#2e7d32' : '#c0392b', fontWeight: 600 }}>
-          {couponMsg}
-        </p>
-      )}
       <div className="co-totals">
         <div className="co-total-line"><span>Subtotal</span><span>{fmt(cartSubtotal)}</span></div>
         {couponDiscount > 0 && (
@@ -247,8 +237,7 @@ export default function Checkout() {
           <div className="co-mobile-summary">
             <OrderSummary cart={cart} cartSubtotal={cartSubtotal}
               shipping={shipping} total={total}
-              descuento={descuento} setDescuento={setDescuento}
-              couponDiscount={couponDiscount} onApplyCoupon={onApplyCoupon} couponMsg={couponMsg} />
+              couponDiscount={couponDiscount} />
           </div>
         )}
 
@@ -339,6 +328,20 @@ export default function Checkout() {
               )}
             </section>
 
+            <section className="co-section">
+              <h2 className="co-section-title">Cupón de descuento</h2>
+              <div className="co-discount-row" style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }}>
+                <input type="text" placeholder="Código de descuento" value={descuento}
+                  onChange={e => setDescuento(e.target.value)} className="co-discount-input" />
+                <button type="button" className="co-apply-btn" onClick={onApplyCoupon}>Aplicar</button>
+              </div>
+              {couponMsg && (
+                <p style={{ fontSize: 12, margin: '8px 0 0', color: couponDiscount > 0 ? '#2e7d32' : '#c0392b', fontWeight: 600 }}>
+                  {couponMsg}
+                </p>
+              )}
+            </section>
+
             {piError && <p className="co-stripe-error">{piError}</p>}
 
             <button type="submit" className="co-submit-btn" disabled={loadingPI}>
@@ -384,8 +387,7 @@ export default function Checkout() {
       <aside className="co-summary">
         <OrderSummary cart={cart} cartSubtotal={cartSubtotal}
           shipping={shipping} total={total}
-          descuento={descuento} setDescuento={setDescuento}
-              couponDiscount={couponDiscount} onApplyCoupon={onApplyCoupon} couponMsg={couponMsg} />
+          couponDiscount={couponDiscount} />
       </aside>
     </div>
   );
