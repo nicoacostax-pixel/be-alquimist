@@ -13,6 +13,59 @@ const INFO = [
   { label: 'ASESORÍA',        value: 'Acceso a grupo de ayuda' },
 ];
 
+const MODULOS = [
+  {
+    titulo: 'Módulo 1: La Vela',
+    desc: 'En este módulo aprenderemos cosas súper interesantes que probablemente no aprenderás en ningún otro curso sobre Vela de Soya:',
+    lecciones: ['Lección 1: Historia de la Vela', 'Lección 2: Química básica de la Vela', 'Lección 3: ¿Por qué iniciar un negocio de velas?'],
+  },
+  {
+    titulo: 'Módulo 2: Composición de las Velas',
+    desc: 'En este módulo veremos a profundidad sobre la composición de las velas:',
+    lecciones: ['Lección 4: Tipos de Ceras', 'Lección 5: La Cera de Soya vs Parafina'],
+  },
+  {
+    titulo: 'Módulo 3: Mechas y Pabilos',
+    desc: 'En este módulo tocaremos a profundidad todo lo relacionado a los tipos de pabilos y mechas:',
+    lecciones: ['Lección 6: Tipos de velas y mechas', 'Lección 7: Cómo elegir nuestro pabilo ideal'],
+  },
+  {
+    titulo: 'Módulo 4: Moldes',
+    desc: '¡Moldes! En este módulo veremos los tipos de moldes más usados en la actualidad.',
+    lecciones: ['Lección 8: Tipos de Moldes'],
+  },
+  {
+    titulo: 'Módulo 5: Colorantes',
+    desc: 'Las velas de soya pueden ser de múltiples colores y tonalidades. En este módulo veremos los tipos de colorantes:',
+    lecciones: ['Lección 9: Teoría del color', 'Lección 10: Tipos de colorantes'],
+  },
+  {
+    titulo: 'Módulo 6: Aromas',
+    desc: 'En Velas de Soya puedes utilizar aceites esenciales o esencias. En este módulo abordaremos sus diferencias:',
+    lecciones: ['Lección 11: Aceites esenciales vs Esencias aromáticas', 'Lección 12: Familias olfativas'],
+  },
+  {
+    titulo: 'Módulo 7: Primeros Pasos',
+    desc: 'En este módulo aprenderemos los pasos iniciales antes de comenzar a elaborar tus primeras velas de soya.',
+    lecciones: ['Lección 13: Primeros pasos'],
+  },
+  {
+    titulo: 'Módulo 8: Recetas Básicas',
+    desc: 'En este módulo comenzaremos a elaborar nuestras primeras recetas de Velas de Soya:',
+    lecciones: ['Lección 15: Vela Natural', 'Lección 16: Vela Aromática', 'Lección 17: Vela para masajes', 'Lección 18: Vela del Bosque'],
+  },
+  {
+    titulo: 'Módulo 9: Recetas Avanzadas',
+    desc: 'Ya que hayas elaborado tus primeras velas, estarás lista para recetas más avanzadas:',
+    lecciones: ['Lección 18: Vela para masaje enriquecida', 'Lección 19: Vela de Cactus', 'Lección 20: Vela Glitter', 'Lección 21: Vela Pastel Feliz Cumpleaños', 'Lección 22: Vela de Unicornio', 'Lección 24: Vela Latte'],
+  },
+  {
+    titulo: 'Examen Final',
+    desc: 'Tu último paso será presentar el examen final del curso. Al aprobarlo recibirás tu diploma como formuladora de Velas de Soya.',
+    lecciones: [],
+  },
+];
+
 const DEADLINE = new Date('2026-05-25T23:59:59');
 
 function useCountdown(target) {
@@ -47,6 +100,7 @@ const NOTA = (
 
 export default function CursoVelas() {
   const { d, h, m, s } = useCountdown(DEADLINE);
+  const [openModulo, setOpenModulo] = useState(null);
 
   return (
     <div className="cv-page">
@@ -295,6 +349,56 @@ export default function CursoVelas() {
               </div>
             </div>
 
+          </div>
+        </div>
+
+        {/* TEMARIO ACORDEÓN */}
+        <div>
+          <div style={{ background: '#B08968', padding: '22px 32px', textAlign: 'center' }}>
+            <h2 style={{ color: '#F3EFE8', fontSize: 22, fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: 3, fontFamily: 'Georgia, serif' }}>
+              Temario
+            </h2>
+          </div>
+
+          <div style={{ padding: '28px 28px 36px' }}>
+            {MODULOS.map((mod, i) => {
+              const isOpen = openModulo === i;
+              return (
+                <div key={i} style={{ marginBottom: 12, borderRadius: 10, overflow: 'hidden', border: '1px solid #EDE0D4' }}>
+                  <button
+                    onClick={() => setOpenModulo(isOpen ? null : i)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      background: isOpen ? '#fff' : '#F5EDE3',
+                      border: 'none', padding: '16px 20px', cursor: 'pointer', textAlign: 'left',
+                    }}
+                  >
+                    <span style={{ fontWeight: 800, fontSize: 14, color: '#4A3F35', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                      {mod.titulo}
+                    </span>
+                    <span style={{
+                      width: 28, height: 28, borderRadius: '50%', background: '#4A3F35',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#fff', fontSize: 18, fontWeight: 700, flexShrink: 0, marginLeft: 12,
+                      transform: isOpen ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s',
+                    }}>+</span>
+                  </button>
+
+                  {isOpen && (
+                    <div style={{ background: '#fff', padding: '16px 20px 20px', borderTop: '1px solid #F0E8DE' }}>
+                      <p style={{ fontSize: 13, color: '#7A6A5A', lineHeight: 1.7, margin: '0 0 12px' }}>{mod.desc}</p>
+                      {mod.lecciones.length > 0 && (
+                        <ul style={{ margin: 0, paddingLeft: 18 }}>
+                          {mod.lecciones.map(l => (
+                            <li key={l} style={{ fontSize: 13, color: '#4A3F35', marginBottom: 6, lineHeight: 1.5 }}>{l}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
