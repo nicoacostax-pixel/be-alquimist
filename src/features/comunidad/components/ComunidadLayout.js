@@ -14,6 +14,7 @@ function toCategoryPath(value = '') {
 
 const TABS = [
   { name: 'Comunidad',  path: '/comunidad' },
+  { name: 'Cursos',     path: '/comunidad/cursos' },
   { name: 'Calendario', path: '/comunidad/calendario' },
   { name: 'Marcadores', path: '/comunidad/marcadores' },
 ];

@@ -37,6 +37,7 @@ import ForoPrincipal from './features/comunidad/pages/ForoPrincipal';
 import Calendario from './features/comunidad/pages/Calendario';
 import Miembros from './features/comunidad/pages/Miembros';
 import Marcadores from './features/comunidad/pages/Marcadores';
+import CursosComunidad from './features/comunidad/pages/CursosComunidad';
 
 
 
@@ -107,6 +108,7 @@ function App() {
             <Route path="calendario" element={<Calendario />} />
             <Route path="miembros" element={<Miembros />} />
             <Route path="marcadores" element={<Marcadores />} />
+            <Route path="cursos" element={<CursosComunidad />} />
           </Route>
 
         </Routes>
