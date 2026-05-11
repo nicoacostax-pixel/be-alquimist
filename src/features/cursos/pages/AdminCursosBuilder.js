@@ -13,6 +13,73 @@ async function api(action, data, token) {
   return res.json();
 }
 
+// ── Portada uploader ──────────────────────────────────────────────────────────
+
+function PortadaUploader({ value, onChange }) {
+  const fileRef    = useRef();
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    const ext  = file.name.split('.').pop().toLowerCase();
+    const path = `portadas/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('recursos').upload(path, file, { upsert: true });
+    if (!error) {
+      onChange(`${SUPABASE_URL}/storage/v1/object/public/recursos/${path}`);
+    }
+    setUploading(false);
+  };
+
+  return (
+    <div>
+      <input
+        type="file"
+        accept="image/*"
+        ref={fileRef}
+        style={{ display: 'none' }}
+        onChange={e => handleFile(e.target.files[0])}
+      />
+      {value ? (
+        <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
+          <img
+            src={value}
+            alt="Portada"
+            style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }}
+          />
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            style={{
+              position: 'absolute', bottom: 10, right: 10,
+              background: 'rgba(0,0,0,0.6)', color: '#fff',
+              border: 'none', borderRadius: 8, padding: '7px 14px',
+              fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'Poppins, sans-serif',
+            }}
+          >
+            {uploading ? 'Subiendo…' : '📷 Cambiar imagen'}
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          style={{
+            width: '100%', border: '2px dashed #D0C8BF', borderRadius: 12,
+            padding: '32px 16px', background: '#FAFAFA', cursor: 'pointer',
+            fontFamily: 'Poppins, sans-serif', color: '#9E8E80', fontSize: 14,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+          }}
+        >
+          <span style={{ fontSize: 32 }}>🖼️</span>
+          <span>{uploading ? 'Subiendo…' : 'Subir imagen de portada'}</span>
+          <span style={{ fontSize: 12 }}>JPG, PNG, WebP — recomendado 1280×720</span>
+        </button>
+      )}
+    </div>
+  );
+}
+
 const BLOCK_TYPES = [
   { value: 'video',  label: '🎬 Video Vimeo' },
   { value: 'text',   label: '📝 Texto' },
@@ -309,7 +376,7 @@ function CursoEditor({ cursoId, token, onBack }) {
             <input value={cursoForm.titulo}      onChange={e => setCursoForm(p => ({ ...p, titulo:      e.target.value }))} placeholder="Título"      style={S.input} />
             <input value={cursoForm.slug}        onChange={e => setCursoForm(p => ({ ...p, slug:        e.target.value.toLowerCase().replace(/\s+/g, '-') }))} placeholder="Slug (ej: velas-avanzadas)" style={S.input} />
             <textarea value={cursoForm.descripcion} onChange={e => setCursoForm(p => ({ ...p, descripcion: e.target.value }))} placeholder="Descripción" rows={3} style={{ ...S.input, resize: 'vertical' }} />
-            <input value={cursoForm.imagen_url}  onChange={e => setCursoForm(p => ({ ...p, imagen_url:  e.target.value }))} placeholder="URL de imagen portada" style={S.input} />
+            <PortadaUploader value={cursoForm.imagen_url} onChange={url => setCursoForm(p => ({ ...p, imagen_url: url }))} />
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#4A3F35', cursor: 'pointer' }}>
               <input type="checkbox" checked={cursoForm.publicado} onChange={e => setCursoForm(p => ({ ...p, publicado: e.target.checked }))} />
               Publicado (visible para usuarios)
@@ -321,18 +388,27 @@ function CursoEditor({ cursoId, token, onBack }) {
           </div>
         ) : (
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-            <div>
-              <h2 style={{ fontSize: 20, fontWeight: 900, color: '#4A3F35', margin: '0 0 6px', fontFamily: 'Georgia, serif' }}>
-                {curso.titulo}
-              </h2>
-              <span style={{ fontSize: 12, color: '#9E8E80' }}>/cursos/{curso.slug}/aprender</span>
-              <span style={{
-                marginLeft: 10, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20,
-                background: curso.publicado ? '#E8F5E9' : '#FFF3E0',
-                color: curso.publicado ? '#2E7D32' : '#E65100',
-              }}>
-                {curso.publicado ? 'Publicado' : 'Borrador'}
-              </span>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flex: 1, minWidth: 0 }}>
+              {curso.imagen_url && (
+                <img
+                  src={curso.imagen_url}
+                  alt="Portada"
+                  style={{ width: 80, height: 56, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
+                />
+              )}
+              <div style={{ minWidth: 0 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 900, color: '#4A3F35', margin: '0 0 6px', fontFamily: 'Georgia, serif' }}>
+                  {curso.titulo}
+                </h2>
+                <span style={{ fontSize: 12, color: '#9E8E80' }}>/cursos/{curso.slug}/aprender</span>
+                <span style={{
+                  marginLeft: 10, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20,
+                  background: curso.publicado ? '#E8F5E9' : '#FFF3E0',
+                  color: curso.publicado ? '#2E7D32' : '#E65100',
+                }}>
+                  {curso.publicado ? 'Publicado' : 'Borrador'}
+                </span>
+              </div>
             </div>
             <button onClick={() => setEditingCurso(true)} style={S.btnGhost}>✏️ Editar</button>
           </div>
@@ -400,7 +476,7 @@ export default function AdminCursosBuilder() {
   const [loading,        setLoading]        = useState(true);
   const [selectedId,     setSelectedId]     = useState(null);
   const [showNewForm,    setShowNewForm]    = useState(false);
-  const [newForm,        setNewForm]        = useState({ titulo: '', slug: '', descripcion: '' });
+  const [newForm,        setNewForm]        = useState({ titulo: '', slug: '', descripcion: '', imagen_url: '' });
   const [creating,       setCreating]       = useState(false);
 
   useEffect(() => {
@@ -481,6 +557,10 @@ export default function AdminCursosBuilder() {
                 rows={3}
                 style={{ ...S.input, resize: 'vertical' }}
               />
+              <PortadaUploader
+                value={newForm.imagen_url}
+                onChange={url => setNewForm(p => ({ ...p, imagen_url: url }))}
+              />
               <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={createCurso} disabled={creating} style={S.btnPrimary}>
                   {creating ? 'Creando…' : 'Crear y editar →'}
@@ -502,6 +582,9 @@ export default function AdminCursosBuilder() {
           </div>
         ) : cursos.map(c => (
           <div key={c.id} style={{ background: '#fff', borderRadius: 14, padding: '18px 24px', border: '1px solid #EDE0D4', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            {c.imagen_url && (
+              <img src={c.imagen_url} alt="" style={{ width: 64, height: 44, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
+            )}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 800, color: '#4A3F35', fontSize: 15, marginBottom: 2 }}>{c.titulo}</div>
               <div style={{ fontSize: 12, color: '#9E8E80', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
