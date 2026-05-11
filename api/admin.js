@@ -135,24 +135,35 @@ module.exports = async function handler(req, res) {
       const stripeKey = process.env.STRIPE_SECRET_KEY;
       if (!stripeKey) return res.json({ pedidos: [] });
       const stripe = Stripe(stripeKey);
-      const intents = await stripe.paymentIntents.list({ limit: 50 });
+      const intents = await stripe.paymentIntents.list({ limit: 100, expand: ['data.latest_charge'] });
 
-      // Merge con estados de fulfillment guardados en Supabase
       const ids = intents.data.map(pi => pi.id);
       const { data: estados } = await sb.from('pedidos_estado').select('id, estado').in('id', ids);
       const estadoMap = {};
       (estados || []).forEach(e => { estadoMap[e.id] = e.estado; });
 
-      const pedidos = intents.data.map(pi => ({
-        id: pi.id,
-        amount: pi.amount,
-        currency: pi.currency,
-        status: pi.status,
-        estado: estadoMap[pi.id] || 'procesando',
-        created: new Date(pi.created * 1000).toISOString(),
-        email: pi.receipt_email || '',
-        metadata: pi.metadata,
-      }));
+      const pedidos = intents.data.map(pi => {
+        const charge = pi.latest_charge || {};
+        const billing = charge.billing_details || {};
+        const addr = billing.address || {};
+        return {
+          id: pi.id,
+          amount: pi.amount,
+          currency: pi.currency,
+          status: pi.status,
+          estado: estadoMap[pi.id] || 'procesando',
+          created: new Date(pi.created * 1000).toISOString(),
+          email: billing.email || pi.receipt_email || pi.metadata?.email || '',
+          nombre: billing.name || pi.metadata?.nombre || '',
+          telefono: billing.phone || '',
+          direccion: addr.line1 || '',
+          apartamento: addr.line2 || '',
+          ciudad: addr.city || '',
+          estado_envio_dir: addr.state || '',
+          cp: addr.postal_code || '',
+          metadata: pi.metadata,
+        };
+      });
       return res.json({ pedidos });
     }
 

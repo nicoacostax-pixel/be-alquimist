@@ -486,10 +486,12 @@ const ESTADOS_ENVIO = [
 ];
 
 function Pedidos() {
-  const [pedidos,  setPedidos]  = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [updating, setUpdating] = useState(null);
-  const [msg,      setMsg]      = useState('');
+  const [pedidos,   setPedidos]   = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [updating,  setUpdating]  = useState(null);
+  const [expanded,  setExpanded]  = useState(null);
+  const [msg,       setMsg]       = useState('');
+  const [search,    setSearch]    = useState('');
 
   const load = useCallback(() => {
     setLoading(true);
@@ -510,77 +512,118 @@ function Pedidos() {
   };
 
   const pagoColor = s => ({ succeeded:'#43A047', requires_payment_method:'#EF5350', processing:'#E6A800', canceled:'#9E9E9E' }[s] || '#9E9E9E');
+  const pagoLabel = s => ({ succeeded:'Pagado', requires_payment_method:'Fallido', processing:'Procesando', canceled:'Cancelado' }[s] || s);
   const fmt = (amount, currency) => `$${(amount/100).toFixed(2)} ${(currency||'mxn').toUpperCase()}`;
+  const tipo = p => p.metadata?.plan === 'pro' ? '⭐ PRO' : p.metadata?.paquete ? `Elementos ×${p.metadata.elementos === '-1' ? '∞' : p.metadata.elementos}` : p.metadata?.origen === 'curso_velas' || p.metadata?.email ? '🕯️ Curso' : '🛒 Tienda';
 
-  const soloTienda = pedidos.filter(p => !p.metadata?.paquete);
+  const filtrados = pedidos.filter(p =>
+    (p.email || '').toLowerCase().includes(search.toLowerCase()) ||
+    (p.nombre || '').toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="adm-section">
       {msg && <div className="adm-msg" onClick={() => setMsg('')}>{msg} ×</div>}
+      <div className="adm-toolbar">
+        <input className="adm-search" placeholder="Buscar por email o nombre…" value={search} onChange={e => setSearch(e.target.value)} />
+        <span className="adm-count">{filtrados.length} pedidos</span>
+      </div>
       {loading ? <div className="adm-loading">Cargando pedidos…</div> : (
         <div className="adm-table-wrap">
           <table className="adm-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Email</th>
+                <th></th>
+                <th>Cliente</th>
                 <th>Monto</th>
                 <th>Pago</th>
-                <th>Envío</th>
                 <th>Tipo</th>
+                <th>Estado envío</th>
                 <th>Fecha</th>
               </tr>
             </thead>
             <tbody>
-              {pedidos.length === 0 && (
+              {filtrados.length === 0 && (
                 <tr><td colSpan={7} style={{ textAlign:'center', color:'#999', padding:24 }}>Sin pedidos aún</td></tr>
               )}
-              {pedidos.map(p => {
-                const estadoEnvio = ESTADOS_ENVIO.find(e => e.value === (p.estado || 'procesando')) || ESTADOS_ENVIO[0];
-                const esTienda = !p.metadata?.paquete;
+              {filtrados.map(p => {
+                const esTienda = !p.metadata?.paquete && p.metadata?.plan !== 'pro';
+                const isOpen = expanded === p.id;
                 return (
-                  <tr key={p.id}>
-                    <td><span className="adm-email">{p.id.slice(-10)}</span></td>
-                    <td><span className="adm-email">{p.email || '—'}</span></td>
-                    <td><strong>{fmt(p.amount, p.currency)}</strong></td>
-                    <td>
-                      <span style={{ display:'inline-flex', alignItems:'center', gap:5, fontSize:12 }}>
-                        <span style={{ width:8, height:8, borderRadius:'50%', background: pagoColor(p.status), display:'inline-block' }} />
-                        {p.status === 'succeeded' ? 'Pagado' : p.status}
-                      </span>
-                    </td>
-                    <td>
-                      {esTienda ? (
-                        <div style={{ display:'flex', gap:4 }}>
-                          {ESTADOS_ENVIO.map(e => (
-                            <button
-                              key={e.value}
-                              onClick={() => cambiarEstado(p.id, e.value)}
-                              disabled={updating === p.id}
-                              style={{
-                                padding: '3px 10px',
-                                fontSize: 11,
-                                fontWeight: 600,
-                                border: 'none',
-                                borderRadius: 20,
-                                cursor: updating === p.id ? 'wait' : 'pointer',
-                                fontFamily: 'inherit',
-                                background: p.estado === e.value ? e.color : '#F0EBE5',
-                                color:      p.estado === e.value ? '#fff'   : '#999',
-                                transition: 'all .15s',
-                              }}
-                            >
-                              {e.label}
-                            </button>
-                          ))}
+                  <>
+                    <tr
+                      key={p.id}
+                      onClick={() => setExpanded(isOpen ? null : p.id)}
+                      style={{ cursor:'pointer', background: isOpen ? '#FDF8F4' : '' }}
+                    >
+                      <td style={{ width:28, color:'#B08968', fontWeight:700, fontSize:16 }}>
+                        {isOpen ? '▾' : '▸'}
+                      </td>
+                      <td>
+                        <div className="adm-user-cell">
+                          <strong>{p.nombre || '—'}</strong>
+                          <span className="adm-email">{p.email || '—'}</span>
                         </div>
-                      ) : (
-                        <span style={{ fontSize:12, color:'#aaa' }}>N/A</span>
-                      )}
-                    </td>
-                    <td>{p.metadata?.paquete ? `Elementos ×${p.metadata.elementos === '-1' ? '∞ PRO' : p.metadata.elementos}` : 'Tienda'}</td>
-                    <td className="adm-date">{new Date(p.created).toLocaleDateString('es-MX')}</td>
-                  </tr>
+                      </td>
+                      <td><strong>{fmt(p.amount, p.currency)}</strong></td>
+                      <td>
+                        <span style={{ display:'inline-flex', alignItems:'center', gap:5, fontSize:12 }}>
+                          <span style={{ width:8, height:8, borderRadius:'50%', background: pagoColor(p.status), display:'inline-block' }} />
+                          {pagoLabel(p.status)}
+                        </span>
+                      </td>
+                      <td><span className="adm-badge">{tipo(p)}</span></td>
+                      <td onClick={e => e.stopPropagation()}>
+                        {esTienda ? (
+                          <div style={{ display:'flex', gap:4 }}>
+                            {ESTADOS_ENVIO.map(e => (
+                              <button
+                                key={e.value}
+                                onClick={() => cambiarEstado(p.id, e.value)}
+                                disabled={updating === p.id}
+                                style={{
+                                  padding: '3px 10px', fontSize: 11, fontWeight: 600,
+                                  border: 'none', borderRadius: 20,
+                                  cursor: updating === p.id ? 'wait' : 'pointer',
+                                  fontFamily: 'inherit',
+                                  background: p.estado === e.value ? e.color : '#F0EBE5',
+                                  color:      p.estado === e.value ? '#fff'   : '#999',
+                                  transition: 'all .15s',
+                                }}
+                              >{e.label}</button>
+                            ))}
+                          </div>
+                        ) : <span style={{ fontSize:12, color:'#aaa' }}>N/A</span>}
+                      </td>
+                      <td className="adm-date">{new Date(p.created).toLocaleDateString('es-MX')}</td>
+                    </tr>
+
+                    {isOpen && (
+                      <tr key={p.id + '-detail'} style={{ background:'#FDF8F4' }}>
+                        <td colSpan={7} style={{ padding:'0 16px 20px 44px' }}>
+                          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px, 1fr))', gap:'12px 24px', paddingTop:12 }}>
+                            {[
+                              { label:'ID Stripe', value: p.id },
+                              { label:'Email', value: p.email },
+                              { label:'Nombre', value: p.nombre },
+                              { label:'Teléfono', value: p.telefono },
+                              { label:'Dirección', value: p.direccion },
+                              { label:'Apartamento', value: p.apartamento },
+                              { label:'Ciudad', value: p.ciudad },
+                              { label:'Estado', value: p.estado_envio_dir },
+                              { label:'C.P.', value: p.cp },
+                              ...Object.entries(p.metadata || {}).map(([k, v]) => ({ label: k, value: v })),
+                            ].filter(f => f.value).map(({ label, value }) => (
+                              <div key={label}>
+                                <div style={{ fontSize:10, textTransform:'uppercase', letterSpacing:1, color:'#9E8E80', fontWeight:700, marginBottom:2 }}>{label}</div>
+                                <div style={{ fontSize:13, color:'#4A3F35', wordBreak:'break-all' }}>{value}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 );
               })}
             </tbody>
