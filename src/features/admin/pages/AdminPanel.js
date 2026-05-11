@@ -1063,6 +1063,7 @@ function Contactos() {
 const TIPO_LABELS = {
   'usuario_nuevo':          '🙋 Usuario nuevo',
   'aceite_de_regalo':       '🎁 Aceite de regalo',
+  'descuento_curso_velas':  '🕯️ Cupón $300 Velas',
   'distribuidora':          '🚀 Distribuidora',
   'distribuidora_existente':'🔄 Distribuidora (ya registrada)',
 };
@@ -1768,6 +1769,7 @@ const LISTAS_ENVIO = [
   { value: 'todos',                  label: 'Todos los leads' },
   { value: 'usuario_nuevo',          label: '🙋 Usuarios nuevos' },
   { value: 'aceite_de_regalo',       label: '🎁 Aceite de regalo' },
+  { value: 'descuento_curso_velas',  label: '🕯️ Cupón $300 Velas' },
   { value: 'distribuidora',          label: '🚀 Distribuidoras' },
   { value: 'distribuidora_existente',label: '🔄 Distribuidoras (ya registradas)' },
 ];
