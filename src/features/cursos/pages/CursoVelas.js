@@ -115,18 +115,32 @@ const GALERIA_IMGS = [
   'https://pxreruyfjpacnvhxmhlk.supabase.co/storage/v1/object/public/Imagenes/Velas7.PNG',
 ];
 
+// Kick off downloads immediately when the module loads
+const _imgCache = {};
+GALERIA_IMGS.forEach((src, i) => {
+  const img = new Image();
+  img.src = src;
+  _imgCache[i] = img;
+});
+
 function GaleriaVelas() {
   const [idx, setIdx] = React.useState(0);
-  const [loaded, setLoaded] = React.useState({});
+  const [loaded, setLoaded] = React.useState(() => {
+    const init = {};
+    GALERIA_IMGS.forEach((_, i) => { if (_imgCache[i]?.complete) init[i] = true; });
+    return init;
+  });
   const total = GALERIA_IMGS.length;
   const prev = () => setIdx(i => (i - 1 + total) % total);
   const next = () => setIdx(i => (i + 1) % total);
 
   React.useEffect(() => {
-    GALERIA_IMGS.forEach((src, i) => {
-      const img = new Image();
-      img.src = src;
-      img.onload = () => setLoaded(p => ({ ...p, [i]: true }));
+    GALERIA_IMGS.forEach((_, i) => {
+      if (_imgCache[i]?.complete) {
+        setLoaded(p => ({ ...p, [i]: true }));
+      } else {
+        _imgCache[i].onload = () => setLoaded(p => ({ ...p, [i]: true }));
+      }
     });
   }, []);
 
