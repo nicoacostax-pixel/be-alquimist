@@ -1,5 +1,6 @@
 const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
+const { sendEmail } = require('./_resend');
 
 function getSupabaseAdmin() {
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
@@ -50,8 +51,25 @@ module.exports = async function handler(req, res) {
 
         // PaymentIntent PRO confirmado → activar PRO y crear suscripción recurrente
         case 'payment_intent.succeeded': {
-          const piObj  = event.data.object;
-          const piMeta = piObj.metadata || {};
+          const piObj   = event.data.object;
+          const piMeta  = piObj.metadata || {};
+          const monto   = (piObj.amount / 100).toFixed(2);
+          const moneda  = (piObj.currency || 'mxn').toUpperCase();
+
+          // Notificación al dueño
+          try {
+            await sendEmail({
+              to: 'nico.acosta.x@gmail.com',
+              subject: `💰 Nueva compra: $${monto} ${moneda}`,
+              bloques: [
+                { type: 'h1', content: `💰 Nueva compra: $${monto} ${moneda}` },
+                { type: 'text', content: `Cliente: ${piMeta.nombre || '—'}\nCorreo: ${piMeta.email || '—'}\nMonto: $${monto} ${moneda}` },
+                { type: 'divider' },
+                { type: 'text', content: `Payment Intent: ${piObj.id}` },
+              ],
+            });
+          } catch (emailErr) { console.error('Webhook notify email error:', emailErr.message); }
+
           if (piMeta.plan === 'pro' && piMeta.userId) {
             // Activar PRO de inmediato
             await sb.from('perfiles').update({ es_pro: true }).eq('id', piMeta.userId);
