@@ -145,24 +145,24 @@ function DescuentoForm() {
   };
 
   return (
-    <div data-reveal style={{ background: '#4A3F35', padding: '52px 32px', textAlign: 'center' }}>
+    <div data-reveal style={{ background: '#F6EDE3', padding: '52px 32px', textAlign: 'center' }}>
       {!sent ? (
         <>
-          <p style={{ fontSize: 11, fontWeight: 800, color: '#C9A882', letterSpacing: 3, textTransform: 'uppercase', margin: '0 0 14px' }}>
+          <p style={{ fontSize: 11, fontWeight: 800, color: '#B08968', letterSpacing: 3, textTransform: 'uppercase', margin: '0 0 14px' }}>
             Oferta exclusiva
           </p>
-          <h2 style={{ fontSize: 28, fontWeight: 900, color: '#F5EDE3', margin: '0 0 12px', fontFamily: 'Georgia, serif', lineHeight: 1.25 }}>
+          <h2 style={{ fontSize: 28, fontWeight: 900, color: '#4A3F35', margin: '0 0 12px', fontFamily: 'Georgia, serif', lineHeight: 1.25 }}>
             Obtén $300 de descuento<br />en el Kit de Velas
           </h2>
-          <p style={{ color: '#C9B8A8', fontSize: 14, margin: '0 auto 32px', lineHeight: 1.7, maxWidth: 360 }}>
+          <p style={{ color: '#7A6A5A', fontSize: 14, margin: '0 auto 32px', lineHeight: 1.7, maxWidth: 360 }}>
             Deja tu correo y te enviamos el cupón al instante. Sin spam, solo tu descuento.
           </p>
           <form onSubmit={enviar} style={{ maxWidth: 360, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{
-              display: 'flex', border: '1.5px solid rgba(255,255,255,0.15)',
-              borderRadius: 10, overflow: 'hidden', background: 'rgba(255,255,255,0.07)',
+              display: 'flex', border: '1.5px solid #B08968',
+              borderRadius: 10, overflow: 'hidden', background: '#fff',
             }}>
-              <span style={{ padding: '0 12px', display: 'flex', alignItems: 'center', color: '#C9B8A8', fontSize: 13, flexShrink: 0 }}>
+              <span style={{ padding: '0 12px', display: 'flex', alignItems: 'center', color: '#7A6A5A', fontSize: 13, flexShrink: 0 }}>
                 🇲🇽 +52
               </span>
               <input
@@ -172,7 +172,7 @@ function DescuentoForm() {
                 onChange={e => setTelefono(e.target.value)}
                 style={{
                   flex: 1, background: 'transparent', border: 'none',
-                  padding: '14px 12px 14px 0', fontSize: 14, color: '#F5EDE3',
+                  padding: '14px 12px 14px 0', fontSize: 14, color: '#4A3F35',
                   outline: 'none', fontFamily: 'inherit',
                 }}
               />
@@ -184,8 +184,8 @@ function DescuentoForm() {
               onChange={e => setEmail(e.target.value)}
               required
               style={{
-                background: 'rgba(255,255,255,0.07)', border: '1.5px solid rgba(255,255,255,0.15)',
-                borderRadius: 10, padding: '14px 16px', fontSize: 14, color: '#F5EDE3',
+                background: '#fff', border: '1.5px solid #B08968',
+                borderRadius: 10, padding: '14px 16px', fontSize: 14, color: '#4A3F35',
                 outline: 'none', fontFamily: 'inherit',
               }}
             />
@@ -201,10 +201,10 @@ function DescuentoForm() {
       ) : (
         <>
           <div style={{ fontSize: 52, marginBottom: 16 }}>🎉</div>
-          <h2 style={{ fontSize: 24, fontWeight: 900, color: '#F5EDE3', margin: '0 0 10px', fontFamily: 'Georgia, serif' }}>
+          <h2 style={{ fontSize: 24, fontWeight: 900, color: '#4A3F35', margin: '0 0 10px', fontFamily: 'Georgia, serif' }}>
             ¡Tu descuento está listo!
           </h2>
-          <p style={{ color: '#C9B8A8', fontSize: 14, margin: '0 0 32px' }}>
+          <p style={{ color: '#7A6A5A', fontSize: 14, margin: '0 0 32px' }}>
             Úsalo al inscribirte al Kit de Velas de Soya
           </p>
           <div style={{
@@ -219,7 +219,7 @@ function DescuentoForm() {
               Válido para el <strong>Kit de Velas de Soya</strong>
             </p>
           </div>
-          <p style={{ color: '#C9B8A8', fontSize: 13, marginTop: 20 }}>
+          <p style={{ color: '#7A6A5A', fontSize: 13, marginTop: 20 }}>
             También te lo enviamos a tu correo 📩
           </p>
         </>
