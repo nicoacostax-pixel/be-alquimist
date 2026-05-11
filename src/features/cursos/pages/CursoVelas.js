@@ -316,6 +316,37 @@ export default function CursoVelas() {
 
         </div>
 
+        {/* GALERÍA DE RESULTADOS */}
+        <div data-reveal style={{ padding: '48px 24px', background: '#fff', textAlign: 'center' }}>
+          <p style={{ fontSize: 12, fontWeight: 800, color: '#B08968', letterSpacing: 3, textTransform: 'uppercase', margin: '0 0 8px' }}>Resultados reales</p>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: '#4A3F35', margin: '0 0 6px', fontFamily: 'Georgia, serif' }}>
+            Esto es lo que aprenderás a crear
+          </h2>
+          <p style={{ color: '#7A6A5A', fontSize: 14, margin: '0 0 28px' }}>Velas artesanales hechas por estudiantes del curso</p>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: 10,
+            maxWidth: 600,
+            margin: '0 auto',
+          }}>
+            {['/Velas4.PNG', '/Velas5.PNG', '/Velas6.PNG', '/Velas7.PNG'].map((src, i) => (
+              <div key={i} style={{
+                borderRadius: 16,
+                overflow: 'hidden',
+                aspectRatio: '3/4',
+                boxShadow: '0 4px 16px rgba(74,63,53,0.12)',
+              }}>
+                <img
+                  src={src}
+                  alt={`Vela artesanal ${i + 1}`}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* SECCIÓN PRECIO */}
         <div id="precio" data-reveal>
           <div style={{ background: '#B08968', padding: '22px 32px', textAlign: 'center' }}>
