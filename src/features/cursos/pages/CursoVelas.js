@@ -104,7 +104,7 @@ const NOTA = (
 
 function scrollToPrecio(e) {
   e.preventDefault();
-  document.getElementById('precio')?.scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('descuento-form')?.scrollIntoView({ behavior: 'smooth' });
 }
 
 const GALERIA_IMGS = [
@@ -145,7 +145,7 @@ function DescuentoForm() {
   };
 
   return (
-    <div data-reveal style={{ background: '#F6EDE3', padding: '52px 32px', textAlign: 'center' }}>
+    <div id="descuento-form" data-reveal style={{ background: '#F6EDE3', padding: '52px 32px', textAlign: 'center' }}>
       {!sent ? (
         <>
           <p style={{ fontSize: 11, fontWeight: 800, color: '#B08968', letterSpacing: 3, textTransform: 'uppercase', margin: '0 0 14px' }}>
