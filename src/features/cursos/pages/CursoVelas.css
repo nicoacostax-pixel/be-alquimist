@@ -40,8 +40,7 @@
   width: 100%;
   border-radius: 12px;
   display: block;
-  object-fit: cover;
-  max-height: 340px;
+  height: auto;
 }
 
 .cv-info { padding: 28px 32px 8px; }
@@ -196,7 +195,7 @@
     padding: 0;
     flex: 0 0 52%;
   }
-  .cv-img-wrap img { max-height: 460px; }
+  .cv-img-wrap img { height: auto; }
 
   .cv-info {
     padding: 0;
