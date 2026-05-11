@@ -138,6 +138,7 @@ function DescuentoForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ telefono, email, tipo: 'descuento_curso_velas' }),
       });
+      if (window.fbq) window.fbq('track', 'Lead', { content_name: 'Descuento Curso Velas' });
       setSent(true);
     } catch {}
     setSending(false);
