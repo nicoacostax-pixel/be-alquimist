@@ -390,7 +390,7 @@ export default function CursoVelas() {
 
         {/* CTA móvil (oculto en desktop via CSS) */}
         <div className="cv-cta-wrap">
-          <a href="#precio" onClick={scrollToPrecio} style={{
+          <a href="#descuento-form" onClick={scrollToPrecio} style={{
             display: 'inline-block', background: '#B08968', color: '#fff',
             fontWeight: 700, fontSize: 14, padding: '14px 44px', borderRadius: 30,
             textDecoration: 'none', letterSpacing: 2, textTransform: 'uppercase',
@@ -398,6 +398,9 @@ export default function CursoVelas() {
             Inscríbete ahora
           </a>
         </div>
+
+        {/* FORMULARIO DESCUENTO — segunda sección */}
+        <DescuentoForm />
 
         {/* INFORMACIÓN DEL CURSO */}
         <div data-reveal>
@@ -514,9 +517,6 @@ export default function CursoVelas() {
 
         {/* GALERÍA DE RESULTADOS */}
         <GaleriaVelas />
-
-        {/* FORMULARIO DESCUENTO */}
-        <DescuentoForm />
 
         {/* SECCIÓN PRECIO */}
         <div id="precio" data-reveal>
