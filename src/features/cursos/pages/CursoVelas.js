@@ -108,6 +108,61 @@ function scrollToPrecio(e) {
   document.getElementById('precio')?.scrollIntoView({ behavior: 'smooth' });
 }
 
+const GALERIA_IMGS = ['/velas4.png', '/velas5.png', '/velas6.png', '/velas7.png'];
+
+function GaleriaVelas() {
+  const [idx, setIdx] = React.useState(0);
+  const total = GALERIA_IMGS.length;
+  const prev = () => setIdx(i => (i - 1 + total) % total);
+  const next = () => setIdx(i => (i + 1) % total);
+
+  return (
+    <div data-reveal style={{ padding: '48px 0', background: '#fff', textAlign: 'center' }}>
+      <p style={{ fontSize: 12, fontWeight: 800, color: '#B08968', letterSpacing: 3, textTransform: 'uppercase', margin: '0 0 8px' }}>Resultados reales</p>
+      <h2 style={{ fontSize: 26, fontWeight: 900, color: '#4A3F35', margin: '0 0 6px', fontFamily: 'Georgia, serif', padding: '0 24px' }}>
+        Esto es lo que aprenderás a crear
+      </h2>
+      <p style={{ color: '#7A6A5A', fontSize: 14, margin: '0 0 28px' }}>Velas artesanales hechas por estudiantes del curso</p>
+
+      <div style={{ position: 'relative', maxWidth: 340, margin: '0 auto' }}>
+        {/* Imagen activa */}
+        <div style={{ borderRadius: 20, overflow: 'hidden', aspectRatio: '3/4', boxShadow: '0 8px 32px rgba(74,63,53,0.18)' }}>
+          <img
+            key={idx}
+            src={GALERIA_IMGS[idx]}
+            alt={`Vela artesanal ${idx + 1}`}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'opacity 0.3s' }}
+          />
+        </div>
+
+        {/* Botones prev/next */}
+        {[{ fn: prev, label: '‹', side: 'left' }, { fn: next, label: '›', side: 'right' }].map(({ fn, label, side }) => (
+          <button key={side} onClick={fn} style={{
+            position: 'absolute', top: '50%', [side]: -16, transform: 'translateY(-50%)',
+            width: 40, height: 40, borderRadius: '50%', border: 'none',
+            background: '#fff', boxShadow: '0 2px 12px rgba(74,63,53,0.2)',
+            fontSize: 22, fontWeight: 700, color: '#4A3F35', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'inherit',
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {/* Dots */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
+        {GALERIA_IMGS.map((_, i) => (
+          <button key={i} onClick={() => setIdx(i)} style={{
+            width: i === idx ? 20 : 8, height: 8,
+            borderRadius: 4, border: 'none', cursor: 'pointer',
+            background: i === idx ? '#B08968' : '#D0C8BF',
+            transition: 'all 0.25s', padding: 0,
+          }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function CursoVelas() {
   const { d, h, m, s } = useCountdown(DEADLINE);
   const [openModulo, setOpenModulo] = useState(null);
@@ -317,35 +372,7 @@ export default function CursoVelas() {
         </div>
 
         {/* GALERÍA DE RESULTADOS */}
-        <div data-reveal style={{ padding: '48px 24px', background: '#fff', textAlign: 'center' }}>
-          <p style={{ fontSize: 12, fontWeight: 800, color: '#B08968', letterSpacing: 3, textTransform: 'uppercase', margin: '0 0 8px' }}>Resultados reales</p>
-          <h2 style={{ fontSize: 26, fontWeight: 900, color: '#4A3F35', margin: '0 0 6px', fontFamily: 'Georgia, serif' }}>
-            Esto es lo que aprenderás a crear
-          </h2>
-          <p style={{ color: '#7A6A5A', fontSize: 14, margin: '0 0 28px' }}>Velas artesanales hechas por estudiantes del curso</p>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: 10,
-            maxWidth: 600,
-            margin: '0 auto',
-          }}>
-            {['/Velas4.PNG', '/Velas5.PNG', '/Velas6.PNG', '/Velas7.PNG'].map((src, i) => (
-              <div key={i} style={{
-                borderRadius: 16,
-                overflow: 'hidden',
-                aspectRatio: '3/4',
-                boxShadow: '0 4px 16px rgba(74,63,53,0.12)',
-              }}>
-                <img
-                  src={src}
-                  alt={`Vela artesanal ${i + 1}`}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        <GaleriaVelas />
 
         {/* SECCIÓN PRECIO */}
         <div id="precio" data-reveal>
