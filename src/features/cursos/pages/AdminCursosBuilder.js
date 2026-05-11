@@ -16,16 +16,19 @@ async function api(action, data, token) {
 // ── Portada uploader ──────────────────────────────────────────────────────────
 
 function PortadaUploader({ value, onChange }) {
-  const fileRef    = useRef();
+  const fileRef     = useRef();
   const [uploading, setUploading] = useState(false);
+  const [errMsg,    setErrMsg]    = useState('');
 
   const handleFile = async (file) => {
     if (!file) return;
-    setUploading(true);
+    setUploading(true); setErrMsg('');
     const ext  = file.name.split('.').pop().toLowerCase();
     const path = `portadas/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from('recursos').upload(path, file, { upsert: true });
-    if (!error) {
+    if (error) {
+      setErrMsg(`Error: ${error.message}`);
+    } else {
       onChange(`${SUPABASE_URL}/storage/v1/object/public/recursos/${path}`);
     }
     setUploading(false);
@@ -40,6 +43,7 @@ function PortadaUploader({ value, onChange }) {
         style={{ display: 'none' }}
         onChange={e => handleFile(e.target.files[0])}
       />
+      {errMsg && <p style={{ color: '#c0392b', fontSize: 12, margin: '0 0 8px' }}>{errMsg}</p>}
       {value ? (
         <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
           <img
