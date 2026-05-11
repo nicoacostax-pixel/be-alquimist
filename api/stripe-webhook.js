@@ -56,6 +56,14 @@ module.exports = async function handler(req, res) {
           const monto   = (piObj.amount / 100).toFixed(2);
           const moneda  = (piObj.currency || 'mxn').toUpperCase();
 
+          // Eliminar de carrito abandonado al completar compra
+          if (sb && piMeta.email) {
+            await sb.from('leads')
+              .delete()
+              .eq('email', piMeta.email)
+              .eq('tipo', 'carrito_abandonado');
+          }
+
           // Confirmación al cliente + BCC a Nico
           if (piMeta.email) {
             try {
