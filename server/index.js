@@ -34,6 +34,7 @@ const API_ROUTES = [
   'distribuidoras',
   'send-welcome-email',
   'carrito-abandonado',
+  'recordatorios',
 ];
 
 for (const name of API_ROUTES) {
