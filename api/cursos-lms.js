@@ -47,9 +47,18 @@ module.exports = async function handler(req, res) {
     if (!isAdmin) return res.status(403).json({ error: 'Acceso denegado' });
 
     if (action === 'admin_listCursos') {
-      const { data: cursos, error } = await db.from('cursos').select('*').order('created_at', { ascending: false });
+      const { data: cursos, error } = await db.from('cursos').select('*').order('orden').order('created_at', { ascending: false });
       if (error) return res.status(500).json({ error: error.message });
       return res.json({ cursos });
+    }
+
+    if (action === 'admin_reorderCursos') {
+      const { orden } = data; // array of { id, orden }
+      const updates = orden.map(({ id, orden: o }) =>
+        db.from('cursos').update({ orden: o }).eq('id', id)
+      );
+      await Promise.all(updates);
+      return res.json({ ok: true });
     }
 
     if (action === 'admin_getCurso') {

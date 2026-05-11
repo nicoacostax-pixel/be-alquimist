@@ -514,6 +514,17 @@ export default function AdminCursosBuilder() {
     setCursos(p => p.filter(c => c.id !== id));
   };
 
+  const moveCurso = async (idx, dir) => {
+    const arr  = [...cursos];
+    const j    = idx + dir;
+    if (j < 0 || j >= arr.length) return;
+    [arr[idx], arr[j]] = [arr[j], arr[idx]];
+    setCursos(arr);
+    await api('admin_reorderCursos', {
+      orden: arr.map((c, i) => ({ id: c.id, orden: i })),
+    }, token);
+  };
+
   if (selectedId) {
     return (
       <div style={{ background: '#F3EFE8', minHeight: '100vh', padding: '0 20px' }}>
@@ -584,8 +595,25 @@ export default function AdminCursosBuilder() {
             <p style={{ color: '#7A6A5A', fontSize: 15, margin: '0 0 20px' }}>No hay cursos todavía.</p>
             <button onClick={() => setShowNewForm(true)} style={S.btnPrimary}>+ Crear primer curso</button>
           </div>
-        ) : cursos.map(c => (
+        ) : cursos.map((c, idx) => (
           <div key={c.id} style={{ background: '#fff', borderRadius: 14, padding: '18px 24px', border: '1px solid #EDE0D4', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+
+            {/* Orden buttons */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
+              <button
+                onClick={() => moveCurso(idx, -1)}
+                disabled={idx === 0}
+                style={{ ...S.btnSm, padding: '2px 8px', fontSize: 16, opacity: idx === 0 ? 0.25 : 1 }}
+                title="Subir"
+              >↑</button>
+              <button
+                onClick={() => moveCurso(idx, 1)}
+                disabled={idx === cursos.length - 1}
+                style={{ ...S.btnSm, padding: '2px 8px', fontSize: 16, opacity: idx === cursos.length - 1 ? 0.25 : 1 }}
+                title="Bajar"
+              >↓</button>
+            </div>
+
             {c.imagen_url && (
               <img src={c.imagen_url} alt="" style={{ width: 64, height: 44, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
             )}

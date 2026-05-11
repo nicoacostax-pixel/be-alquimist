@@ -28,6 +28,7 @@ export default function CursosComunidad() {
         .from('cursos')
         .select('id, slug, titulo, descripcion, imagen_url')
         .eq('publicado', true)
+        .order('orden')
         .order('created_at', { ascending: false });
 
       const lista = rows || [];
