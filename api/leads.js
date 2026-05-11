@@ -6,6 +6,18 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+const BLOQUES_CUPON_VELAS = [
+  { type: 'h1', content: '🕯️ Tu cupón de $300 de descuento' },
+  { type: 'text', content: 'Gracias por tu interés en el Curso de Velas de Soya de Be Alquimist. Aquí está tu cupón exclusivo:' },
+  { type: 'divider' },
+  { type: 'h2', content: 'Tu código de descuento:' },
+  { type: 'text', content: '300DES' },
+  { type: 'text', content: 'Aplica $300 de descuento al adquirir el Kit de Velas de Soya. Úsalo al momento de hacer tu inscripción.' },
+  { type: 'button', content: 'Inscribirme ahora', url: 'https://bealquimist.com/cursos/velas-de-soya', color: '#B08968' },
+  { type: 'divider' },
+  { type: 'text', content: 'Con cariño,\nEl equipo de Be Alquimist 🕯️' },
+];
+
 const BLOQUES_ACEITE_REGALO = [
   {
     type: 'h1',
@@ -61,9 +73,17 @@ module.exports = async function handler(req, res) {
         subject: '🌿 Tu aceite esencial gratuito te está esperando',
         bloques: BLOQUES_ACEITE_REGALO,
       });
-    } catch (_) {
-      // No bloquear el registro si el email falla
-    }
+    } catch (_) {}
+  }
+
+  if (tipo === 'descuento_curso_velas') {
+    try {
+      await sendEmail({
+        to: email,
+        subject: '🕯️ Tu cupón de $300 para el Curso de Velas de Soya',
+        bloques: BLOQUES_CUPON_VELAS,
+      });
+    } catch (_) {}
   }
 
   res.json({ ok: true });
