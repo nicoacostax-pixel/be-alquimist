@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './CursoVelas.css';
-import CursoVelasPopup from './CursoVelasPopup';
 import { useCart } from '../../../shared/context/CartContext';
 
 const KIT_PRODUCTO = { id: 'kit-de-velas-de-soya', nombre: 'Kit de Velas de Soya', imagen_url: '/KIT.jpg' };
@@ -123,6 +122,111 @@ GALERIA_IMGS.forEach((src, i) => {
   _imgCache[i] = img;
 });
 
+function DescuentoForm() {
+  const [telefono, setTelefono] = React.useState('');
+  const [email,    setEmail]    = React.useState('');
+  const [sending,  setSending]  = React.useState(false);
+  const [sent,     setSent]     = React.useState(false);
+
+  const enviar = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+    setSending(true);
+    try {
+      await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telefono, email, tipo: 'descuento_curso_velas' }),
+      });
+      setSent(true);
+    } catch {}
+    setSending(false);
+  };
+
+  return (
+    <div data-reveal style={{ background: '#4A3F35', padding: '52px 32px', textAlign: 'center' }}>
+      {!sent ? (
+        <>
+          <p style={{ fontSize: 11, fontWeight: 800, color: '#C9A882', letterSpacing: 3, textTransform: 'uppercase', margin: '0 0 14px' }}>
+            Oferta exclusiva
+          </p>
+          <h2 style={{ fontSize: 28, fontWeight: 900, color: '#F5EDE3', margin: '0 0 12px', fontFamily: 'Georgia, serif', lineHeight: 1.25 }}>
+            Obtén $300 de descuento<br />en el Kit de Velas
+          </h2>
+          <p style={{ color: '#C9B8A8', fontSize: 14, margin: '0 auto 32px', lineHeight: 1.7, maxWidth: 360 }}>
+            Deja tu correo y te enviamos el cupón al instante. Sin spam, solo tu descuento.
+          </p>
+          <form onSubmit={enviar} style={{ maxWidth: 360, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{
+              display: 'flex', border: '1.5px solid rgba(255,255,255,0.15)',
+              borderRadius: 10, overflow: 'hidden', background: 'rgba(255,255,255,0.07)',
+            }}>
+              <span style={{ padding: '0 12px', display: 'flex', alignItems: 'center', color: '#C9B8A8', fontSize: 13, flexShrink: 0 }}>
+                🇲🇽 +52
+              </span>
+              <input
+                type="tel"
+                placeholder="Número de teléfono"
+                value={telefono}
+                onChange={e => setTelefono(e.target.value)}
+                style={{
+                  flex: 1, background: 'transparent', border: 'none',
+                  padding: '14px 12px 14px 0', fontSize: 14, color: '#F5EDE3',
+                  outline: 'none', fontFamily: 'inherit',
+                }}
+              />
+            </div>
+            <input
+              type="email"
+              placeholder="Correo electrónico *"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              style={{
+                background: 'rgba(255,255,255,0.07)', border: '1.5px solid rgba(255,255,255,0.15)',
+                borderRadius: 10, padding: '14px 16px', fontSize: 14, color: '#F5EDE3',
+                outline: 'none', fontFamily: 'inherit',
+              }}
+            />
+            <button type="submit" disabled={sending} style={{
+              background: '#B08968', color: '#fff', border: 'none', borderRadius: 10,
+              padding: '15px', fontSize: 15, fontWeight: 800, cursor: 'pointer',
+              fontFamily: 'inherit', letterSpacing: 0.5, marginTop: 4,
+            }}>
+              {sending ? 'Enviando…' : 'RECLAMAR MI DESCUENTO'}
+            </button>
+          </form>
+        </>
+      ) : (
+        <>
+          <div style={{ fontSize: 52, marginBottom: 16 }}>🎉</div>
+          <h2 style={{ fontSize: 24, fontWeight: 900, color: '#F5EDE3', margin: '0 0 10px', fontFamily: 'Georgia, serif' }}>
+            ¡Tu descuento está listo!
+          </h2>
+          <p style={{ color: '#C9B8A8', fontSize: 14, margin: '0 0 32px' }}>
+            Úsalo al inscribirte al Kit de Velas de Soya
+          </p>
+          <div style={{
+            background: '#F3EFE8', border: '2px dashed #B08968', borderRadius: 16,
+            padding: '28px 40px', display: 'inline-block',
+          }}>
+            <p style={{ fontSize: 11, color: '#7A6A5A', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: 1.5 }}>
+              Tu cupón de descuento
+            </p>
+            <p style={{ fontSize: 38, fontWeight: 900, color: '#4A3F35', margin: '0 0 8px', letterSpacing: 5 }}>300DES</p>
+            <p style={{ fontSize: 12, color: '#B08968', margin: 0 }}>
+              Válido para el <strong>Kit de Velas de Soya</strong>
+            </p>
+          </div>
+          <p style={{ color: '#C9B8A8', fontSize: 13, marginTop: 20 }}>
+            También te lo enviamos a tu correo 📩
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
+
 function GaleriaVelas() {
   const [idx, setIdx] = React.useState(0);
   const [loaded, setLoaded] = React.useState(() => {
@@ -225,8 +329,6 @@ export default function CursoVelas() {
 
   return (
     <div className="cv-page">
-      <CursoVelasPopup />
-
       {/* NAV */}
       <nav className="cv-nav">
         <Link to="/" style={{ color: '#B08968', fontWeight: 700, textDecoration: 'none', fontSize: 15 }}>
@@ -411,6 +513,9 @@ export default function CursoVelas() {
 
         {/* GALERÍA DE RESULTADOS */}
         <GaleriaVelas />
+
+        {/* FORMULARIO DESCUENTO */}
+        <DescuentoForm />
 
         {/* SECCIÓN PRECIO */}
         <div id="precio" data-reveal>
