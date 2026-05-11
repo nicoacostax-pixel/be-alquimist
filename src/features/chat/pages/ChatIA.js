@@ -591,6 +591,7 @@ function ChatIA() {
 
   const handleEnviar = (e) => {
     e.preventDefault();
+    if (!isLoggedIn) { navigate('/login'); return; }
     if (!input.trim() && !pendingImage) return;
     const text = input;
     const img = pendingImage;
