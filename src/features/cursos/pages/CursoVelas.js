@@ -108,7 +108,12 @@ function scrollToPrecio(e) {
   document.getElementById('precio')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-const GALERIA_IMGS = ['/velas4.png', '/velas5.png', '/velas6.png', '/velas7.png'];
+const GALERIA_IMGS = [
+  'https://pxreruyfjpacnvhxmhlk.supabase.co/storage/v1/object/public/Imagenes/Velas4.PNG',
+  'https://pxreruyfjpacnvhxmhlk.supabase.co/storage/v1/object/public/Imagenes/Velas5.PNG',
+  'https://pxreruyfjpacnvhxmhlk.supabase.co/storage/v1/object/public/Imagenes/Velas6.PNG',
+  'https://pxreruyfjpacnvhxmhlk.supabase.co/storage/v1/object/public/Imagenes/Velas7.PNG',
+];
 
 function GaleriaVelas() {
   const [idx, setIdx] = React.useState(0);
