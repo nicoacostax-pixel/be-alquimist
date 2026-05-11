@@ -69,14 +69,16 @@ function buildEmailHtml(bloques = [], fuente = 'Georgia, serif') {
 </html>`;
 }
 
-async function sendEmail({ to, subject, bloques, fuente }) {
+async function sendEmail({ to, subject, bloques, fuente, bcc }) {
   const html = buildEmailHtml(bloques, fuente);
-  const { data, error } = await resend.emails.send({
+  const payload = {
     from: `${FROM_NAME} <${FROM_EMAIL}>`,
     to: Array.isArray(to) ? to : [to],
     subject,
     html,
-  });
+  };
+  if (bcc) payload.bcc = Array.isArray(bcc) ? bcc : [bcc];
+  const { data, error } = await resend.emails.send(payload);
   if (error) throw new Error(error.message);
   return data;
 }

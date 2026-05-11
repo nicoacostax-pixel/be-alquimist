@@ -56,19 +56,28 @@ module.exports = async function handler(req, res) {
           const monto   = (piObj.amount / 100).toFixed(2);
           const moneda  = (piObj.currency || 'mxn').toUpperCase();
 
-          // Notificación al dueño
-          try {
-            await sendEmail({
-              to: 'nico.acosta.x@gmail.com',
-              subject: `💰 Nueva compra: $${monto} ${moneda}`,
-              bloques: [
-                { type: 'h1', content: `💰 Nueva compra: $${monto} ${moneda}` },
-                { type: 'text', content: `Cliente: ${piMeta.nombre || '—'}\nCorreo: ${piMeta.email || '—'}\nMonto: $${monto} ${moneda}` },
-                { type: 'divider' },
-                { type: 'text', content: `Payment Intent: ${piObj.id}` },
-              ],
-            });
-          } catch (emailErr) { console.error('Webhook notify email error:', emailErr.message); }
+          // Confirmación al cliente + BCC a Nico
+          if (piMeta.email) {
+            try {
+              await sendEmail({
+                to: piMeta.email,
+                bcc: 'nico.acosta.x@gmail.com',
+                subject: '✅ Confirmación de tu compra en Be Alquimist',
+                bloques: [
+                  { type: 'h1', content: `¡Gracias por tu compra, ${piMeta.nombre || ''}! 🕯️` },
+                  { type: 'text', content: `Hemos recibido tu pago correctamente. Aquí están los detalles de tu pedido:` },
+                  { type: 'divider' },
+                  { type: 'h2', content: 'Resumen del pedido' },
+                  { type: 'text', content: `Monto pagado: $${monto} ${moneda}\nNombre: ${piMeta.nombre || '—'}\nCorreo: ${piMeta.email}` },
+                  { type: 'divider' },
+                  { type: 'text', content: 'En breve recibirás más información sobre tu pedido. Si tienes alguna duda, responde este correo o contáctanos por WhatsApp.' },
+                  { type: 'button', content: 'Ir a Be Alquimist', url: 'https://bealquimist.com', color: '#B08968' },
+                  { type: 'text', content: 'Con cariño,\nEl equipo de Be Alquimist 🌿' },
+                ],
+              });
+              console.log('[webhook] confirmación enviada a:', piMeta.email);
+            } catch (emailErr) { console.error('Webhook confirm email error:', emailErr.message); }
+          }
 
           if (piMeta.plan === 'pro' && piMeta.userId) {
             // Activar PRO de inmediato
