@@ -631,7 +631,7 @@ export default function CursoVelas() {
           </div>
 
           <div style={{ textAlign: 'center', padding: '16px 32px 56px' }}>
-            <a href="https://wa.me/524921291547?text=Quiero%20inscribirme%20al%20Curso%20Velas%20de%20Soya" target="_blank" rel="noreferrer"
+            <a href="#precio" onClick={scrollToPrecio}
               style={{
                 display: 'inline-block', background: '#B08968', color: '#fff',
                 fontWeight: 700, fontSize: 14, padding: '14px 48px', borderRadius: 30,
