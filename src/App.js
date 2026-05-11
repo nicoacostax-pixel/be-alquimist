@@ -28,6 +28,8 @@ import Distribuidoras from './features/distribuidoras/pages/Distribuidoras';
 import DistribuidorasGracias from './features/distribuidoras/pages/DistribuidorasGracias';
 import CursoVelas from './features/cursos/pages/CursoVelas';
 import CursoVelasCheckout from './features/cursos/pages/CursoVelasCheckout';
+import CursoPlayer from './features/cursos/pages/CursoPlayer';
+import AdminCursosBuilder from './features/cursos/pages/AdminCursosBuilder';
 
 // Importaciones de Comunidad
 import ComunidadLayout from './features/comunidad/components/ComunidadLayout';
@@ -89,6 +91,8 @@ function App() {
           <Route path="/cursos" element={<Cursos />} />
           <Route path="/cursos/velas-de-soya" element={<CursoVelas />} />
           <Route path="/cursos/velas-de-soya/checkout" element={<CursoVelasCheckout />} />
+          <Route path="/cursos/:slug/aprender" element={<CursoPlayer />} />
+          <Route path="/admin/cursos" element={<AdminCursosBuilder />} />
           <Route path="/biblioteca" element={<Biblioteca />} />
           <Route path="/politicas-de-compra" element={<PoliticasDeCompra />} />
           <Route path="/privacidad"           element={<Privacidad />} />

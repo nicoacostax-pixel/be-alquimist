@@ -35,6 +35,7 @@ const API_ROUTES = [
   'send-welcome-email',
   'carrito-abandonado',
   'recordatorios',
+  'cursos-lms',
 ];
 
 for (const name of API_ROUTES) {
