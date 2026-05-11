@@ -73,7 +73,7 @@ module.exports = async function handler(req, res) {
         subject: '🌿 Tu aceite esencial gratuito te está esperando',
         bloques: BLOQUES_ACEITE_REGALO,
       });
-    } catch (_) {}
+    } catch (err) { console.error('[leads] aceite email error:', err.message); }
   }
 
   if (tipo === 'descuento_curso_velas') {
@@ -83,7 +83,8 @@ module.exports = async function handler(req, res) {
         subject: '🕯️ Tu cupón de $300 para el Curso de Velas de Soya',
         bloques: BLOQUES_CUPON_VELAS,
       });
-    } catch (_) {}
+      console.log('[leads] cupón enviado a:', email);
+    } catch (err) { console.error('[leads] cupón email error:', err.message); }
   }
 
   res.json({ ok: true });
