@@ -113,43 +113,6 @@ export default function CursoVelasCheckout() {
           <p style={{ fontWeight: 900, fontSize: 22, color: '#B08968', margin: 0 }}>$200 MXN</p>
         </div>
 
-        {/* Upsell PRO */}
-        <div style={{
-          background: 'linear-gradient(135deg, #4A3F35 0%, #6B5B4E 100%)',
-          borderRadius: 14, padding: '18px 22px', marginBottom: 20,
-          color: '#fff', position: 'relative', overflow: 'hidden',
-        }}>
-          <div style={{ position:'absolute', top:-16, right:-16, fontSize:64, opacity:0.08, lineHeight:1 }}>⚗️</div>
-          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
-            <span style={{ background:'#B08968', color:'#fff', fontSize:10, fontWeight:800, letterSpacing:2, padding:'3px 10px', borderRadius:20, textTransform:'uppercase' }}>PRO</span>
-            <span style={{ fontSize:13, fontWeight:700, color:'#F5EDE3' }}>$149/mes · Todo incluido</span>
-          </div>
-          <ul style={{ margin:'0 0 14px', padding:0, listStyle:'none', display:'flex', flexDirection:'column', gap:7 }}>
-            {[
-              ['⚗️', 'Recetas ilimitadas en la IA'],
-              ['📚', 'Acceso a todos los cursos (incluido éste)'],
-              ['🚚', 'Envíos gratis en todos tus pedidos'],
-            ].map(([icon, text]) => (
-              <li key={text} style={{ display:'flex', gap:8, alignItems:'center', fontSize:13, color:'#F5EDE3' }}>
-                <span style={{ flexShrink:0 }}>{icon}</span> {text}
-              </li>
-            ))}
-          </ul>
-          <a
-            href="/pro"
-            style={{
-              display:'block', textAlign:'center', background:'#B08968',
-              color:'#fff', fontWeight:800, fontSize:14, padding:'11px',
-              borderRadius:10, textDecoration:'none',
-            }}
-          >
-            Quiero ser Alquimista PRO →
-          </a>
-          <p style={{ textAlign:'center', fontSize:11, color:'#A89080', margin:'8px 0 0' }}>
-            Sin contratos · Cancela cuando quieras
-          </p>
-        </div>
-
         {/* Card formulario */}
         <div style={{ background: '#fff', borderRadius: 14, padding: '28px 24px', border: '1px solid #EDE0D4' }}>
 

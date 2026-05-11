@@ -22,57 +22,6 @@ function fmt(v) { return `$${Number(v || 0).toFixed(2)}`; }
 
 const CUPONES = { '300DES': 300 };
 
-function ProUpsell() {
-  return (
-    <div style={{
-      marginTop: 20,
-      background: 'linear-gradient(135deg, #4A3F35 0%, #6B5B4E 100%)',
-      borderRadius: 14,
-      padding: '20px 22px',
-      color: '#fff',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      <div style={{ position:'absolute', top:-18, right:-18, fontSize:72, opacity:0.08, lineHeight:1 }}>⚗️</div>
-      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:12 }}>
-        <span style={{
-          background:'#B08968', color:'#fff', fontSize:10, fontWeight:800,
-          letterSpacing:2, padding:'3px 10px', borderRadius:20, textTransform:'uppercase',
-        }}>PRO</span>
-        <span style={{ fontSize:13, fontWeight:700, color:'#F5EDE3' }}>Alquimista PRO — $149/mes</span>
-      </div>
-      <ul style={{ margin:'0 0 16px', padding:0, listStyle:'none', display:'flex', flexDirection:'column', gap:8 }}>
-        {[
-          ['⚗️', 'Recetas ilimitadas', 'Formula sin límites, sin esperar 24 h'],
-          ['📚', 'Acceso a todos los cursos', 'Velas, cosmética avanzada y más'],
-          ['🚚', 'Envíos gratis todo el mes', 'En cada pedido en Be Alquimist'],
-        ].map(([icon, title, desc]) => (
-          <li key={title} style={{ display:'flex', gap:10, alignItems:'flex-start' }}>
-            <span style={{ fontSize:16, flexShrink:0, marginTop:1 }}>{icon}</span>
-            <div>
-              <div style={{ fontSize:13, fontWeight:700, color:'#F5EDE3', lineHeight:1.3 }}>{title}</div>
-              <div style={{ fontSize:11, color:'#C9B8A8', lineHeight:1.4 }}>{desc}</div>
-            </div>
-          </li>
-        ))}
-      </ul>
-      <a
-        href="/pro"
-        style={{
-          display:'block', textAlign:'center', background:'#B08968',
-          color:'#fff', fontWeight:800, fontSize:14, padding:'12px',
-          borderRadius:10, textDecoration:'none', letterSpacing:0.5,
-        }}
-      >
-        Quiero ser Alquimista PRO →
-      </a>
-      <p style={{ textAlign:'center', fontSize:11, color:'#A89080', margin:'10px 0 0' }}>
-        Sin contratos · Cancela cuando quieras
-      </p>
-    </div>
-  );
-}
-
 function OrderSummary({ cart, cartSubtotal, shipping, total, couponDiscount }) {
   return (
     <>
@@ -444,7 +393,6 @@ export default function Checkout() {
         <OrderSummary cart={cart} cartSubtotal={cartSubtotal}
           shipping={shipping} total={total}
           couponDiscount={couponDiscount} />
-        {!esPro && <ProUpsell />}
       </aside>
     </div>
   );
