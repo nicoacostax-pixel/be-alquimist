@@ -117,9 +117,18 @@ const GALERIA_IMGS = [
 
 function GaleriaVelas() {
   const [idx, setIdx] = React.useState(0);
+  const [loaded, setLoaded] = React.useState({});
   const total = GALERIA_IMGS.length;
   const prev = () => setIdx(i => (i - 1 + total) % total);
   const next = () => setIdx(i => (i + 1) % total);
+
+  React.useEffect(() => {
+    GALERIA_IMGS.forEach((src, i) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => setLoaded(p => ({ ...p, [i]: true }));
+    });
+  }, []);
 
   return (
     <div data-reveal style={{ padding: '48px 0', background: '#fff', textAlign: 'center' }}>
@@ -131,12 +140,22 @@ function GaleriaVelas() {
 
       <div style={{ position: 'relative', maxWidth: 340, margin: '0 auto' }}>
         {/* Imagen activa */}
-        <div style={{ borderRadius: 20, overflow: 'hidden', aspectRatio: '3/4', boxShadow: '0 8px 32px rgba(74,63,53,0.18)' }}>
+        <div style={{ borderRadius: 20, overflow: 'hidden', aspectRatio: '3/4', boxShadow: '0 8px 32px rgba(74,63,53,0.18)', background: '#EDE0D4', position: 'relative' }}>
+          {!loaded[idx] && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(90deg, #EDE0D4 25%, #F3EFE8 50%, #EDE0D4 75%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 1.4s infinite',
+            }} />
+          )}
           <img
-            key={idx}
             src={GALERIA_IMGS[idx]}
             alt={`Vela artesanal ${idx + 1}`}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'opacity 0.3s' }}
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+              opacity: loaded[idx] ? 1 : 0, transition: 'opacity 0.4s',
+            }}
           />
         </div>
 

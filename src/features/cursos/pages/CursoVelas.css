@@ -254,3 +254,8 @@
   .cv-paratiif-img { flex: 0 0 48%; }
   .cv-paratiif-text { flex: 1; }
 }
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
