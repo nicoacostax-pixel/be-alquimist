@@ -70,11 +70,10 @@ export default function CursoVelasCheckout() {
   const handleContinue = async (e) => {
     e.preventDefault();
     if (!form.nombre || !form.email) { alert('Completa nombre y correo.'); return; }
-    // Guardar carrito abandonado
-    fetch('/api/leads', {
+    fetch('/api/carrito-abandonado', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: form.email, telefono: form.telefono, tipo: 'carrito_abandonado' }),
+      body: JSON.stringify({ email: form.email, telefono: form.telefono, origen: 'curso_velas' }),
     }).catch(() => {});
     setLoadingPI(true); setPiError('');
     try {

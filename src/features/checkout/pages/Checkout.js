@@ -171,11 +171,10 @@ export default function Checkout() {
       alert('Completa todos los campos obligatorios.');
       return;
     }
-    // Guardar carrito abandonado
-    fetch('/api/leads', {
+    fetch('/api/carrito-abandonado', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: form.email, telefono: form.telefono, tipo: 'carrito_abandonado' }),
+      body: JSON.stringify({ email: form.email, telefono: form.telefono, origen: 'checkout' }),
     }).catch(() => {});
     setLoadingPI(true);
     setPiError('');

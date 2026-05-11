@@ -58,10 +58,9 @@ module.exports = async function handler(req, res) {
 
           // Eliminar de carrito abandonado al completar compra
           if (sb && piMeta.email) {
-            await sb.from('leads')
+            await sb.from('carritos_abandonados')
               .delete()
-              .eq('email', piMeta.email)
-              .eq('tipo', 'carrito_abandonado');
+              .eq('email', piMeta.email);
           }
 
           // Confirmación al cliente + BCC a Nico

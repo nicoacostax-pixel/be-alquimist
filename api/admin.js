@@ -270,6 +270,18 @@ module.exports = async function handler(req, res) {
       return res.json({ distribuidoras: data || [] });
     }
 
+    if (action === 'getCarritosAbandonados') {
+      const { data } = await sb.from('carritos_abandonados').select('*').order('created_at', { ascending: false }).limit(500);
+      return res.json({ carritos: data || [] });
+    }
+
+    if (action === 'deleteCarritoAbandonado') {
+      const { id } = req.body;
+      if (!id) return res.status(400).json({ error: 'Falta id' });
+      await sb.from('carritos_abandonados').delete().eq('id', id);
+      return res.json({ ok: true });
+    }
+
     return res.status(400).json({ error: 'Acción desconocida' });
   } catch (err) {
     return res.status(500).json({ error: err.message });

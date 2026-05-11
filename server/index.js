@@ -33,6 +33,7 @@ const API_ROUTES = [
   'recetas',
   'distribuidoras',
   'send-welcome-email',
+  'carrito-abandonado',
 ];
 
 for (const name of API_ROUTES) {

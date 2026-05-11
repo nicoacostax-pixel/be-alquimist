@@ -1126,6 +1126,99 @@ function Leads() {
   );
 }
 
+/* ── CARRITOS ABANDONADOS ───────────────────────────────────── */
+function CarritosAbandonados() {
+  const [carritos, setCarritos] = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [msg,      setMsg]      = useState('');
+  const [search,   setSearch]   = useState('');
+
+  const load = useCallback(() => {
+    setLoading(true);
+    callAdmin('getCarritosAbandonados')
+      .then(d => { setCarritos(d.carritos); setLoading(false); })
+      .catch(e => { setMsg('Error: ' + e.message); setLoading(false); });
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const filtered = carritos.filter(c =>
+    c.email?.toLowerCase().includes(search.toLowerCase()) ||
+    (c.telefono || '').includes(search)
+  );
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('¿Eliminar este carrito abandonado?')) return;
+    try {
+      await callAdmin('deleteCarritoAbandonado', { id });
+      setMsg('Eliminado ✓');
+      load();
+    } catch (e) { setMsg('Error: ' + e.message); }
+  };
+
+  const exportCSV = () => {
+    const header = ['Email', 'Teléfono', 'Origen', 'Fecha'];
+    const rows = filtered.map(c => [
+      c.email, c.telefono || '', c.origen || '', new Date(c.created_at).toLocaleString('es-MX'),
+    ]);
+    const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a'); a.href = url; a.download = 'carritos_abandonados.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const ORIGEN_LABELS = { checkout: 'Tienda', curso_velas: 'Curso Velas' };
+
+  return (
+    <div className="adm-section">
+      {msg && <div className="adm-msg" onClick={() => setMsg('')}>{msg} ×</div>}
+      <div className="adm-toolbar">
+        <input className="adm-search" placeholder="Buscar por email o teléfono…" value={search} onChange={e => setSearch(e.target.value)} />
+        <span className="adm-count">{filtered.length} registros</span>
+        <button className="adm-btn-sec" onClick={exportCSV} style={{ marginLeft: 'auto' }}>Exportar CSV</button>
+      </div>
+      {loading ? <div className="adm-loading">Cargando…</div> : (
+        <div className="adm-table-wrap">
+          <table className="adm-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Origen</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 && (
+                <tr><td colSpan={5} style={{ textAlign: 'center', color: '#999', padding: 24 }}>Sin carritos abandonados</td></tr>
+              )}
+              {filtered.map(c => (
+                <tr key={c.id}>
+                  <td><strong>{c.email}</strong></td>
+                  <td>{c.telefono || '—'}</td>
+                  <td><span className="adm-badge">{ORIGEN_LABELS[c.origen] || c.origen || '—'}</span></td>
+                  <td className="adm-date">{new Date(c.created_at).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                  <td>
+                    {c.telefono && (
+                      <a
+                        href={`https://wa.me/52${c.telefono.replace(/\D/g,'')}?text=${encodeURIComponent('Hola, vimos que estuviste por hacer un pedido en Be Alquimist. ¿Te podemos ayudar? 🕯️')}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="adm-btn-sec" style={{ marginRight: 6, fontSize: 12 }}
+                      >WhatsApp</a>
+                    )}
+                    <button className="adm-btn-danger" style={{ fontSize: 12 }} onClick={() => handleDelete(c.id)}>Eliminar</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── DISTRIBUIDORAS ─────────────────────────────────────────── */
 const Q_LABELS = ['Canal de venta', 'Inversión inicial', 'Ya vende', 'Clientes/seguidores', 'Primer pedido'];
 const Q_KEYS   = ['q1_comercializacion', 'q2_inversion', 'q3_vende_actualmente', 'q4_clientes', 'q5_cuando'];
@@ -1916,6 +2009,7 @@ const TABS = [
   { id: 'comunidad',  label: '💬 Comunidad' },
   { id: 'biblioteca', label: '🌿 Biblioteca' },
   { id: 'leads',         label: '📧 Leads' },
+  { id: 'carritos',      label: '🛒 Carritos Abandonados' },
   { id: 'distribuidoras',label: '🚀 Distribuidoras' },
   { id: 'recetas',    label: '🧪 Recetas IA' },
   { id: 'destacadas', label: '✨ Destacadas' },
@@ -1963,6 +2057,7 @@ export default function AdminPanel() {
           {tab === 'comunidad'  && <Comunidad />}
           {tab === 'biblioteca' && <BibliotecaAdmin />}
           {tab === 'leads'         && <Leads />}
+          {tab === 'carritos'      && <CarritosAbandonados />}
           {tab === 'distribuidoras' && <DistribuidorasAdmin />}
           {tab === 'recetas'    && <RecetasAdmin />}
           {tab === 'destacadas' && <RecetasDestacadasAdmin />}
