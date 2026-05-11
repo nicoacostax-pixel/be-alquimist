@@ -119,7 +119,7 @@ function Registro() {
       <div className="login-box-premium">
         <div className="center-text">
           <div className="static-name">Be Alquimist</div>
-          <p className="app-subtitle-final">Crea tu cuenta de Alquimista</p>
+          <p className="app-subtitle-final" style={{ marginBottom: 24 }}>Crea tu cuenta de Alquimista</p>
         </div>
 
         <button

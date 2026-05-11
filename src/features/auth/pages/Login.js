@@ -51,7 +51,7 @@ function Login() {
       <div className="login-box-premium">
         <div className="center-text">
           <div className="static-name">Be Alquimist</div>
-          <p className="app-subtitle-final">Acceso al Laboratorio</p>
+          <p className="app-subtitle-final" style={{ marginBottom: 24 }}>Acceso al Laboratorio</p>
         </div>
 
         <button
