@@ -342,41 +342,24 @@ export default function ComunidadLayout() {
 
       <main className="comunidad-content">
         <Outlet />
-
-        {/* ── CTA PRO ── */}
-        <div style={{
-          margin: '48px auto 40px', maxWidth: 720, padding: '0 20px',
-        }}>
-          <div
-            onClick={() => navigate('/pro')}
-            style={{
-              background: 'linear-gradient(135deg, #B08968 0%, #8C6A4F 100%)',
-              borderRadius: 20, padding: '36px 32px', textAlign: 'center',
-              cursor: 'pointer', boxShadow: '0 8px 32px rgba(176,137,104,0.35)',
-              transition: 'transform 0.15s, box-shadow 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(176,137,104,0.45)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(176,137,104,0.35)'; }}
-          >
-            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: 700, margin: '0 0 8px', letterSpacing: 1, textTransform: 'uppercase', fontFamily: 'Poppins, sans-serif' }}>
-              ⭐ Be Alquimist PRO
-            </p>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(20px, 4vw, 28px)', color: '#fff', margin: '0 0 10px', fontWeight: 900 }}>
-              No esperes más y únete a PRO
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.82)', fontSize: 14, margin: '0 0 24px', fontFamily: 'Poppins, sans-serif', lineHeight: 1.6 }}>
-              +12 cursos · Envíos gratis · Chat IA · Comunidad activa — todo por $149 MXN/mes
-            </p>
-            <span style={{
-              display: 'inline-block', background: '#fff', color: '#8C6A4F',
-              borderRadius: 12, padding: '12px 32px', fontSize: 15, fontWeight: 800,
-              fontFamily: 'Poppins, sans-serif',
-            }}>
-              Quiero ser PRO →
-            </span>
-          </div>
-        </div>
       </main>
+
+      {/* ── Fixed PRO CTA button ── */}
+      <button
+        onClick={() => navigate('/pro')}
+        style={{
+          position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 900,
+          background: 'linear-gradient(135deg, #B08968, #8C6A4F)',
+          color: '#fff', border: 'none', borderRadius: 50,
+          padding: '14px 32px', fontSize: 15, fontWeight: 800,
+          cursor: 'pointer', fontFamily: 'Poppins, sans-serif',
+          boxShadow: '0 6px 24px rgba(176,137,104,0.5)',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        ⭐ Únete a PRO
+      </button>
     </div>
   );
 }
