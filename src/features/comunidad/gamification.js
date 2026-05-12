@@ -17,7 +17,3 @@ export function getLevel(pts) {
   }
   return LEVELS[0];
 }
-
-export function calcPts(postCount, likesReceived) {
-  return postCount * 2 + likesReceived * 5;
-}

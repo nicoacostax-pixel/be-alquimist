@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Lock, Settings, HelpCircle } from 'lucide-react';
 import { supabase } from '../../../shared/lib/supabaseClient';
-import { LEVELS, getLevel, calcPts } from '../gamification';
+import { LEVELS, getLevel } from '../gamification';
 
 const DEFAULT_AVATAR = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
 const RANK_COLORS    = ['#FFD700', '#C0C0C0', '#CD7F32'];
@@ -69,39 +69,26 @@ export default function Marcadores() {
       const { data: { session } } = await supabase.auth.getSession();
       const uid = session?.user?.id;
 
-      const [{ data: perfiles }, { data: allPosts }, { data: allLikes }] = await Promise.all([
-        supabase.from('perfiles').select('id, nombre, apellido, avatar_url'),
-        supabase.from('posts').select('id, usuario_id, created_at'),
-        supabase.from('post_likes').select('post_id'),
+      const ago7  = new Date(Date.now() - 7  * 864e5).toISOString();
+      const ago30 = new Date(Date.now() - 30 * 864e5).toISOString();
+
+      const [{ data: perfiles }, { data: log7 }, { data: log30 }] = await Promise.all([
+        supabase.from('perfiles').select('id, nombre, apellido, avatar_url, puntos'),
+        supabase.from('puntos_log').select('user_id').gte('created_at', ago7),
+        supabase.from('puntos_log').select('user_id').gte('created_at', ago30),
       ]);
 
-      const postOwner = {};
-      (allPosts || []).forEach(p => { postOwner[p.id] = p.usuario_id; });
+      const pts7Map = {}, pts30Map = {};
+      (log7  || []).forEach(r => { pts7Map[r.user_id]  = (pts7Map[r.user_id]  || 0) + 1; });
+      (log30 || []).forEach(r => { pts30Map[r.user_id] = (pts30Map[r.user_id] || 0) + 1; });
 
-      const likesAllTime = {};
-      (allLikes || []).forEach(l => {
-        const owner = postOwner[l.post_id];
-        if (owner) likesAllTime[owner] = (likesAllTime[owner] || 0) + 1;
-      });
-
-      const now = Date.now();
-      const postsAll = {}, posts30 = {}, posts7 = {};
-      (allPosts || []).forEach(p => {
-        const o = p.usuario_id;
-        postsAll[o] = (postsAll[o] || 0) + 1;
-        const age = now - new Date(p.created_at).getTime();
-        if (age <= 30 * 864e5) posts30[o] = (posts30[o] || 0) + 1;
-        if (age <= 7  * 864e5) posts7[o]  = (posts7[o]  || 0) + 1;
-      });
-
-      const enriched = (perfiles || []).map(p => {
-        const postCount = postsAll[p.id] || 0;
-        const likes     = likesAllTime[p.id] || 0;
-        const points    = calcPts(postCount, likes);
-        const pts30     = calcPts(posts30[p.id] || 0, 0);
-        const pts7      = calcPts(posts7[p.id]  || 0, 0);
-        return { ...p, points, pts30, pts7, levelInfo: getLevel(points) };
-      });
+      const enriched = (perfiles || []).map(p => ({
+        ...p,
+        points:    p.puntos || 0,
+        pts7:      pts7Map[p.id]  || 0,
+        pts30:     pts30Map[p.id] || 0,
+        levelInfo: getLevel(p.puntos || 0),
+      }));
 
       setAllMembers(enriched);
       if (uid) setMe(enriched.find(m => m.id === uid) || null);
