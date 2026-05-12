@@ -26,31 +26,44 @@ export default function CursosComunidad() {
       const uid = session?.user?.id;
       setToken(tok);
 
-      const [{ data: rows }, perfilRes] = await Promise.all([
-        supabase.from('cursos')
-          .select('id, slug, titulo, descripcion, imagen_url, nivel_requerido')
-          .eq('publicado', true)
-          .order('orden')
-          .order('created_at', { ascending: false }),
-        uid ? supabase.from('perfiles').select('puntos').eq('id', uid).single() : Promise.resolve({ data: null }),
-      ]);
+      try {
+        const [{ data: rows, error: rowsErr }, perfilRes] = await Promise.all([
+          supabase.from('cursos')
+            .select('id, slug, titulo, descripcion, imagen_url, nivel_requerido')
+            .eq('publicado', true)
+            .order('orden')
+            .order('created_at', { ascending: false }),
+          uid ? supabase.from('perfiles').select('puntos').eq('id', uid).single() : Promise.resolve({ data: null }),
+        ]);
 
-      const lista = rows || [];
-      setCursos(lista);
+        if (rowsErr) {
+          // columna nivel_requerido puede no existir aún — fallback sin ella
+          const { data: rowsFallback } = await supabase.from('cursos')
+            .select('id, slug, titulo, descripcion, imagen_url')
+            .eq('publicado', true)
+            .order('created_at', { ascending: false });
+          setCursos((rowsFallback || []).map(c => ({ ...c, nivel_requerido: 1 })));
+        } else {
+          setCursos((rows || []).map(c => ({ ...c, nivel_requerido: c.nivel_requerido ?? 1 })));
+        }
 
-      const nivel = getLevel(perfilRes.data?.puntos || 0).level;
-      setUserLevel(nivel);
+        const nivel = getLevel(perfilRes?.data?.puntos || 0).level;
+        setUserLevel(nivel);
 
-      if (tok && lista.length) {
-        const checks = await Promise.all(
-          lista.map(c => api('checkAcceso', { cursoId: c.id }, tok))
-        );
-        const map = {};
-        lista.forEach((c, i) => { map[c.id] = checks[i]; });
-        setAccesos(map);
+        if (tok) {
+          const lista = rows || [];
+          if (lista.length) {
+            const checks = await Promise.all(
+              lista.map(c => api('checkAcceso', { cursoId: c.id }, tok))
+            );
+            const map = {};
+            lista.forEach((c, i) => { map[c.id] = checks[i]; });
+            setAccesos(map);
+          }
+        }
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     });
   }, []);
 
