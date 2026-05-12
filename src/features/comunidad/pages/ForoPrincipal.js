@@ -35,7 +35,7 @@ function extractYoutubeId(url) {
 }
 
 const CATEGORIAS = [
-  { id: 'todos',     nombre: 'Todos los temas',       icono: '🌐' },
+  { id: 'todos',     nombre: 'Todo',                  icono: '🌐' },
   { id: 'general',   nombre: 'General',               icono: '🌎' },
   { id: 'anuncios',  nombre: 'Anuncios',              icono: '📣' },
   { id: 'bienvenida',nombre: 'Bienvenida',            icono: '👋' },
@@ -45,8 +45,6 @@ const CATEGORIAS = [
   { id: 'diversion', nombre: 'Diversión',             icono: '🥳' },
   { id: 'proceso',   nombre: 'Documenta tu proceso',  icono: '❤️' },
   { id: 'marca',     nombre: 'Camino a tu marca',     icono: '🔥' },
-  { id: 'recetas',   nombre: 'Recetas Alquimistas',   icono: '🧪' },
-  { id: 'dudas',     nombre: 'Dudas y Soporte',       icono: '❓' },
 ];
 
 /* ── Componente principal ─────────────────── */
@@ -367,17 +365,26 @@ export default function ForoPrincipal() {
 
       {/* Categorías */}
       <nav className="foro-categorias-nav">
-        {CATEGORIAS.map(cat => (
-          <button key={cat.id} onClick={() => setCategoriaActiva(cat.id)} style={{
-            whiteSpace: 'nowrap', padding: '10px 16px', borderRadius: '25px',
-            border: '1px solid #B08968', fontSize: '13px', fontWeight: '500', flexShrink: 0,
-            background: categoriaActiva === cat.id ? '#B08968' : '#fff',
-            color:      categoriaActiva === cat.id ? '#fff'    : '#B08968',
-            cursor: 'pointer', transition: 'all 0.2s',
-          }}>
-            {cat.icono} {cat.nombre}
-          </button>
-        ))}
+        {CATEGORIAS.map(cat => {
+          const active = categoriaActiva === cat.id;
+          return (
+            <button key={cat.id} onClick={() => setCategoriaActiva(cat.id)} style={{
+              whiteSpace: 'nowrap', flexShrink: 0, cursor: 'pointer',
+              padding: '7px 15px', borderRadius: '20px', fontSize: '13px', fontWeight: 600,
+              fontFamily: 'Poppins, sans-serif', letterSpacing: '0.01em',
+              transition: 'all 0.18s ease',
+              border: active ? 'none' : '1.5px solid #E5D9CE',
+              background: active ? 'linear-gradient(135deg, #B08968, #8C6A4F)' : '#FAFAF8',
+              color:  active ? '#fff' : '#6B5744',
+              boxShadow: active
+                ? '0 3px 10px rgba(176,137,104,0.35)'
+                : '0 1px 3px rgba(0,0,0,0.04)',
+              transform: active ? 'translateY(-1px)' : 'none',
+            }}>
+              <span style={{ marginRight: 5 }}>{cat.icono}</span>{cat.nombre}
+            </button>
+          );
+        })}
       </nav>
 
       <div style={{ width: '100%', maxWidth: '800px', padding: '15px 10px', boxSizing: 'border-box' }}>
