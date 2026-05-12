@@ -185,6 +185,17 @@ export default function ForoPrincipal() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { alert('Debes estar logueado'); return; }
 
+      const hace1h = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { count } = await supabase.from('posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('usuario_id', user.id)
+        .gte('created_at', hace1h);
+      if (count >= 3) {
+        alert('Alcanzaste el límite de 3 publicaciones por hora. Intenta más tarde.');
+        setSubiendoPost(false);
+        return;
+      }
+
       const imagen_url = postImagenFile ? await uploadImagen(postImagenFile, user.id) : null;
       const metadata   = buildMetadata(postLink, postVideo, postPoll);
 
