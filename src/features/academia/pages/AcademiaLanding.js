@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../shared/lib/supabaseClient';
 
@@ -11,9 +11,16 @@ const BENEFICIOS = [
 
 export default function AcademiaLanding() {
   const navigate = useNavigate();
-  const [form,    setForm]    = useState({ nombre: '', correo: '', telefono: '' });
-  const [sending, setSending] = useState(false);
-  const [formErr, setFormErr] = useState('');
+  const [form,     setForm]     = useState({ nombre: '', correo: '', telefono: '' });
+  const [sending,  setSending]  = useState(false);
+  const [formErr,  setFormErr]  = useState('');
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,7 +59,7 @@ export default function AcademiaLanding() {
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 1000, margin: '0 auto', padding: 'clamp(40px, 8vh, 80px) 24px 60px' }}>
 
         {/* ── HERO + FORM ── */}
-        <div style={{ display: 'flex', gap: 56, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: isMobile ? 32 : 56, alignItems: 'center', flexWrap: 'wrap', flexDirection: isMobile ? 'column-reverse' : 'row' }}>
 
           {/* Left */}
           <div style={{ flex: '1 1 340px' }}>
@@ -79,19 +86,21 @@ export default function AcademiaLanding() {
               +12 cursos, chat IA de recetas y comunidad activa. <strong>Inscríbete gratis</strong> y empieza hoy.
             </p>
 
-            {/* Benefits strip */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-              {BENEFICIOS.map((b, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(176,137,104,0.18)', borderRadius: 30,
-                  padding: '7px 14px', fontSize: 12, fontWeight: 600, color: '#4A3F35',
-                }}>
-                  <span>{b.emoji}</span> {b.text}
-                </div>
-              ))}
-            </div>
+            {/* Benefits strip — hidden on mobile to save space */}
+            {!isMobile && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {BENEFICIOS.map((b, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(176,137,104,0.18)', borderRadius: 30,
+                    padding: '7px 14px', fontSize: 12, fontWeight: 600, color: '#4A3F35',
+                  }}>
+                    <span>{b.emoji}</span> {b.text}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right — Form */}
