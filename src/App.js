@@ -38,6 +38,7 @@ import Calendario from './features/comunidad/pages/Calendario';
 import Miembros from './features/comunidad/pages/Miembros';
 import Marcadores from './features/comunidad/pages/Marcadores';
 import CursosComunidad from './features/comunidad/pages/CursosComunidad';
+import AcademiaLanding from './features/academia/pages/AcademiaLanding';
 
 
 
@@ -94,6 +95,7 @@ function App() {
           <Route path="/cursos/velas-de-soya/checkout" element={<CursoVelasCheckout />} />
           <Route path="/cursos/:slug/aprender" element={<CursoPlayer />} />
           <Route path="/admin/cursos" element={<AdminCursosBuilder />} />
+          <Route path="/academia" element={<AcademiaLanding />} />
           <Route path="/biblioteca" element={<Biblioteca />} />
           <Route path="/politicas-de-compra" element={<PoliticasDeCompra />} />
           <Route path="/privacidad"           element={<Privacidad />} />
