@@ -201,15 +201,25 @@ export default function AcademiaLanding() {
           </div>
 
           {/* Social proof */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 56, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 56, flexWrap: 'wrap' }}>
             {[
-              { num: '7', label: 'Días gratis de acceso' },
-              { num: '6', label: 'Cursos especializados' },
-              { num: '🚚', label: 'Envíos gratuitos' },
+              { num: '+12', label: 'Cursos especializados', icon: '📚' },
+              { num: '7',   label: 'Días gratis de acceso', icon: '🎁' },
+              { num: '100%',label: 'Natural & sin químicos', icon: '🌿' },
+              { num: '🚚',  label: 'Envíos siempre gratis', icon: null },
             ].map((s, i) => (
-              <div key={i} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 28, fontWeight: 900, color: '#B08968', fontFamily: 'Georgia, serif' }}>{s.num}</div>
-                <div style={{ fontSize: 12, color: '#9E8E80', fontWeight: 500, marginTop: 2 }}>{s.label}</div>
+              <div key={i} style={{
+                background: 'rgba(255,255,255,0.7)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(176,137,104,0.18)',
+                borderRadius: 16,
+                padding: '16px 24px',
+                textAlign: 'center',
+                minWidth: 120,
+                boxShadow: '0 2px 12px rgba(176,137,104,0.10)',
+              }}>
+                <div style={{ fontSize: 26, fontWeight: 900, color: '#B08968', fontFamily: 'Georgia, serif', lineHeight: 1 }}>{s.num}</div>
+                <div style={{ fontSize: 12, color: '#7A6A5A', fontWeight: 600, marginTop: 6, lineHeight: 1.4 }}>{s.label}</div>
               </div>
             ))}
           </div>
