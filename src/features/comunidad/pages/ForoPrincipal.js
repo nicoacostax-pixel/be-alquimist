@@ -35,11 +35,18 @@ function extractYoutubeId(url) {
 }
 
 const CATEGORIAS = [
-  { id: 'todos',      nombre: 'Todos los temas',    icono: '🌐' },
-  { id: 'bienvenida', nombre: 'Bienvenida',          icono: '👋' },
-  { id: 'recetas',    nombre: 'Recetas Alquimistas', icono: '🧪' },
-  { id: 'dudas',      nombre: 'Dudas y Soporte',     icono: '❓' },
-  { id: 'anuncios',   nombre: 'Anuncios',            icono: '📢' },
+  { id: 'todos',     nombre: 'Todos los temas',       icono: '🌐' },
+  { id: 'general',   nombre: 'General',               icono: '🌎' },
+  { id: 'anuncios',  nombre: 'Anuncios',              icono: '📣' },
+  { id: 'bienvenida',nombre: 'Bienvenida',            icono: '👋' },
+  { id: 'victorias', nombre: 'Victorias',             icono: '🏆' },
+  { id: 'ayuda',     nombre: 'Necesito ayuda',        icono: '🙌' },
+  { id: 'valor',     nombre: 'Valor',                 icono: '💎' },
+  { id: 'diversion', nombre: 'Diversión',             icono: '🥳' },
+  { id: 'proceso',   nombre: 'Documenta tu proceso',  icono: '❤️' },
+  { id: 'marca',     nombre: 'Camino a tu marca',     icono: '🔥' },
+  { id: 'recetas',   nombre: 'Recetas Alquimistas',   icono: '🧪' },
+  { id: 'dudas',     nombre: 'Dudas y Soporte',       icono: '❓' },
 ];
 
 /* ── Componente principal ─────────────────── */
@@ -181,12 +188,15 @@ export default function ForoPrincipal() {
       const imagen_url = postImagenFile ? await uploadImagen(postImagenFile, user.id) : null;
       const metadata   = buildMetadata(postLink, postVideo, postPoll);
 
-      const { error } = await supabase.from('posts').insert([{
+      const { data: newPosts, error } = await supabase.from('posts').insert([{
         titulo: nuevoPost.titulo.trim(), contenido: nuevoPost.contenido.trim(),
         categoria: categoriaActiva === 'todos' ? 'bienvenida' : categoriaActiva,
         usuario_id: user.id, imagen_url, metadata,
-      }]);
+      }]).select('id');
       if (error) throw error;
+      if (newPosts?.[0]) {
+        await awardPuntos(user.id, 1, 'post_publicado', newPosts[0].id);
+      }
 
       setNuevoPost({ titulo: '', contenido: '' });
       setPostLink(''); setPostVideo(''); setPostPoll(['', '']);
@@ -212,8 +222,12 @@ export default function ForoPrincipal() {
     }));
     if (post._userLiked) {
       await supabase.from('post_likes').delete().eq('post_id', postId).eq('usuario_id', currentUser.id);
+      if (post.usuario_id && post.usuario_id !== currentUser.id)
+        await supabase.rpc('incrementar_puntos', { uid: post.usuario_id, delta: -1 });
     } else {
       await supabase.from('post_likes').insert({ post_id: postId, usuario_id: currentUser.id });
+      if (post.usuario_id && post.usuario_id !== currentUser.id)
+        await supabase.rpc('incrementar_puntos', { uid: post.usuario_id, delta: 1 });
     }
   }
 
@@ -221,16 +235,55 @@ export default function ForoPrincipal() {
   async function fetchComentarios(postId) {
     const { data: comentarios } = await supabase
       .from('post_comentarios').select('*').eq('post_id', postId).order('created_at', { ascending: true });
-    const userIds = [...new Set((comentarios || []).map(c => c.usuario_id).filter(Boolean))];
-    let perfilMap = {};
-    if (userIds.length > 0) {
-      const { data: perfiles } = await supabase.from('perfiles').select('id, nombre, avatar_url').in('id', userIds);
-      (perfiles || []).forEach(p => { perfilMap[p.id] = p; });
-    }
+    const rows    = comentarios || [];
+    const cIds    = rows.map(c => c.id);
+    const userIds = [...new Set(rows.map(c => c.usuario_id).filter(Boolean))];
+
+    const [perfilesRes, cLikesRes, { data: { user } }] = await Promise.all([
+      userIds.length ? supabase.from('perfiles').select('id, nombre, avatar_url').in('id', userIds) : { data: [] },
+      cIds.length    ? supabase.from('comentario_likes').select('comentario_id, usuario_id').in('comentario_id', cIds) : { data: [] },
+      supabase.auth.getUser(),
+    ]);
+
+    const perfilMap = {};
+    (perfilesRes.data || []).forEach(p => { perfilMap[p.id] = p; });
+
+    const cLikesMap = {};
+    (cLikesRes.data || []).forEach(l => {
+      if (!cLikesMap[l.comentario_id]) cLikesMap[l.comentario_id] = { count: 0, userLiked: false };
+      cLikesMap[l.comentario_id].count++;
+      if (user && l.usuario_id === user.id) cLikesMap[l.comentario_id].userLiked = true;
+    });
+
     setComentariosMap(prev => ({
       ...prev,
-      [postId]: (comentarios || []).map(c => ({ ...c, _perfil: perfilMap[c.usuario_id] || null })),
+      [postId]: rows.map(c => ({
+        ...c,
+        _perfil:    perfilMap[c.usuario_id] || null,
+        _likes:     cLikesMap[c.id]?.count     || 0,
+        _userLiked: cLikesMap[c.id]?.userLiked || false,
+      })),
     }));
+  }
+
+  async function toggleComentarioLike(comentario, postId) {
+    if (!currentUser) return;
+    const isLiked = comentario._userLiked;
+    setComentariosMap(prev => ({
+      ...prev,
+      [postId]: (prev[postId] || []).map(c => c.id !== comentario.id ? c : {
+        ...c, _likes: isLiked ? c._likes - 1 : c._likes + 1, _userLiked: !isLiked,
+      }),
+    }));
+    if (isLiked) {
+      await supabase.from('comentario_likes').delete().eq('comentario_id', comentario.id).eq('usuario_id', currentUser.id);
+      if (comentario.usuario_id && comentario.usuario_id !== currentUser.id)
+        await supabase.rpc('incrementar_puntos', { uid: comentario.usuario_id, delta: -1 });
+    } else {
+      await supabase.from('comentario_likes').insert({ comentario_id: comentario.id, usuario_id: currentUser.id });
+      if (comentario.usuario_id && comentario.usuario_id !== currentUser.id)
+        await supabase.rpc('incrementar_puntos', { uid: comentario.usuario_id, delta: 1 });
+    }
   }
 
   async function toggleComentarios(postId) {
@@ -266,6 +319,15 @@ export default function ForoPrincipal() {
     } finally {
       setSubiendoComentario(false);
     }
+  }
+
+  /* ── Puntos ── */
+  async function awardPuntos(uid, delta, tipo, refId) {
+    if (tipo && refId) {
+      const { error } = await supabase.from('puntos_log').insert({ user_id: uid, tipo, referencia_id: refId });
+      if (error) return; // unique constraint → ya otorgado
+    }
+    await supabase.rpc('incrementar_puntos', { uid, delta });
   }
 
   /* ── Emoji insert ── */
@@ -446,6 +508,18 @@ export default function ForoPrincipal() {
                               {cmeta.poll.opciones.map((op, i) => <div key={i} className="poll-opcion-preview">{op}</div>)}
                             </div>
                           )}
+                          <button
+                            onClick={() => toggleComentarioLike(c, post.id)}
+                            style={{
+                              background: 'none', border: 'none', cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', gap: 4,
+                              color: c._userLiked ? '#B08968' : '#9E9188',
+                              fontSize: 12, padding: '4px 0', marginTop: 6,
+                            }}
+                          >
+                            <ThumbsUp size={12} />
+                            {c._likes > 0 && <span>{c._likes}</span>}
+                          </button>
                         </div>
                       </div>
                     );
