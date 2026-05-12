@@ -123,7 +123,11 @@ export default function AcademiaLanding() {
       });
       const json = await res.json();
       if (!res.ok) { setFormErr(json.error || 'Ocurrió un error. Intenta de nuevo.'); setSending(false); return; }
-      navigate('/academia/confirmacion');
+      if (json.loginUrl) {
+        window.location.href = json.loginUrl; // Supabase logs them in and redirects to /academia/confirmacion
+      } else {
+        navigate('/academia/confirmacion');
+      }
     } catch {
       setFormErr('Ocurrió un error. Intenta de nuevo.');
     } finally {

@@ -49,13 +49,26 @@ module.exports = async function handler(req, res) {
     { onConflict: 'id' }
   );
 
-  // 3. Generate password setup link
-  let passwordLink = `${process.env.REACT_APP_SITE_URL || 'https://bealquimist.com'}/cuenta`;
+  const SITE = process.env.REACT_APP_SITE_URL || 'https://bealquimist.com';
+
+  // 3. Generate auto-login link (magic link → redirects to confirmacion)
+  let loginUrl = null;
+  try {
+    const { data: mlData } = await sb.auth.admin.generateLink({
+      type: 'magiclink',
+      email,
+      options: { redirectTo: `${SITE}/academia/confirmacion` },
+    });
+    loginUrl = mlData?.properties?.action_link || null;
+  } catch (_) { /* no auto-login */ }
+
+  // 3b. Generate password setup link (for welcome email)
+  let passwordLink = `${SITE}/cuenta`;
   try {
     const { data: linkData } = await sb.auth.admin.generateLink({
       type: 'recovery',
       email,
-      options: { redirectTo: `${process.env.REACT_APP_SITE_URL || 'https://bealquimist.com'}/cuenta` },
+      options: { redirectTo: `${SITE}/cuenta` },
     });
     if (linkData?.properties?.action_link) {
       passwordLink = linkData.properties.action_link;
@@ -119,5 +132,5 @@ module.exports = async function handler(req, res) {
     console.error('[academia-registro] error guardando recordatorio:', e.message);
   }
 
-  return res.json({ ok: true });
+  return res.json({ ok: true, loginUrl });
 };
