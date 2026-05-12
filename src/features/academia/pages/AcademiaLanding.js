@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../../shared/lib/supabaseClient';
 
 const CURSOS = [
   {
@@ -100,6 +101,40 @@ function FadeIn({ children, delay = 0, style = {} }) {
 export default function AcademiaLanding() {
   const navigate = useNavigate();
   const [hoveredCurso, setHoveredCurso] = useState(null);
+  const [form,    setForm]    = useState({ nombre: '', correo: '', telefono: '' });
+  const [sending, setSending] = useState(false);
+  const [done,    setDone]    = useState(false);
+  const [formErr, setFormErr] = useState('');
+
+  const scrollToForm = () => document.getElementById('registro-form').scrollIntoView({ behavior: 'smooth' });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.nombre.trim() || !form.correo.trim()) return;
+    setSending(true); setFormErr('');
+    try {
+      // Save lead
+      await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: 'academia_landing', nombre: form.nombre.trim(), correo: form.correo.trim(), telefono: form.telefono }),
+      });
+      // Send magic link (creates account if new, logs in if existing)
+      const { error } = await supabase.auth.signInWithOtp({
+        email: form.correo.trim(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/comunidad`,
+          data: { nombre: form.nombre.trim(), telefono: form.telefono },
+        },
+      });
+      if (error) { setFormErr(error.message); setSending(false); return; }
+      setDone(true);
+    } catch {
+      setFormErr('Ocurrió un error. Intenta de nuevo.');
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div style={{ fontFamily: 'Poppins, sans-serif', background: '#FDFAF6', overflowX: 'hidden' }}>
@@ -121,7 +156,7 @@ export default function AcademiaLanding() {
             padding: '6px 18px', fontSize: 13, fontWeight: 600, color: '#B08968',
             marginBottom: 32, boxShadow: '0 2px 12px rgba(176,137,104,0.12)',
           }}>
-            ✨ La academia de cosmética natural más completa de México
+            🎁 Acceso gratuito por 7 días — sin tarjeta de crédito
           </div>
 
           <h1 style={{
@@ -134,12 +169,12 @@ export default function AcademiaLanding() {
           </h1>
 
           <p style={{ fontSize: 'clamp(15px, 2vw, 19px)', color: '#7A6A5A', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 580, marginLeft: 'auto', marginRight: 'auto' }}>
-            6 cursos especializados, envíos gratuitos en tus insumos y un chat con IA que genera recetas personalizadas al instante.
+            6 cursos especializados, envíos gratuitos y chat IA de recetas. Pruébalo <strong>7 días completamente gratis</strong>.
           </p>
 
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
-              onClick={() => navigate('/registro')}
+              onClick={scrollToForm}
               style={{
                 background: 'linear-gradient(135deg, #B08968, #8C6A4F)', color: '#fff',
                 border: 'none', borderRadius: 14, padding: '16px 36px',
@@ -150,7 +185,7 @@ export default function AcademiaLanding() {
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(176,137,104,0.5)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(176,137,104,0.4)'; }}
             >
-              Empezar gratis →
+              Quiero mis 7 días gratis →
             </button>
             <button
               onClick={() => document.getElementById('cursos-section').scrollIntoView({ behavior: 'smooth' })}
@@ -168,8 +203,8 @@ export default function AcademiaLanding() {
           {/* Social proof */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 56, flexWrap: 'wrap' }}>
             {[
+              { num: '7', label: 'Días gratis de acceso' },
               { num: '6', label: 'Cursos especializados' },
-              { num: '100%', label: 'Natural & sustentable' },
               { num: '🚚', label: 'Envíos gratuitos' },
             ].map((s, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
@@ -373,45 +408,101 @@ export default function AcademiaLanding() {
         </FadeIn>
       </section>
 
-      {/* ── CTA FINAL ── */}
-      <section style={{
-        padding: '64px 24px', textAlign: 'center',
+      {/* ── REGISTRO FORM ── */}
+      <section id="registro-form" style={{
+        padding: '64px 24px',
         background: 'linear-gradient(160deg, #2C2318 0%, #4A3F35 100%)',
         position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 600, height: 600, borderRadius: '50%', background: 'rgba(176,137,104,0.06)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 700, height: 700, borderRadius: '50%', background: 'rgba(176,137,104,0.05)', pointerEvents: 'none' }} />
         <FadeIn>
-          <span style={{ fontSize: 52 }}>⚗️</span>
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(30px, 5vw, 58px)', fontWeight: 900, color: '#fff', margin: '20px 0 20px', letterSpacing: '-1px', lineHeight: 1.1 }}>
-            Empieza tu camino<br />
-            <span style={{ color: '#C4A882' }}>como alquimista hoy</span>
-          </h2>
-          <p style={{ color: '#A89080', fontSize: 17, lineHeight: 1.8, marginBottom: 44, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto' }}>
-            Regístrate gratis, accede al chat IA y comienza con tu primer curso de cosmética natural.
-          </p>
-          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button
-              onClick={() => window.location.href = '/registro'}
-              style={{
-                background: 'linear-gradient(135deg, #B08968, #8C6A4F)', color: '#fff',
-                border: 'none', borderRadius: 14, padding: '18px 44px',
-                fontSize: 17, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
-                boxShadow: '0 6px 28px rgba(176,137,104,0.45)',
-              }}
-            >
-              Crear mi cuenta gratis →
-            </button>
-            <button
-              onClick={() => window.location.href = '/comunidad'}
-              style={{
-                background: 'rgba(255,255,255,0.08)', color: '#D4C4B0',
-                border: '1.5px solid rgba(255,255,255,0.15)', borderRadius: 14,
-                padding: '18px 44px', fontSize: 17, fontWeight: 700,
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >
-              Ver la comunidad
-            </button>
+          <div style={{ maxWidth: 940, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 56, flexWrap: 'wrap' }}>
+
+            {/* Left copy */}
+            <div style={{ flex: '1 1 340px', position: 'relative' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(176,137,104,0.2)', borderRadius: 30, padding: '5px 16px', fontSize: 12, fontWeight: 700, color: '#C4A882', marginBottom: 20, letterSpacing: 1, textTransform: 'uppercase' }}>
+                🎁 7 días completamente gratis
+              </div>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 900, color: '#fff', margin: '0 0 18px', lineHeight: 1.15, letterSpacing: '-0.5px' }}>
+                Empieza hoy.<br />
+                <span style={{ color: '#C4A882' }}>Sin costo.</span>
+              </h2>
+              <p style={{ color: '#A89080', fontSize: 15, lineHeight: 1.8, margin: '0 0 24px' }}>
+                Accede a los 6 cursos, al chat IA de recetas y a la comunidad durante 7 días sin pagar nada. Sin tarjeta de crédito, sin compromisos.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {['✓ Acceso inmediato a todos los cursos', '✓ Chat IA de recetas ilimitado', '✓ Comunidad de alquimistas activa', '✓ Envíos gratis en tu tienda de insumos'].map((t, i) => (
+                  <span key={i} style={{ color: '#C4B09A', fontSize: 14, fontWeight: 500 }}>{t}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Right form */}
+            <div style={{ flex: '1 1 340px', position: 'relative' }}>
+              <div style={{ background: '#fff', borderRadius: 24, padding: '36px 32px', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
+                {done ? (
+                  <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                    <div style={{ fontSize: 52, marginBottom: 16 }}>📬</div>
+                    <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 22, fontWeight: 900, color: '#4A3F35', margin: '0 0 12px' }}>¡Revisa tu correo!</h3>
+                    <p style={{ color: '#7A6A5A', fontSize: 14, lineHeight: 1.7, margin: 0 }}>
+                      Te enviamos un enlace mágico a <strong>{form.correo}</strong>. Haz clic en él para activar tu cuenta y empezar.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 900, color: '#4A3F35', margin: '0 0 6px' }}>
+                      Crear mi cuenta gratis
+                    </h3>
+                    <p style={{ color: '#9E8E80', fontSize: 13, margin: '0 0 24px' }}>7 días de acceso completo · Sin tarjeta</p>
+
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                      <input
+                        placeholder="Tu nombre completo *"
+                        value={form.nombre}
+                        onChange={e => setForm(p => ({ ...p, nombre: e.target.value }))}
+                        required
+                        style={{ border: '1.5px solid #E0D6CE', borderRadius: 10, padding: '13px 16px', fontSize: 14, fontFamily: 'Poppins, sans-serif', outline: 'none', color: '#1A1A1A', background: '#FAFAFA' }}
+                      />
+                      <input
+                        placeholder="Correo electrónico *"
+                        type="email"
+                        value={form.correo}
+                        onChange={e => setForm(p => ({ ...p, correo: e.target.value }))}
+                        required
+                        style={{ border: '1.5px solid #E0D6CE', borderRadius: 10, padding: '13px 16px', fontSize: 14, fontFamily: 'Poppins, sans-serif', outline: 'none', color: '#1A1A1A', background: '#FAFAFA' }}
+                      />
+                      <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #E0D6CE', borderRadius: 10, background: '#FAFAFA', overflow: 'hidden' }}>
+                        <span style={{ padding: '13px 12px', fontSize: 14, color: '#7A6A5A', borderRight: '1px solid #E0D6CE', background: '#F3EFE8', whiteSpace: 'nowrap' }}>🇲🇽 +52</span>
+                        <input
+                          placeholder="Teléfono (opcional)"
+                          type="tel"
+                          value={form.telefono}
+                          onChange={e => setForm(p => ({ ...p, telefono: e.target.value }))}
+                          style={{ flex: 1, border: 'none', padding: '13px 14px', fontSize: 14, fontFamily: 'Poppins, sans-serif', outline: 'none', color: '#1A1A1A', background: 'transparent' }}
+                        />
+                      </div>
+                      {formErr && <p style={{ color: '#c0392b', fontSize: 13, margin: 0 }}>{formErr}</p>}
+                      <button
+                        type="submit"
+                        disabled={sending}
+                        style={{
+                          background: 'linear-gradient(135deg, #B08968, #8C6A4F)', color: '#fff',
+                          border: 'none', borderRadius: 10, padding: '15px',
+                          fontSize: 15, fontWeight: 800, cursor: sending ? 'not-allowed' : 'pointer',
+                          fontFamily: 'Poppins, sans-serif', marginTop: 4,
+                          boxShadow: '0 4px 16px rgba(176,137,104,0.4)',
+                        }}
+                      >
+                        {sending ? 'Enviando…' : 'Empezar mis 7 días gratis →'}
+                      </button>
+                    </form>
+                    <p style={{ fontSize: 11, color: '#B0A09A', textAlign: 'center', marginTop: 16, lineHeight: 1.6 }}>
+                      Al registrarte aceptas nuestros términos. Sin cobros automáticos.
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </FadeIn>
       </section>
