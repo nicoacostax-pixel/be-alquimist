@@ -51,15 +51,17 @@ module.exports = async function handler(req, res) {
 
   const SITE = process.env.REACT_APP_SITE_URL || 'https://bealquimist.com';
 
-  // 3. Generate auto-login link (magic link → redirects to confirmacion)
-  let loginUrl = null;
+  // 3. Generate token hash for client-side auto-login (verifyOtp)
+  let tokenHash = null;
   try {
     const { data: mlData } = await sb.auth.admin.generateLink({
       type: 'magiclink',
       email,
       options: { redirectTo: `${SITE}/academia/confirmacion` },
     });
-    loginUrl = mlData?.properties?.action_link || null;
+    const actionLink = mlData?.properties?.action_link || '';
+    const url = new URL(actionLink);
+    tokenHash = url.searchParams.get('token') || null;
   } catch (_) { /* no auto-login */ }
 
   // 3b. Generate password setup link (for welcome email)
@@ -132,5 +134,5 @@ module.exports = async function handler(req, res) {
     console.error('[academia-registro] error guardando recordatorio:', e.message);
   }
 
-  return res.json({ ok: true, loginUrl });
+  return res.json({ ok: true, tokenHash });
 };

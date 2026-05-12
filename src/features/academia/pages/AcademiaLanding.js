@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../../shared/lib/supabaseClient';
 
 const CURSOS = [
   {
@@ -123,11 +124,10 @@ export default function AcademiaLanding() {
       });
       const json = await res.json();
       if (!res.ok) { setFormErr(json.error || 'Ocurrió un error. Intenta de nuevo.'); setSending(false); return; }
-      if (json.loginUrl) {
-        window.location.href = json.loginUrl; // Supabase logs them in and redirects to /academia/confirmacion
-      } else {
-        navigate('/academia/confirmacion');
+      if (json.tokenHash) {
+        await supabase.auth.verifyOtp({ token_hash: json.tokenHash, type: 'magiclink' });
       }
+      navigate('/academia/confirmacion');
     } catch {
       setFormErr('Ocurrió un error. Intenta de nuevo.');
     } finally {
