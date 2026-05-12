@@ -34,6 +34,19 @@ const PASOS = [
       whatsapp: false,
     },
   },
+  {
+    num: '4',
+    icon: '🚀',
+    titulo: 'Explora la academia',
+    desc: 'Entra a tu cuenta, conoce los cursos disponibles, participa en la comunidad y empieza tu camino como alquimista.',
+    tip: null,
+    action: {
+      label: 'Entrar a la comunidad →',
+      href: '/comunidad',
+      whatsapp: false,
+      internal: true,
+    },
+  },
 ];
 
 export default function AcademiaConfirmacion() {
@@ -123,7 +136,22 @@ export default function AcademiaConfirmacion() {
                     💡 {paso.tip}
                   </p>
                 )}
-                {paso.action && (
+                {paso.action && paso.action.internal && (
+                  <button
+                    onClick={() => navigate(paso.action.href)}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 8,
+                      textDecoration: 'none', border: 'none', cursor: 'pointer',
+                      background: 'linear-gradient(135deg, #B08968, #8C6A4F)',
+                      color: '#fff', borderRadius: 10, padding: '11px 22px',
+                      fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+                      boxShadow: '0 4px 14px rgba(176,137,104,0.35)',
+                    }}
+                  >
+                    {paso.action.label}
+                  </button>
+                )}
+                {paso.action && !paso.action.internal && (
                   <a
                     href={paso.action.href}
                     target="_blank"
