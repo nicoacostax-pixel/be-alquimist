@@ -1109,6 +1109,7 @@ const TIPO_LABELS = {
   'descuento_curso_velas':  '🕯️ Cupón $300 Velas',
   'distribuidora':          '🚀 Distribuidora',
   'distribuidora_existente':'🔄 Distribuidora (ya registrada)',
+  'alumnos':                '🎓 Alumnos',
 };
 
 function Leads() {
