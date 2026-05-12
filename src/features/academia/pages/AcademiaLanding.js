@@ -164,7 +164,7 @@ export default function AcademiaLanding() {
           </h1>
 
           <p style={{ fontSize: 'clamp(15px, 2vw, 19px)', color: '#7A6A5A', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 580, marginLeft: 'auto', marginRight: 'auto' }}>
-            6 cursos especializados, envíos gratuitos y chat IA de recetas. Pruébalo <strong>7 días completamente gratis</strong>.
+            +12 cursos especializados, envíos gratuitos y chat IA de recetas. Pruébalo <strong>7 días completamente gratis</strong>.
           </p>
 
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>

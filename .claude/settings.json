@@ -15,7 +15,12 @@
       "Bash(node -e \"require\\('./api/send-welcome-email'\\)\")",
       "Bash(node -e ' *)",
       "Bash(sed -i '' \"s/navigate\\('\\\\/cuenta'\\)/navigate\\('\\\\/'\\)/g\" /Users/nicoacosta/bealquimist-web/src/features/auth/pages/Login.js)",
-      "Bash(sed -i '' \"s/navigate\\('\\\\/cuenta'\\)/navigate\\('\\\\/'\\)/g\" /Users/nicoacosta/bealquimist-web/src/features/auth/pages/Registro.js)"
+      "Bash(sed -i '' \"s/navigate\\('\\\\/cuenta'\\)/navigate\\('\\\\/'\\)/g\" /Users/nicoacosta/bealquimist-web/src/features/auth/pages/Registro.js)",
+      "Bash(curl -s 'https://pxreruyfjpacnvhxmhlk.supabase.co/rest/v1/productos?select=id,nombre,descripcion,imagen_url,categoria,slug,variantes&limit=3' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cmVydXlmanBhY252aHhtaGxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwODAzODYsImV4cCI6MjA5MjY1NjM4Nn0.8X-57s6qv7CSFieQcYQlN0MjseKmTrpiOldoyNItZE4' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cmVydXlmanBhY252aHhtaGxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwODAzODYsImV4cCI6MjA5MjY1NjM4Nn0.8X-57s6qv7CSFieQcYQlN0MjseKmTrpiOldoyNItZE4')",
+      "Bash(curl -s 'https://pxreruyfjpacnvhxmhlk.supabase.co/rest/v1/productos?select=count' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cmVydXlmanBhY252aHhtaGxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwODAzODYsImV4cCI6MjA5MjY1NjM4Nn0.8X-57s6qv7CSFieQcYQlN0MjseKmTrpiOldoyNItZE4' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cmVydXlmanBhY252aHhtaGxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwODAzODYsImV4cCI6MjA5MjY1NjM4Nn0.8X-57s6qv7CSFieQcYQlN0MjseKmTrpiOldoyNItZE4' -H 'Prefer: count=exact' -I)",
+      "Bash(pip3 install *)",
+      "Bash(open /Users/nicoacosta/Downloads/catalogo_bealquimist_meta.xlsx)",
+      "Bash(xargs ls -la)"
     ],
     "additionalDirectories": [
       "/Users/nicoacosta/Downloads"
