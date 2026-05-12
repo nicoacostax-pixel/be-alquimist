@@ -16,7 +16,7 @@ function decodeJwt(token) {
   } catch { return null; }
 }
 
-async const LEVEL_MINS = [0, 5, 25, 75, 150, 300, 500, 1000, 1600, 2500];
+const LEVEL_MINS = [0, 5, 25, 75, 150, 300, 500, 1000, 1600, 2500];
 function getLevelNum(pts) {
   for (let i = LEVEL_MINS.length - 1; i >= 0; i--) {
     if (pts >= LEVEL_MINS[i]) return i + 1;
@@ -29,7 +29,7 @@ async function getUserLevel(db, userId) {
   return getLevelNum(data?.puntos || 0);
 }
 
-function getCursoBySlugOrId(db, { slug, cursoId }) {
+async function getCursoBySlugOrId(db, { slug, cursoId }) {
   if (cursoId) {
     const { data } = await db.from('cursos').select('*').eq('id', cursoId).single();
     return data;
