@@ -104,33 +104,6 @@ export default function AcademiaLanding() {
   return (
     <div style={{ fontFamily: 'Poppins, sans-serif', background: '#FDFAF6', overflowX: 'hidden' }}>
 
-      {/* ── NAV ── */}
-      <nav style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(253,250,246,0.92)', backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid #EDE0D4',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 32px', height: 60,
-      }}>
-        <span style={{ fontFamily: 'Georgia, serif', fontWeight: 900, fontSize: 18, color: '#4A3F35', letterSpacing: '-0.5px' }}>
-          Be Alquimist
-        </span>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button
-            onClick={() => navigate('/login')}
-            style={{ background: 'none', border: '1.5px solid #D0C8BF', borderRadius: 30, padding: '8px 20px', fontSize: 13, fontWeight: 600, color: '#4A3F35', cursor: 'pointer', fontFamily: 'inherit' }}
-          >
-            Iniciar sesión
-          </button>
-          <button
-            onClick={() => navigate('/registro')}
-            style={{ background: '#B08968', border: 'none', borderRadius: 30, padding: '8px 20px', fontSize: 13, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: 'inherit' }}
-          >
-            Unirme gratis →
-          </button>
-        </div>
-      </nav>
-
       {/* ── HERO ── */}
       <section style={{
         minHeight: '92vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -209,7 +182,7 @@ export default function AcademiaLanding() {
       </section>
 
       {/* ── CURSOS ── */}
-      <section id="cursos-section" style={{ padding: '96px 24px', background: '#fff' }}>
+      <section id="cursos-section" style={{ padding: '56px 24px', background: '#fff' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <FadeIn>
             <div style={{ textAlign: 'center', marginBottom: 56 }}>
@@ -262,7 +235,7 @@ export default function AcademiaLanding() {
       </section>
 
       {/* ── CHAT IA ── */}
-      <section style={{ padding: '96px 24px', background: 'linear-gradient(135deg, #2C2318 0%, #4A3F35 100%)', overflow: 'hidden', position: 'relative' }}>
+      <section style={{ padding: '56px 24px', background: 'linear-gradient(135deg, #2C2318 0%, #4A3F35 100%)', overflow: 'hidden', position: 'relative' }}>
         <div style={{ position: 'absolute', top: -100, right: -100, width: 500, height: 500, borderRadius: '50%', background: 'rgba(176,137,104,0.08)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 64, flexWrap: 'wrap' }}>
           <FadeIn style={{ flex: '1 1 360px' }}>
@@ -270,7 +243,7 @@ export default function AcademiaLanding() {
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(28px, 4vw, 46px)', fontWeight: 900, color: '#fff', margin: '12px 0 20px', letterSpacing: '-0.5px', lineHeight: 1.15 }}>
               Tu formuladora personal,<br />disponible 24/7
             </h2>
-            <p style={{ color: '#C4B09A', fontSize: 16, lineHeight: 1.8, margin: '0 0 32px' }}>
+            <p style={{ color: '#C4B09A', fontSize: 16, lineHeight: 1.8, margin: '0 0 32px', textAlign: 'left' }}>
               Describe el producto que quieres crear y nuestra IA genera la fórmula completa: ingredientes, porcentajes, modo de preparación y consejos de conservación.
             </p>
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -325,7 +298,7 @@ export default function AcademiaLanding() {
       </section>
 
       {/* ── BENEFICIOS ── */}
-      <section style={{ padding: '96px 24px', background: '#F9F5EF' }}>
+      <section style={{ padding: '56px 24px', background: '#F9F5EF' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <FadeIn>
             <div style={{ textAlign: 'center', marginBottom: 56 }}>
@@ -355,7 +328,7 @@ export default function AcademiaLanding() {
       </section>
 
       {/* ── ENVÍOS ── */}
-      <section style={{ padding: '80px 24px', background: '#fff' }}>
+      <section style={{ padding: '48px 24px', background: '#fff' }}>
         <FadeIn>
           <div style={{
             maxWidth: 900, margin: '0 auto',
@@ -402,7 +375,7 @@ export default function AcademiaLanding() {
 
       {/* ── CTA FINAL ── */}
       <section style={{
-        padding: '100px 24px', textAlign: 'center',
+        padding: '64px 24px', textAlign: 'center',
         background: 'linear-gradient(160deg, #2C2318 0%, #4A3F35 100%)',
         position: 'relative', overflow: 'hidden',
       }}>
@@ -443,12 +416,6 @@ export default function AcademiaLanding() {
         </FadeIn>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer style={{ background: '#1A110A', padding: '32px 24px', textAlign: 'center' }}>
-        <p style={{ color: '#6B5744', fontSize: 13, margin: 0, fontWeight: 500 }}>
-          © 2025 Be Alquimist · Cosmética natural hecha con amor 🌿
-        </p>
-      </footer>
     </div>
   );
 }
