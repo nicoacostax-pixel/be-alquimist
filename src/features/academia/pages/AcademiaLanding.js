@@ -62,7 +62,7 @@ export default function AcademiaLanding() {
               padding: '5px 16px', fontSize: 12, fontWeight: 700, color: '#B08968',
               marginBottom: 24, boxShadow: '0 2px 8px rgba(176,137,104,0.12)', letterSpacing: 0.5,
             }}>
-              🎁 7 días gratis · sin tarjeta de crédito
+              🎁 Inscripción gratuita · sin tarjeta de crédito
             </div>
 
             <h1 style={{
@@ -76,7 +76,7 @@ export default function AcademiaLanding() {
             </h1>
 
             <p style={{ fontSize: 15, color: '#7A6A5A', lineHeight: 1.75, margin: '0 0 28px', maxWidth: 460 }}>
-              +12 cursos, chat IA de recetas y comunidad activa. Pruébalo <strong>7 días completamente gratis</strong>.
+              +12 cursos, chat IA de recetas y comunidad activa. <strong>Inscríbete gratis</strong> y empieza hoy.
             </p>
 
             {/* Benefits strip */}
@@ -100,7 +100,7 @@ export default function AcademiaLanding() {
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 22, fontWeight: 900, color: '#2C2318', margin: '0 0 4px' }}>
                 Crear mi cuenta gratis
               </h2>
-              <p style={{ color: '#9E8E80', fontSize: 13, margin: '0 0 24px' }}>7 días de acceso completo · Sin tarjeta</p>
+              <p style={{ color: '#9E8E80', fontSize: 13, margin: '0 0 24px' }}>Acceso gratuito · Sin tarjeta de crédito</p>
 
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <input
@@ -142,7 +142,7 @@ export default function AcademiaLanding() {
                     boxShadow: '0 4px 16px rgba(176,137,104,0.4)',
                   }}
                 >
-                  {sending ? 'Creando tu cuenta…' : 'Empezar mis 7 días gratis →'}
+                  {sending ? 'Creando tu cuenta…' : 'Inscribirme gratis →'}
                 </button>
               </form>
 
