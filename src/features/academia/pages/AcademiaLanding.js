@@ -124,8 +124,8 @@ export default function AcademiaLanding() {
       });
       const json = await res.json();
       if (!res.ok) { setFormErr(json.error || 'Ocurrió un error. Intenta de nuevo.'); setSending(false); return; }
-      if (json.tokenHash) {
-        await supabase.auth.verifyOtp({ token_hash: json.tokenHash, type: 'magiclink' });
+      if (json.email && json.tempPassword) {
+        await supabase.auth.signInWithPassword({ email: json.email, password: json.tempPassword });
       }
       navigate('/academia/confirmacion');
     } catch {

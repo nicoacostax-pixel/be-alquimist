@@ -20,23 +20,30 @@ module.exports = async function handler(req, res) {
   const email = correo.trim().toLowerCase();
   const sb = getSb();
 
-  // 1. Create or retrieve Supabase user
+  // 1. Create or retrieve Supabase user, set temp password for auto-login
+  const crypto = require('crypto');
+  const tempPassword = crypto.randomBytes(20).toString('hex');
   let userId;
+  let isNewUser = false;
+
   try {
     const { data: created, error: createErr } = await sb.auth.admin.createUser({
       email,
+      password: tempPassword,
       email_confirm: true,
       user_metadata: { nombre: nombre.trim(), telefono: telefono || '' },
     });
 
     if (createErr) {
-      // User may already exist — fetch by email
+      // User already exists — update their password temporarily for auto-login
       const { data: { users } } = await sb.auth.admin.listUsers({ perPage: 1000 });
       const existing = (users || []).find(u => u.email === email);
       if (!existing) return res.status(500).json({ error: createErr.message });
       userId = existing.id;
+      await sb.auth.admin.updateUserById(userId, { password: tempPassword });
     } else {
       userId = created.user.id;
+      isNewUser = true;
     }
   } catch (e) {
     return res.status(500).json({ error: 'Error al crear cuenta: ' + e.message });
@@ -51,20 +58,7 @@ module.exports = async function handler(req, res) {
 
   const SITE = process.env.REACT_APP_SITE_URL || 'https://bealquimist.com';
 
-  // 3. Generate token hash for client-side auto-login (verifyOtp)
-  let tokenHash = null;
-  try {
-    const { data: mlData } = await sb.auth.admin.generateLink({
-      type: 'magiclink',
-      email,
-      options: { redirectTo: `${SITE}/academia/confirmacion` },
-    });
-    const actionLink = mlData?.properties?.action_link || '';
-    const url = new URL(actionLink);
-    tokenHash = url.searchParams.get('token') || null;
-  } catch (_) { /* no auto-login */ }
-
-  // 3b. Generate password setup link (for welcome email)
+  // 3. Generate password setup link (for welcome email)
   let passwordLink = `${SITE}/cuenta`;
   try {
     const { data: linkData } = await sb.auth.admin.generateLink({
@@ -134,5 +128,5 @@ module.exports = async function handler(req, res) {
     console.error('[academia-registro] error guardando recordatorio:', e.message);
   }
 
-  return res.json({ ok: true, tokenHash });
+  return res.json({ ok: true, email, tempPassword });
 };
