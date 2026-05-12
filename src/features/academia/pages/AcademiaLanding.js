@@ -266,7 +266,122 @@ export default function AcademiaLanding() {
               </FadeIn>
             ))}
           </div>
+
+          {/* CTA bajo cursos */}
+          <FadeIn>
+            <div style={{ textAlign: 'center', marginTop: 48 }}>
+              <button
+                onClick={scrollToForm}
+                style={{
+                  background: 'linear-gradient(135deg, #B08968, #8C6A4F)', color: '#fff',
+                  border: 'none', borderRadius: 14, padding: '15px 38px',
+                  fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
+                  boxShadow: '0 6px 20px rgba(176,137,104,0.35)',
+                }}
+              >
+                Quiero acceso gratis por 7 días →
+              </button>
+            </div>
+          </FadeIn>
         </div>
+      </section>
+
+      {/* ── REGISTRO FORM ── */}
+      <section id="registro-form" style={{
+        padding: '64px 24px',
+        background: 'linear-gradient(160deg, #2C2318 0%, #4A3F35 100%)',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 700, height: 700, borderRadius: '50%', background: 'rgba(176,137,104,0.05)', pointerEvents: 'none' }} />
+        <FadeIn>
+          <div style={{ maxWidth: 940, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 56, flexWrap: 'wrap' }}>
+
+            {/* Left copy */}
+            <div style={{ flex: '1 1 340px', position: 'relative' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(176,137,104,0.2)', borderRadius: 30, padding: '5px 16px', fontSize: 12, fontWeight: 700, color: '#C4A882', marginBottom: 20, letterSpacing: 1, textTransform: 'uppercase' }}>
+                🎁 7 días completamente gratis
+              </div>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 900, color: '#fff', margin: '0 0 18px', lineHeight: 1.15, letterSpacing: '-0.5px' }}>
+                Empieza hoy.<br />
+                <span style={{ color: '#C4A882' }}>Sin costo.</span>
+              </h2>
+              <p style={{ color: '#A89080', fontSize: 15, lineHeight: 1.8, margin: '0 0 24px' }}>
+                Accede a los 6 cursos, al chat IA de recetas y a la comunidad durante 7 días sin pagar nada. Sin tarjeta de crédito, sin compromisos.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {['✓ Acceso inmediato a todos los cursos', '✓ Chat IA de recetas ilimitado', '✓ Comunidad de alquimistas activa', '✓ Envíos gratis en tu tienda de insumos'].map((t, i) => (
+                  <span key={i} style={{ color: '#C4B09A', fontSize: 14, fontWeight: 500 }}>{t}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Right form */}
+            <div style={{ flex: '1 1 340px', position: 'relative' }}>
+              <div style={{ background: '#fff', borderRadius: 24, padding: '36px 32px', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
+                {done ? (
+                  <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                    <div style={{ fontSize: 52, marginBottom: 16 }}>📬</div>
+                    <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 22, fontWeight: 900, color: '#4A3F35', margin: '0 0 12px' }}>¡Revisa tu correo!</h3>
+                    <p style={{ color: '#7A6A5A', fontSize: 14, lineHeight: 1.7, margin: 0 }}>
+                      Te enviamos un enlace mágico a <strong>{form.correo}</strong>. Haz clic en él para activar tu cuenta y empezar.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 900, color: '#4A3F35', margin: '0 0 6px' }}>
+                      Crear mi cuenta gratis
+                    </h3>
+                    <p style={{ color: '#9E8E80', fontSize: 13, margin: '0 0 24px' }}>7 días de acceso completo · Sin tarjeta</p>
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                      <input
+                        placeholder="Tu nombre completo *"
+                        value={form.nombre}
+                        onChange={e => setForm(p => ({ ...p, nombre: e.target.value }))}
+                        required
+                        style={{ border: '1.5px solid #E0D6CE', borderRadius: 10, padding: '13px 16px', fontSize: 14, fontFamily: 'Poppins, sans-serif', outline: 'none', color: '#1A1A1A', background: '#FAFAFA' }}
+                      />
+                      <input
+                        placeholder="Correo electrónico *"
+                        type="email"
+                        value={form.correo}
+                        onChange={e => setForm(p => ({ ...p, correo: e.target.value }))}
+                        required
+                        style={{ border: '1.5px solid #E0D6CE', borderRadius: 10, padding: '13px 16px', fontSize: 14, fontFamily: 'Poppins, sans-serif', outline: 'none', color: '#1A1A1A', background: '#FAFAFA' }}
+                      />
+                      <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #E0D6CE', borderRadius: 10, background: '#FAFAFA', overflow: 'hidden' }}>
+                        <span style={{ padding: '13px 12px', fontSize: 14, color: '#7A6A5A', borderRight: '1px solid #E0D6CE', background: '#F3EFE8', whiteSpace: 'nowrap' }}>🇲🇽 +52</span>
+                        <input
+                          placeholder="Teléfono (opcional)"
+                          type="tel"
+                          value={form.telefono}
+                          onChange={e => setForm(p => ({ ...p, telefono: e.target.value }))}
+                          style={{ flex: 1, border: 'none', padding: '13px 14px', fontSize: 14, fontFamily: 'Poppins, sans-serif', outline: 'none', color: '#1A1A1A', background: 'transparent' }}
+                        />
+                      </div>
+                      {formErr && <p style={{ color: '#c0392b', fontSize: 13, margin: 0 }}>{formErr}</p>}
+                      <button
+                        type="submit"
+                        disabled={sending}
+                        style={{
+                          background: 'linear-gradient(135deg, #B08968, #8C6A4F)', color: '#fff',
+                          border: 'none', borderRadius: 10, padding: '15px',
+                          fontSize: 15, fontWeight: 800, cursor: sending ? 'not-allowed' : 'pointer',
+                          fontFamily: 'Poppins, sans-serif', marginTop: 4,
+                          boxShadow: '0 4px 16px rgba(176,137,104,0.4)',
+                        }}
+                      >
+                        {sending ? 'Enviando…' : 'Empezar mis 7 días gratis →'}
+                      </button>
+                    </form>
+                    <p style={{ fontSize: 11, color: '#B0A09A', textAlign: 'center', marginTop: 16, lineHeight: 1.6 }}>
+                      Al registrarte aceptas nuestros términos. Sin cobros automáticos.
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </FadeIn>
       </section>
 
       {/* ── CHAT IA ── */}
@@ -288,17 +403,20 @@ export default function AcademiaLanding() {
                 </li>
               ))}
             </ul>
-            <button
-              onClick={() => window.location.href = '/'}
-              style={{
-                background: 'linear-gradient(135deg, #B08968, #8C6A4F)', color: '#fff',
-                border: 'none', borderRadius: 12, padding: '14px 32px',
-                fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-                boxShadow: '0 4px 20px rgba(176,137,104,0.4)',
-              }}
-            >
-              Probar el chat IA →
-            </button>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => window.location.href = '/'}
+                style={{ background: 'rgba(255,255,255,0.12)', color: '#D4C4B0', border: '1.5px solid rgba(255,255,255,0.2)', borderRadius: 12, padding: '13px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Probar el chat IA →
+              </button>
+              <button
+                onClick={scrollToForm}
+                style={{ background: 'linear-gradient(135deg, #B08968, #8C6A4F)', color: '#fff', border: 'none', borderRadius: 12, padding: '13px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 16px rgba(176,137,104,0.4)' }}
+              >
+                Quiero mis 7 días gratis →
+              </button>
+            </div>
           </FadeIn>
 
           <FadeIn delay={0.2} style={{ flex: '1 1 300px' }}>
@@ -359,6 +477,22 @@ export default function AcademiaLanding() {
               </FadeIn>
             ))}
           </div>
+
+          <FadeIn>
+            <div style={{ textAlign: 'center', marginTop: 48 }}>
+              <button
+                onClick={scrollToForm}
+                style={{
+                  background: 'linear-gradient(135deg, #B08968, #8C6A4F)', color: '#fff',
+                  border: 'none', borderRadius: 14, padding: '15px 38px',
+                  fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
+                  boxShadow: '0 6px 20px rgba(176,137,104,0.35)',
+                }}
+              >
+                Empezar gratis — 7 días sin costo →
+              </button>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
@@ -403,105 +537,6 @@ export default function AcademiaLanding() {
                   <span style={{ fontSize: 14, fontWeight: 600, color: '#4A3F35' }}>{item.text}</span>
                 </div>
               ))}
-            </div>
-          </div>
-        </FadeIn>
-      </section>
-
-      {/* ── REGISTRO FORM ── */}
-      <section id="registro-form" style={{
-        padding: '64px 24px',
-        background: 'linear-gradient(160deg, #2C2318 0%, #4A3F35 100%)',
-        position: 'relative', overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 700, height: 700, borderRadius: '50%', background: 'rgba(176,137,104,0.05)', pointerEvents: 'none' }} />
-        <FadeIn>
-          <div style={{ maxWidth: 940, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 56, flexWrap: 'wrap' }}>
-
-            {/* Left copy */}
-            <div style={{ flex: '1 1 340px', position: 'relative' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(176,137,104,0.2)', borderRadius: 30, padding: '5px 16px', fontSize: 12, fontWeight: 700, color: '#C4A882', marginBottom: 20, letterSpacing: 1, textTransform: 'uppercase' }}>
-                🎁 7 días completamente gratis
-              </div>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 900, color: '#fff', margin: '0 0 18px', lineHeight: 1.15, letterSpacing: '-0.5px' }}>
-                Empieza hoy.<br />
-                <span style={{ color: '#C4A882' }}>Sin costo.</span>
-              </h2>
-              <p style={{ color: '#A89080', fontSize: 15, lineHeight: 1.8, margin: '0 0 24px' }}>
-                Accede a los 6 cursos, al chat IA de recetas y a la comunidad durante 7 días sin pagar nada. Sin tarjeta de crédito, sin compromisos.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {['✓ Acceso inmediato a todos los cursos', '✓ Chat IA de recetas ilimitado', '✓ Comunidad de alquimistas activa', '✓ Envíos gratis en tu tienda de insumos'].map((t, i) => (
-                  <span key={i} style={{ color: '#C4B09A', fontSize: 14, fontWeight: 500 }}>{t}</span>
-                ))}
-              </div>
-            </div>
-
-            {/* Right form */}
-            <div style={{ flex: '1 1 340px', position: 'relative' }}>
-              <div style={{ background: '#fff', borderRadius: 24, padding: '36px 32px', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
-                {done ? (
-                  <div style={{ textAlign: 'center', padding: '16px 0' }}>
-                    <div style={{ fontSize: 52, marginBottom: 16 }}>📬</div>
-                    <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 22, fontWeight: 900, color: '#4A3F35', margin: '0 0 12px' }}>¡Revisa tu correo!</h3>
-                    <p style={{ color: '#7A6A5A', fontSize: 14, lineHeight: 1.7, margin: 0 }}>
-                      Te enviamos un enlace mágico a <strong>{form.correo}</strong>. Haz clic en él para activar tu cuenta y empezar.
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 900, color: '#4A3F35', margin: '0 0 6px' }}>
-                      Crear mi cuenta gratis
-                    </h3>
-                    <p style={{ color: '#9E8E80', fontSize: 13, margin: '0 0 24px' }}>7 días de acceso completo · Sin tarjeta</p>
-
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                      <input
-                        placeholder="Tu nombre completo *"
-                        value={form.nombre}
-                        onChange={e => setForm(p => ({ ...p, nombre: e.target.value }))}
-                        required
-                        style={{ border: '1.5px solid #E0D6CE', borderRadius: 10, padding: '13px 16px', fontSize: 14, fontFamily: 'Poppins, sans-serif', outline: 'none', color: '#1A1A1A', background: '#FAFAFA' }}
-                      />
-                      <input
-                        placeholder="Correo electrónico *"
-                        type="email"
-                        value={form.correo}
-                        onChange={e => setForm(p => ({ ...p, correo: e.target.value }))}
-                        required
-                        style={{ border: '1.5px solid #E0D6CE', borderRadius: 10, padding: '13px 16px', fontSize: 14, fontFamily: 'Poppins, sans-serif', outline: 'none', color: '#1A1A1A', background: '#FAFAFA' }}
-                      />
-                      <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #E0D6CE', borderRadius: 10, background: '#FAFAFA', overflow: 'hidden' }}>
-                        <span style={{ padding: '13px 12px', fontSize: 14, color: '#7A6A5A', borderRight: '1px solid #E0D6CE', background: '#F3EFE8', whiteSpace: 'nowrap' }}>🇲🇽 +52</span>
-                        <input
-                          placeholder="Teléfono (opcional)"
-                          type="tel"
-                          value={form.telefono}
-                          onChange={e => setForm(p => ({ ...p, telefono: e.target.value }))}
-                          style={{ flex: 1, border: 'none', padding: '13px 14px', fontSize: 14, fontFamily: 'Poppins, sans-serif', outline: 'none', color: '#1A1A1A', background: 'transparent' }}
-                        />
-                      </div>
-                      {formErr && <p style={{ color: '#c0392b', fontSize: 13, margin: 0 }}>{formErr}</p>}
-                      <button
-                        type="submit"
-                        disabled={sending}
-                        style={{
-                          background: 'linear-gradient(135deg, #B08968, #8C6A4F)', color: '#fff',
-                          border: 'none', borderRadius: 10, padding: '15px',
-                          fontSize: 15, fontWeight: 800, cursor: sending ? 'not-allowed' : 'pointer',
-                          fontFamily: 'Poppins, sans-serif', marginTop: 4,
-                          boxShadow: '0 4px 16px rgba(176,137,104,0.4)',
-                        }}
-                      >
-                        {sending ? 'Enviando…' : 'Empezar mis 7 días gratis →'}
-                      </button>
-                    </form>
-                    <p style={{ fontSize: 11, color: '#B0A09A', textAlign: 'center', marginTop: 16, lineHeight: 1.6 }}>
-                      Al registrarte aceptas nuestros términos. Sin cobros automáticos.
-                    </p>
-                  </>
-                )}
-              </div>
             </div>
           </div>
         </FadeIn>
