@@ -16,7 +16,20 @@ function decodeJwt(token) {
   } catch { return null; }
 }
 
-async function getCursoBySlugOrId(db, { slug, cursoId }) {
+async const LEVEL_MINS = [0, 5, 25, 75, 150, 300, 500, 1000, 1600, 2500];
+function getLevelNum(pts) {
+  for (let i = LEVEL_MINS.length - 1; i >= 0; i--) {
+    if (pts >= LEVEL_MINS[i]) return i + 1;
+  }
+  return 1;
+}
+
+async function getUserLevel(db, userId) {
+  const { data } = await db.from('perfiles').select('puntos').eq('id', userId).single();
+  return getLevelNum(data?.puntos || 0);
+}
+
+function getCursoBySlugOrId(db, { slug, cursoId }) {
   if (cursoId) {
     const { data } = await db.from('cursos').select('*').eq('id', cursoId).single();
     return data;
@@ -74,18 +87,18 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === 'admin_createCurso') {
-      const { titulo, slug, descripcion, imagen_url } = data;
+      const { titulo, slug, descripcion, imagen_url, nivel_requerido } = data;
       const { data: curso, error } = await db.from('cursos')
-        .insert({ titulo, slug, descripcion, imagen_url, publicado: false })
+        .insert({ titulo, slug, descripcion, imagen_url, publicado: false, nivel_requerido: nivel_requerido ?? 1 })
         .select().single();
       if (error) return res.status(500).json({ error: error.message });
       return res.json({ curso });
     }
 
     if (action === 'admin_updateCurso') {
-      const { cursoId, titulo, slug, descripcion, imagen_url, publicado } = data;
+      const { cursoId, titulo, slug, descripcion, imagen_url, publicado, nivel_requerido } = data;
       const { data: curso, error } = await db.from('cursos')
-        .update({ titulo, slug, descripcion, imagen_url, publicado })
+        .update({ titulo, slug, descripcion, imagen_url, publicado, nivel_requerido })
         .eq('id', cursoId).select().single();
       if (error) return res.status(500).json({ error: error.message });
       return res.json({ curso });
@@ -161,9 +174,29 @@ module.exports = async function handler(req, res) {
 
   // ── STUDENT ACTIONS ───────────────────────────────────────────────────────────
 
+  if (action === 'checkAcceso') {
+    const curso = await getCursoBySlugOrId(db, data);
+    if (!curso) return res.json({ tieneAcceso: false });
+    const nivelRequerido = curso.nivel_requerido || 1;
+    const nivelUsuario   = await getUserLevel(db, userId);
+    if (nivelUsuario < nivelRequerido) {
+      return res.json({ tieneAcceso: false, nivelSuficiente: false, nivelRequerido, nivelUsuario });
+    }
+    const { data: insc } = await db.from('inscripciones')
+      .select('id').eq('user_id', userId).eq('curso_id', curso.id)
+      .gt('expira_at', new Date().toISOString()).maybeSingle();
+    return res.json({ tieneAcceso: !!insc, nivelSuficiente: true, nivelRequerido, nivelUsuario });
+  }
+
   if (action === 'getPlayerData') {
     const curso = await getCursoBySlugOrId(db, data);
     if (!curso) return res.status(404).json({ error: 'Curso no encontrado' });
+
+    const nivelRequerido = curso.nivel_requerido || 1;
+    const nivelUsuario   = await getUserLevel(db, userId);
+    if (nivelUsuario < nivelRequerido) {
+      return res.status(403).json({ error: 'Nivel insuficiente', needsLevel: true, nivelRequerido, nivelUsuario, curso });
+    }
 
     const { data: inscripcion } = await db.from('inscripciones')
       .select('*')

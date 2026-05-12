@@ -141,9 +141,11 @@ export default function CursoPlayer() {
   const { slug }       = useParams();
   const navigate       = useNavigate();
   const [token,         setToken]         = useState(null);
+  const [userId,        setUserId]        = useState(null);
   const [loading,       setLoading]       = useState(true);
   const [playerData,    setPlayerData]    = useState(null);
   const [needsEnroll,   setNeedsEnroll]   = useState(false);
+  const [needsLevel,    setNeedsLevel]    = useState(null);
   const [cursoPrev,     setCursoPrev]     = useState(null);
   const [leccion,       setLeccion]       = useState(null);
   const [completadas,   setCompletadas]   = useState([]);
@@ -154,6 +156,10 @@ export default function CursoPlayer() {
     setLoading(true);
     const res = await api('getPlayerData', { slug }, tok);
     setLoading(false);
+    if (res.needsLevel) {
+      setNeedsLevel({ nivelRequerido: res.nivelRequerido, nivelUsuario: res.nivelUsuario, curso: res.curso });
+      return;
+    }
     if (res.needsEnrollment) {
       setNeedsEnroll(true);
       setCursoPrev(res.curso);
@@ -174,6 +180,7 @@ export default function CursoPlayer() {
       }
       const tok = session.access_token;
       setToken(tok);
+      setUserId(session.user.id);
       loadPlayer(tok);
     });
   }, [slug, navigate, loadPlayer]);
@@ -188,8 +195,16 @@ export default function CursoPlayer() {
     setMarking(false);
     // Auto-advance on mark complete
     if (!isDone) {
-      const all  = playerData.modulos.flatMap(m => m.lecciones || []);
-      const idx  = all.findIndex(l => l.id === leccion.id);
+      const newTotal = completadas.length + 1;
+      if (userId && newTotal % 5 === 0) {
+        const batch = Math.floor(newTotal / 5);
+        const { error } = await supabase.from('puntos_log').insert({
+          user_id: userId, tipo: 'lecciones_5', referencia_id: `${userId}_b${batch}`,
+        });
+        if (!error) await supabase.rpc('incrementar_puntos', { uid: userId, delta: 1 });
+      }
+      const all = playerData.modulos.flatMap(m => m.lecciones || []);
+      const idx = all.findIndex(l => l.id === leccion.id);
       if (idx < all.length - 1) setLeccion(all[idx + 1]);
     }
   }, [leccion, completadas, token, marking, playerData]);
@@ -197,6 +212,27 @@ export default function CursoPlayer() {
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Poppins, sans-serif', color: '#7A6A5A' }}>
       Cargando…
+    </div>
+  );
+
+  if (needsLevel) return (
+    <div style={{ minHeight: '100vh', background: '#F3EFE8', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 16px', fontFamily: 'Poppins, sans-serif' }}>
+      <div style={{ textAlign: 'center', maxWidth: 400 }}>
+        <span style={{ fontSize: 56 }}>🔒</span>
+        <h1 style={{ fontSize: 22, fontWeight: 900, color: '#4A3F35', margin: '18px 0 10px', fontFamily: 'Georgia, serif' }}>
+          {needsLevel.curso?.titulo || 'Curso bloqueado'}
+        </h1>
+        <p style={{ color: '#7A6A5A', fontSize: 15, lineHeight: 1.7, margin: '0 0 24px' }}>
+          Este curso requiere <strong>Nivel {needsLevel.nivelRequerido}</strong> para acceder.<br />
+          Tu nivel actual es <strong>{needsLevel.nivelUsuario}</strong>. Sigue participando en la comunidad para subir de nivel.
+        </p>
+        <button
+          onClick={() => window.history.back()}
+          style={{ background: '#B08968', color: '#fff', border: 'none', borderRadius: 10, padding: '13px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          ← Volver a cursos
+        </button>
+      </div>
     </div>
   );
 

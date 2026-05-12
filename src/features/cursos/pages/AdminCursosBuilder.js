@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../../shared/lib/supabaseClient';
+import { LEVELS, getLevel } from '../../comunidad/gamification';
 
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
 
@@ -326,6 +327,7 @@ function CursoEditor({ cursoId, token, onBack }) {
       descripcion: res.curso.descripcion || '',
       imagen_url: res.curso.imagen_url || '',
       publicado: res.curso.publicado,
+      nivel_requerido: res.curso.nivel_requerido ?? 1,
     });
     setModulos(res.modulos || []);
     setLoading(false);
@@ -381,6 +383,22 @@ function CursoEditor({ cursoId, token, onBack }) {
             <input value={cursoForm.slug}        onChange={e => setCursoForm(p => ({ ...p, slug:        e.target.value.toLowerCase().replace(/\s+/g, '-') }))} placeholder="Slug (ej: velas-avanzadas)" style={S.input} />
             <textarea value={cursoForm.descripcion} onChange={e => setCursoForm(p => ({ ...p, descripcion: e.target.value }))} placeholder="Descripción" rows={3} style={{ ...S.input, resize: 'vertical' }} />
             <PortadaUploader value={cursoForm.imagen_url} onChange={url => setCursoForm(p => ({ ...p, imagen_url: url }))} />
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 700, color: '#7A6A5A', display: 'block', marginBottom: 6 }}>
+                Nivel mínimo requerido
+              </label>
+              <select
+                value={cursoForm.nivel_requerido}
+                onChange={e => setCursoForm(p => ({ ...p, nivel_requerido: Number(e.target.value) }))}
+                style={S.input}
+              >
+                {LEVELS.map(l => (
+                  <option key={l.level} value={l.level}>
+                    Nivel {l.level} — {l.name} ({l.min === 0 ? 'Gratis' : `${l.min}+ pts`})
+                  </option>
+                ))}
+              </select>
+            </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#4A3F35', cursor: 'pointer' }}>
               <input type="checkbox" checked={cursoForm.publicado} onChange={e => setCursoForm(p => ({ ...p, publicado: e.target.checked }))} />
               Publicado (visible para usuarios)
@@ -412,6 +430,11 @@ function CursoEditor({ cursoId, token, onBack }) {
                 }}>
                   {curso.publicado ? 'Publicado' : 'Borrador'}
                 </span>
+                {(() => { const lvl = LEVELS.find(l => l.level === (cursoForm.nivel_requerido || 1)); return lvl ? (
+                  <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: lvl.color + '22', color: lvl.color }}>
+                    Nivel {lvl.level} — {lvl.name}
+                  </span>
+                ) : null; })()}
               </div>
             </div>
             <button onClick={() => setEditingCurso(true)} style={S.btnGhost}>✏️ Editar</button>
@@ -480,11 +503,13 @@ export default function AdminCursosBuilder() {
   const [loading,        setLoading]        = useState(true);
   const [selectedId,     setSelectedId]     = useState(null);
   const [showNewForm,    setShowNewForm]    = useState(false);
-  const [newForm,        setNewForm]        = useState({ titulo: '', slug: '', descripcion: '', imagen_url: '' });
+  const [newForm,        setNewForm]        = useState({ titulo: '', slug: '', descripcion: '', imagen_url: '', nivel_requerido: 1 });
   const [creating,       setCreating]       = useState(false);
+  const [preview,        setPreview]        = useState(false);
+  const [myLevel,        setMyLevel]        = useState(10);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) return;
       const tok = session.access_token;
       setToken(tok);
@@ -492,6 +517,8 @@ export default function AdminCursosBuilder() {
         setCursos(d.cursos || []);
         setLoading(false);
       });
+      const { data: perfil } = await supabase.from('perfiles').select('puntos').eq('id', session.user.id).single();
+      setMyLevel(getLevel(perfil?.puntos || 0).level);
     });
   }, []);
 
@@ -505,7 +532,7 @@ export default function AdminCursosBuilder() {
     }
     setCreating(false);
     setShowNewForm(false);
-    setNewForm({ titulo: '', slug: '', descripcion: '' });
+    setNewForm({ titulo: '', slug: '', descripcion: '', imagen_url: '', nivel_requerido: 1 });
   };
 
   const deleteCurso = async (id) => {
@@ -545,8 +572,28 @@ export default function AdminCursosBuilder() {
               Constructor de Cursos
             </h1>
           </div>
-          <button onClick={() => setShowNewForm(true)} style={S.btnPrimary}>+ Nuevo curso</button>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <button
+              onClick={() => setPreview(p => !p)}
+              style={{
+                ...S.btnGhost,
+                background: preview ? '#4A3F35' : 'none',
+                color:      preview ? '#fff'    : '#4A3F35',
+                border:     preview ? 'none'    : '1.5px solid #D0C8BF',
+              }}
+            >
+              {preview ? '👤 Vista usuario' : '🔧 Vista admin'}
+            </button>
+            {!preview && <button onClick={() => setShowNewForm(true)} style={S.btnPrimary}>+ Nuevo curso</button>}
+          </div>
         </div>
+
+        {preview && (
+          <div style={{ background: '#FFF8F0', border: '1.5px dashed #B08968', borderRadius: 12, padding: '12px 18px', marginBottom: 20, fontSize: 13, color: '#7A6A5A' }}>
+            👁 Simulando vista de usuario · Tu nivel actual: <strong style={{ color: '#B08968' }}>Nivel {myLevel} — {getLevel(0).name}</strong>
+            {' '}— Los cursos bloqueados se muestran tal como los vería un usuario con este nivel.
+          </div>
+        )}
 
         {/* New course form */}
         {showNewForm && (
@@ -595,45 +642,100 @@ export default function AdminCursosBuilder() {
             <p style={{ color: '#7A6A5A', fontSize: 15, margin: '0 0 20px' }}>No hay cursos todavía.</p>
             <button onClick={() => setShowNewForm(true)} style={S.btnPrimary}>+ Crear primer curso</button>
           </div>
-        ) : cursos.map((c, idx) => (
-          <div key={c.id} style={{ background: '#fff', borderRadius: 14, padding: '18px 24px', border: '1px solid #EDE0D4', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-
-            {/* Orden buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
-              <button
-                onClick={() => moveCurso(idx, -1)}
-                disabled={idx === 0}
-                style={{ ...S.btnSm, padding: '2px 8px', fontSize: 16, opacity: idx === 0 ? 0.25 : 1 }}
-                title="Subir"
-              >↑</button>
-              <button
-                onClick={() => moveCurso(idx, 1)}
-                disabled={idx === cursos.length - 1}
-                style={{ ...S.btnSm, padding: '2px 8px', fontSize: 16, opacity: idx === cursos.length - 1 ? 0.25 : 1 }}
-                title="Bajar"
-              >↓</button>
-            </div>
-
-            {c.imagen_url && (
-              <img src={c.imagen_url} alt="" style={{ width: 64, height: 44, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
-            )}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 800, color: '#4A3F35', fontSize: 15, marginBottom: 2 }}>{c.titulo}</div>
-              <div style={{ fontSize: 12, color: '#9E8E80', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                /cursos/{c.slug}/aprender
-              </div>
-            </div>
-            <span style={{
-              fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 20, flexShrink: 0,
-              background: c.publicado ? '#E8F5E9' : '#FFF3E0',
-              color: c.publicado ? '#2E7D32' : '#E65100',
-            }}>
-              {c.publicado ? 'Publicado' : 'Borrador'}
-            </span>
-            <button onClick={() => setSelectedId(c.id)} style={S.btnPrimary}>Editar →</button>
-            <button onClick={() => deleteCurso(c.id)} style={{ ...S.btnSm, color: '#c0392b', fontSize: 18 }}>✕</button>
+        ) : preview ? (
+          /* ── Vista usuario (preview) ── */
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 18 }}>
+            {cursos.filter(c => c.publicado).map(c => {
+              const nivelReq  = c.nivel_requerido || 1;
+              const locked    = myLevel < nivelReq;
+              const lvlInfo   = LEVELS.find(l => l.level === nivelReq) || LEVELS[0];
+              return (
+                <div key={c.id} style={{
+                  background: '#fff', borderRadius: 14, overflow: 'hidden',
+                  border: '1px solid #EDE0D4', opacity: locked ? 0.75 : 1,
+                  boxShadow: '0 2px 10px rgba(74,63,53,0.06)',
+                  position: 'relative',
+                }}>
+                  <div style={{ background: '#F3EFE8', aspectRatio: '16/9', overflow: 'hidden', position: 'relative' }}>
+                    {c.imagen_url
+                      ? <img src={c.imagen_url} alt={c.titulo} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: locked ? 'grayscale(60%)' : 'none' }} />
+                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36 }}>🕯️</div>
+                    }
+                    {locked && (
+                      <div style={{
+                        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                        alignItems: 'center', justifyContent: 'center',
+                        background: 'rgba(30,20,10,0.52)', gap: 6,
+                      }}>
+                        <span style={{ fontSize: 28 }}>🔒</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', background: lvlInfo.color, padding: '3px 12px', borderRadius: 20 }}>
+                          Nivel {nivelReq} requerido
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ padding: '14px 16px 16px' }}>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: '#4A3F35', marginBottom: 4 }}>{c.titulo}</div>
+                    {locked ? (
+                      <p style={{ fontSize: 12, color: '#9E8E80', margin: '0 0 10px' }}>
+                        Necesitas ser <strong style={{ color: lvlInfo.color }}>{lvlInfo.name}</strong> para acceder.
+                      </p>
+                    ) : (
+                      <p style={{ fontSize: 12, color: '#9E8E80', margin: '0 0 10px', lineHeight: 1.5 }}>
+                        {c.descripcion?.slice(0, 80) || ''}
+                      </p>
+                    )}
+                    <button disabled={locked} style={{
+                      width: '100%', background: locked ? '#D0C8BF' : '#B08968',
+                      color: '#fff', border: 'none', borderRadius: 8, padding: '9px',
+                      fontSize: 13, fontWeight: 700, cursor: locked ? 'not-allowed' : 'pointer',
+                    }}>
+                      {locked ? `🔒 Bloqueado` : 'Ver curso →'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        ))}
+        ) : (
+          /* ── Vista admin ── */
+          cursos.map((c, idx) => {
+            const nivelReq = c.nivel_requerido || 1;
+            const lvlInfo  = LEVELS.find(l => l.level === nivelReq) || LEVELS[0];
+            return (
+              <div key={c.id} style={{ background: '#fff', borderRadius: 14, padding: '18px 24px', border: '1px solid #EDE0D4', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+
+                {/* Orden buttons */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
+                  <button onClick={() => moveCurso(idx, -1)} disabled={idx === 0} style={{ ...S.btnSm, padding: '2px 8px', fontSize: 16, opacity: idx === 0 ? 0.25 : 1 }} title="Subir">↑</button>
+                  <button onClick={() => moveCurso(idx, 1)} disabled={idx === cursos.length - 1} style={{ ...S.btnSm, padding: '2px 8px', fontSize: 16, opacity: idx === cursos.length - 1 ? 0.25 : 1 }} title="Bajar">↓</button>
+                </div>
+
+                {c.imagen_url && (
+                  <img src={c.imagen_url} alt="" style={{ width: 64, height: 44, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 800, color: '#4A3F35', fontSize: 15, marginBottom: 2 }}>{c.titulo}</div>
+                  <div style={{ fontSize: 12, color: '#9E8E80', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    /cursos/{c.slug}/aprender
+                  </div>
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, flexShrink: 0, background: lvlInfo.color + '22', color: lvlInfo.color }}>
+                  Nivel {nivelReq}
+                </span>
+                <span style={{
+                  fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 20, flexShrink: 0,
+                  background: c.publicado ? '#E8F5E9' : '#FFF3E0',
+                  color: c.publicado ? '#2E7D32' : '#E65100',
+                }}>
+                  {c.publicado ? 'Publicado' : 'Borrador'}
+                </span>
+                <button onClick={() => setSelectedId(c.id)} style={S.btnPrimary}>Editar →</button>
+                <button onClick={() => deleteCurso(c.id)} style={{ ...S.btnSm, color: '#c0392b', fontSize: 18 }}>✕</button>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
