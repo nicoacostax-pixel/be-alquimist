@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const PASOS = [
@@ -38,6 +38,10 @@ const PASOS = [
 
 export default function AcademiaConfirmacion() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (window.fbq) window.fbq('track', 'Lead');
+  }, []);
 
   return (
     <div style={{
