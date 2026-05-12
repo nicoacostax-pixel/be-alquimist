@@ -36,6 +36,7 @@ const API_ROUTES = [
   'carrito-abandonado',
   'recordatorios',
   'cursos-lms',
+  'academia-registro',
 ];
 
 for (const name of API_ROUTES) {

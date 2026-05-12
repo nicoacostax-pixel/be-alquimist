@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../../shared/lib/supabaseClient';
 
 const CURSOS = [
   {
@@ -113,21 +112,17 @@ export default function AcademiaLanding() {
     if (!form.nombre.trim() || !form.correo.trim()) return;
     setSending(true); setFormErr('');
     try {
-      // Save lead
-      await fetch('/api/leads', {
+      const res = await fetch('/api/academia-registro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipo: 'academia_landing', nombre: form.nombre.trim(), correo: form.correo.trim(), telefono: form.telefono }),
+        body: JSON.stringify({
+          nombre: form.nombre.trim(),
+          correo: form.correo.trim(),
+          telefono: form.telefono,
+        }),
       });
-      // Send magic link (creates account if new, logs in if existing)
-      const { error } = await supabase.auth.signInWithOtp({
-        email: form.correo.trim(),
-        options: {
-          emailRedirectTo: `${window.location.origin}/comunidad`,
-          data: { nombre: form.nombre.trim(), telefono: form.telefono },
-        },
-      });
-      if (error) { setFormErr(error.message); setSending(false); return; }
+      const json = await res.json();
+      if (!res.ok) { setFormErr(json.error || 'Ocurrió un error. Intenta de nuevo.'); setSending(false); return; }
       navigate('/academia/confirmacion');
     } catch {
       setFormErr('Ocurrió un error. Intenta de nuevo.');

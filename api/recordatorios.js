@@ -129,6 +129,37 @@ const ACEITE_SECUENCIA = [
   },
 ];
 
+// ── Academia PRO reminder sequences ───────────────────────────────────────────
+
+const WHATSAPP_LINK = 'https://chat.whatsapp.com/KVN6V1jrR2YAGzRKQNvnkd';
+const COMUNIDAD_LINK = 'https://bealquimist.com/comunidad';
+const SUSCRIPCION_URL = 'https://bealquimist.com/academia';
+
+const ACADEMIA_R1 = {
+  subject: '⏰ Faltan 24 horas — renueva tu acceso a Be Alquimist Academia',
+  bloques: [
+    { type: 'h1', content: '¡Tu acceso PRO termina mañana! ⏰' },
+    { type: 'text', content: 'Tu prueba gratuita de 7 días en Be Alquimist Academia termina en menos de 24 horas.' },
+    { type: 'divider' },
+    { type: 'text', content: 'Con tu suscripción mensual por solo $149 MXN sigues disfrutando de:\n\n✅ +12 cursos de cosmética natural\n✅ Envíos gratuitos en todos tus pedidos\n✅ Chat IA de recetas personalizado\n✅ Comunidad activa de alquimistas\n✅ Sistema de niveles y retos' },
+    { type: 'button', content: 'Renovar por $149 MXN / mes', url: SUSCRIPCION_URL, color: '#B08968' },
+    { type: 'text', content: 'Con cariño,\nEl equipo de Be Alquimist 🌿' },
+  ],
+};
+
+const ACADEMIA_R2 = {
+  subject: '🌿 Tu acceso PRO ha expirado — continúa en Be Alquimist Academia',
+  bloques: [
+    { type: 'h1', content: 'Tu prueba gratuita ha terminado 🌿' },
+    { type: 'text', content: 'Tu acceso PRO de 7 días a Be Alquimist Academia ha expirado. Esperamos que hayas disfrutado los cursos y la comunidad.' },
+    { type: 'divider' },
+    { type: 'text', content: 'Para seguir aprendiendo y formando parte de esta comunidad de alquimistas, activa tu suscripción mensual:' },
+    { type: 'text', content: '✅ +12 cursos de cosmética natural\n✅ Envíos gratuitos en todos tus pedidos\n✅ Chat IA de recetas personalizado\n✅ Comunidad activa de alquimistas' },
+    { type: 'button', content: 'Activar suscripción — $149 MXN / mes', url: SUSCRIPCION_URL, color: '#B08968' },
+    { type: 'text', content: 'Con cariño,\nEl equipo de Be Alquimist 🌿' },
+  ],
+};
+
 // ── Core logic ─────────────────────────────────────────────────────────────────
 
 async function procesarCarritos(sb) {
@@ -186,15 +217,53 @@ async function procesarAceite(sb) {
   return sent;
 }
 
+async function procesarAcademia(sb) {
+  let sent = 0;
+  const { data: rows } = await sb.from('academia_recordatorios')
+    .select('*')
+    .or('r1_sent.eq.false,r2_sent.eq.false');
+
+  const now = Date.now();
+
+  for (const r of rows || []) {
+    const expiry = new Date(r.pro_expira_at).getTime();
+
+    // R1: 24h before expiry
+    if (!r.r1_sent && now >= expiry - H(24)) {
+      try {
+        await sendEmail({ to: r.email, subject: ACADEMIA_R1.subject, bloques: ACADEMIA_R1.bloques });
+        await sb.from('academia_recordatorios').update({ r1_sent: true }).eq('id', r.id);
+        sent++;
+        console.log(`[recordatorio] academia r1 → ${r.email}`);
+      } catch (e) {
+        console.error(`[recordatorio] error academia r1 ${r.email}:`, e.message);
+      }
+    }
+
+    // R2: at expiry
+    if (!r.r2_sent && now >= expiry) {
+      try {
+        await sendEmail({ to: r.email, subject: ACADEMIA_R2.subject, bloques: ACADEMIA_R2.bloques });
+        await sb.from('academia_recordatorios').update({ r2_sent: true }).eq('id', r.id);
+        sent++;
+        console.log(`[recordatorio] academia r2 → ${r.email}`);
+      } catch (e) {
+        console.error(`[recordatorio] error academia r2 ${r.email}:`, e.message);
+      }
+    }
+  }
+  return sent;
+}
+
 module.exports = async function handler(req, res) {
   const sb = getSb();
   if (!sb) return res.status(500).json({ error: 'DB no configurada' });
 
   try {
-    const [c, a] = await Promise.all([procesarCarritos(sb), procesarAceite(sb)]);
-    const total = c + a;
-    console.log(`[recordatorio] corrida: ${c} carritos + ${a} aceite = ${total} emails`);
-    res.json({ ok: true, carritos: c, aceite: a, total });
+    const [c, a, ac] = await Promise.all([procesarCarritos(sb), procesarAceite(sb), procesarAcademia(sb)]);
+    const total = c + a + ac;
+    console.log(`[recordatorio] corrida: ${c} carritos + ${a} aceite + ${ac} academia = ${total} emails`);
+    res.json({ ok: true, carritos: c, aceite: a, academia: ac, total });
   } catch (err) {
     console.error('[recordatorio] error general:', err.message);
     res.status(500).json({ error: err.message });
