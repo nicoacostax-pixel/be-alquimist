@@ -45,7 +45,8 @@ module.exports = async function handler(req, res) {
         // Pago mensual exitoso → mantener PRO activo
         case 'invoice.paid':
           if (event.data.object.subscription) {
-            await sb.from('perfiles').update({ es_pro: true }).eq('stripe_customer_id', customerId);
+            const proExpira30 = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+            await sb.from('perfiles').update({ es_pro: true, pro_expira_at: proExpira30 }).eq('stripe_customer_id', customerId);
           }
           break;
 
@@ -88,7 +89,8 @@ module.exports = async function handler(req, res) {
 
           if (piMeta.plan === 'pro' && piMeta.userId) {
             // Activar PRO de inmediato
-            await sb.from('perfiles').update({ es_pro: true }).eq('id', piMeta.userId);
+            const proExpiraPago = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+            await sb.from('perfiles').update({ es_pro: true, pro_expira_at: proExpiraPago }).eq('id', piMeta.userId);
             // Crear suscripción con trial 30 días (primer mes ya cobrado por este PI)
             try {
               const stripe2 = Stripe(process.env.STRIPE_SECRET_KEY);
