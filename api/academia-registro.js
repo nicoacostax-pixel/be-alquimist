@@ -106,15 +106,8 @@ module.exports = async function handler(req, res) {
   }
 
   // 6. Save lead in leads table with tipo 'alumnos'
-  try {
-    await sb.from('leads').upsert(
-      { email, telefono: telefono || '', tipo: 'alumnos' },
-      { onConflict: 'email,tipo' }
-    );
-  } catch (e) {
-    // fallback: plain insert if unique constraint doesn't exist yet
-    try { await sb.from('leads').insert({ email, telefono: telefono || '', tipo: 'alumnos' }); } catch (_) {}
-  }
+  const { error: leadErr } = await sb.from('leads').insert({ email, telefono: telefono || '', tipo: 'alumnos' });
+  if (leadErr) console.error('[academia-registro] error guardando lead:', leadErr.message);
 
   // Schedule reminder emails via academia_recordatorios table
   try {
