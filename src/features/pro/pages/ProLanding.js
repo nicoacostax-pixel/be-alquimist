@@ -43,7 +43,7 @@ const FAQ = [
 ];
 
 export default function ProLanding() {
-  const { isLoggedIn, esPro } = useElementos();
+  const { isLoggedIn, esPro, esProCompleto } = useElementos();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
@@ -70,7 +70,7 @@ export default function ProLanding() {
         <span className="pro-hero-icon">⚗️</span>
         <h1 className="pro-hero-title">Alquimista PRO</h1>
         <p className="pro-hero-sub">El plan para quienes formulan en serio.</p>
-        {esPro && (
+        {esProCompleto && (
           <div className="pro-already-badge">✓ Ya eres Alquimista PRO</div>
         )}
       </section>
