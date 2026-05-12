@@ -206,7 +206,20 @@ module.exports = async function handler(req, res) {
       .maybeSingle();
 
     if (!inscripcion) {
-      return res.status(403).json({ error: 'Sin acceso', needsEnrollment: true, curso });
+      // PRO users get auto-enrolled
+      const { data: perfil } = await db.from('perfiles')
+        .select('es_pro, pro_expira_at')
+        .eq('id', userId)
+        .maybeSingle();
+      const proActivo = perfil?.es_pro && perfil?.pro_expira_at && new Date(perfil.pro_expira_at) > new Date();
+      if (!proActivo) {
+        return res.status(403).json({ error: 'Sin acceso', needsEnrollment: true, curso });
+      }
+      const expira_at = perfil.pro_expira_at; // inherit PRO expiry
+      await db.from('inscripciones').upsert(
+        { user_id: userId, curso_id: curso.id, expira_at },
+        { onConflict: 'user_id,curso_id' }
+      );
     }
 
     const { data: modulos } = await db.from('modulos')
