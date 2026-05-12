@@ -317,6 +317,8 @@ function CursoEditor({ cursoId, token, onBack }) {
   const [cursoForm,      setCursoForm]      = useState({});
   const [newModulo,      setNewModulo]      = useState('');
   const [newLecciones,   setNewLecciones]   = useState({});
+  const [editingModulo,  setEditingModulo]  = useState(null); // moduloId being renamed
+  const [moduloTitulo,   setModuloTitulo]   = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -349,6 +351,12 @@ function CursoEditor({ cursoId, token, onBack }) {
     if (!newModulo.trim()) return;
     await api('admin_createModulo', { cursoId, titulo: newModulo.trim(), orden: modulos.length }, token);
     setNewModulo(''); load();
+  };
+
+  const saveModuloTitulo = async () => {
+    if (!moduloTitulo.trim()) return;
+    await api('admin_updateModulo', { moduloId: editingModulo, titulo: moduloTitulo.trim() }, token);
+    setEditingModulo(null); load();
   };
 
   const deleteModulo = async (moduloId) => {
@@ -446,10 +454,27 @@ function CursoEditor({ cursoId, token, onBack }) {
       {modulos.map((modulo, mi) => (
         <div key={modulo.id} style={{ background: '#fff', borderRadius: 14, border: '1px solid #EDE0D4', marginBottom: 14, overflow: 'hidden' }}>
           <div style={{ background: '#FAF7F2', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontWeight: 800, fontSize: 13, color: '#B08968', flex: 1 }}>
-              Módulo {mi + 1}: {modulo.titulo}
-            </span>
-            <button onClick={() => deleteModulo(modulo.id)} style={{ ...S.btnSm, color: '#c0392b' }}>Eliminar módulo</button>
+            {editingModulo === modulo.id ? (
+              <>
+                <input
+                  value={moduloTitulo}
+                  onChange={e => setModuloTitulo(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') saveModuloTitulo(); if (e.key === 'Escape') setEditingModulo(null); }}
+                  autoFocus
+                  style={{ ...S.input, flex: 1, marginBottom: 0, fontSize: 13 }}
+                />
+                <button onClick={saveModuloTitulo} style={S.btnPrimary}>Guardar</button>
+                <button onClick={() => setEditingModulo(null)} style={S.btnGhost}>Cancelar</button>
+              </>
+            ) : (
+              <>
+                <span style={{ fontWeight: 800, fontSize: 13, color: '#B08968', flex: 1 }}>
+                  Módulo {mi + 1}: {modulo.titulo}
+                </span>
+                <button onClick={() => { setEditingModulo(modulo.id); setModuloTitulo(modulo.titulo); }} style={{ ...S.btnSm, color: '#B08968' }}>✏️ Renombrar</button>
+                <button onClick={() => deleteModulo(modulo.id)} style={{ ...S.btnSm, color: '#c0392b' }}>Eliminar</button>
+              </>
+            )}
           </div>
 
           <div>
