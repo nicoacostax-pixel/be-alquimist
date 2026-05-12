@@ -98,7 +98,7 @@ export default function AcademiaLanding() {
           <div style={{ flex: '1 1 320px' }}>
             <div style={{ background: '#fff', borderRadius: 24, padding: '36px 32px', boxShadow: '0 20px 60px rgba(0,0,0,0.15)', border: '1px solid #EDE0D4' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 22, fontWeight: 900, color: '#2C2318', margin: '0 0 4px' }}>
-                Crear mi cuenta gratis
+                Inscríbete a la Academia
               </h2>
               <p style={{ color: '#9E8E80', fontSize: 13, margin: '0 0 24px' }}>Acceso gratuito · Sin tarjeta de crédito</p>
 
