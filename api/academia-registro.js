@@ -105,7 +105,18 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // 6. Schedule reminder emails via academia_recordatorios table
+  // 6. Save lead in leads table with tipo 'alumnos'
+  try {
+    await sb.from('leads').upsert(
+      { email, telefono: telefono || '', tipo: 'alumnos' },
+      { onConflict: 'email,tipo' }
+    );
+  } catch (e) {
+    // fallback: plain insert if unique constraint doesn't exist yet
+    try { await sb.from('leads').insert({ email, telefono: telefono || '', tipo: 'alumnos' }); } catch (_) {}
+  }
+
+  // Schedule reminder emails via academia_recordatorios table
   try {
     await sb.from('academia_recordatorios').upsert(
       { user_id: userId, email, pro_expira_at: proExpiraAt, r1_sent: false, r2_sent: false },
