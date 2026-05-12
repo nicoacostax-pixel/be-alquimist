@@ -56,7 +56,7 @@ export default function AcademiaLanding() {
       <div style={{ position: 'fixed', top: -100, right: -100, width: 500, height: 500, borderRadius: '50%', background: 'rgba(176,137,104,0.07)', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'fixed', bottom: -80, left: -80, width: 400, height: 400, borderRadius: '50%', background: 'rgba(176,137,104,0.05)', pointerEvents: 'none', zIndex: 0 }} />
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 960, margin: '0 auto', padding: isMobile ? '40px 16px 60px' : '72px 32px 80px' }}>
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 960, margin: '0 auto', padding: isMobile ? '40px 28px 60px' : '72px 32px 80px' }}>
         <div style={{ display: 'flex', gap: isMobile ? 28 : 56, alignItems: 'flex-start', flexDirection: isMobile ? 'column' : 'row' }}>
 
           {/* ── COPY (left on desktop, top on mobile) ── */}
