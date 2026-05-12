@@ -39,6 +39,7 @@ import Miembros from './features/comunidad/pages/Miembros';
 import Marcadores from './features/comunidad/pages/Marcadores';
 import CursosComunidad from './features/comunidad/pages/CursosComunidad';
 import AcademiaLanding from './features/academia/pages/AcademiaLanding';
+import AcademiaConfirmacion from './features/academia/pages/AcademiaConfirmacion';
 
 
 
@@ -96,6 +97,7 @@ function App() {
           <Route path="/cursos/:slug/aprender" element={<CursoPlayer />} />
           <Route path="/admin/cursos" element={<AdminCursosBuilder />} />
           <Route path="/academia" element={<AcademiaLanding />} />
+          <Route path="/academia/confirmacion" element={<AcademiaConfirmacion />} />
           <Route path="/biblioteca" element={<Biblioteca />} />
           <Route path="/politicas-de-compra" element={<PoliticasDeCompra />} />
           <Route path="/privacidad"           element={<Privacidad />} />

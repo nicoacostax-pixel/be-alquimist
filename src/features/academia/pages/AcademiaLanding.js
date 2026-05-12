@@ -128,7 +128,7 @@ export default function AcademiaLanding() {
         },
       });
       if (error) { setFormErr(error.message); setSending(false); return; }
-      setDone(true);
+      navigate('/academia/confirmacion');
     } catch {
       setFormErr('Ocurrió un error. Intenta de nuevo.');
     } finally {
