@@ -289,28 +289,29 @@ export default function AcademiaLanding() {
       {/* ── REGISTRO FORM ── */}
       <section id="registro-form" style={{
         padding: '64px 24px',
-        background: 'linear-gradient(160deg, #2C2318 0%, #4A3F35 100%)',
+        background: 'linear-gradient(160deg, #F3EFE8 0%, #EDE0D4 50%, #F9F5EF 100%)',
         position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 700, height: 700, borderRadius: '50%', background: 'rgba(176,137,104,0.05)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: -80, right: -80, width: 400, height: 400, borderRadius: '50%', background: 'rgba(176,137,104,0.08)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: -60, left: -60, width: 300, height: 300, borderRadius: '50%', background: 'rgba(176,137,104,0.06)', pointerEvents: 'none' }} />
         <FadeIn>
           <div style={{ maxWidth: 940, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 56, flexWrap: 'wrap' }}>
 
             {/* Left copy */}
             <div style={{ flex: '1 1 340px', position: 'relative' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(176,137,104,0.2)', borderRadius: 30, padding: '5px 16px', fontSize: 12, fontWeight: 700, color: '#C4A882', marginBottom: 20, letterSpacing: 1, textTransform: 'uppercase' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #EDE0D4', borderRadius: 30, padding: '5px 16px', fontSize: 12, fontWeight: 700, color: '#B08968', marginBottom: 20, letterSpacing: 1, textTransform: 'uppercase', boxShadow: '0 2px 8px rgba(176,137,104,0.12)' }}>
                 🎁 7 días completamente gratis
               </div>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 900, color: '#fff', margin: '0 0 18px', lineHeight: 1.15, letterSpacing: '-0.5px' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 900, color: '#2C2318', margin: '0 0 18px', lineHeight: 1.15, letterSpacing: '-0.5px' }}>
                 Empieza hoy.<br />
-                <span style={{ color: '#C4A882' }}>Sin costo.</span>
+                <span style={{ color: '#B08968' }}>Sin costo.</span>
               </h2>
-              <p style={{ color: '#A89080', fontSize: 15, lineHeight: 1.8, margin: '0 0 24px' }}>
+              <p style={{ color: '#7A6A5A', fontSize: 15, lineHeight: 1.8, margin: '0 0 24px' }}>
                 Accede a los 6 cursos, al chat IA de recetas y a la comunidad durante 7 días sin pagar nada. Sin tarjeta de crédito, sin compromisos.
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {['✓ Acceso inmediato a todos los cursos', '✓ Chat IA de recetas ilimitado', '✓ Comunidad de alquimistas activa', '✓ Envíos gratis en tu tienda de insumos'].map((t, i) => (
-                  <span key={i} style={{ color: '#C4B09A', fontSize: 14, fontWeight: 500 }}>{t}</span>
+                  <span key={i} style={{ color: '#4A3F35', fontSize: 14, fontWeight: 500 }}>{t}</span>
                 ))}
               </div>
             </div>
