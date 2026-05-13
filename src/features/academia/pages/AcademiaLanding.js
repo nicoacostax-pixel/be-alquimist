@@ -275,7 +275,7 @@ export default function AcademiaLanding() {
               </Link>
             ) : (
               <button className="ac-pricing-btn" onClick={handleCTA}>
-                {isLoggedIn ? 'Suscribirme ahora' : 'Crear cuenta y suscribirme'}
+                Suscribirme ahora
               </button>
             )}
           </div>
