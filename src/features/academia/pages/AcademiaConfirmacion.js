@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../../shared/lib/supabaseClient';
 
 const PASOS = [
   {
@@ -51,9 +52,28 @@ const PASOS = [
 
 export default function AcademiaConfirmacion() {
   const navigate = useNavigate();
+  const activated = useRef(false);
 
   useEffect(() => {
-    if (window.fbq) window.fbq('track', 'Lead');
+    if (activated.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    if (!sessionId) return;
+    activated.current = true;
+
+    fetch('/api/academia-post-pago', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    })
+      .then(r => r.json())
+      .then(async json => {
+        if (json.email && json.tempPassword) {
+          await supabase.auth.signInWithPassword({ email: json.email, password: json.tempPassword });
+        }
+        if (window.fbq) window.fbq('track', 'Purchase', { currency: 'MXN', value: 149 });
+      })
+      .catch(() => {});
   }, []);
 
   return (

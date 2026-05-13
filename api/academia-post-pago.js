@@ -13,31 +13,43 @@ function getSb() {
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { nombre, email, paymentIntentId, subscriptionId } = req.body || {};
-  if (!email || !paymentIntentId) return res.status(400).json({ error: 'Datos incompletos' });
+  const { sessionId } = req.body || {};
+  if (!sessionId) return res.status(400).json({ error: 'sessionId requerido' });
 
   const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-  const pi = await stripe.paymentIntents.retrieve(paymentIntentId).catch(() => null);
-  if (!pi || pi.status !== 'succeeded') {
+
+  let session;
+  try {
+    session = await stripe.checkout.sessions.retrieve(sessionId);
+  } catch (e) {
+    return res.status(400).json({ error: 'Sesión inválida' });
+  }
+
+  if (session.payment_status !== 'paid') {
     return res.status(400).json({ error: 'El pago no fue completado' });
   }
 
+  const email = (session.customer_details?.email || session.customer_email || '').toLowerCase();
+  const nombre = session.customer_details?.name || '';
+  const subscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
+
+  if (!email) return res.status(400).json({ error: 'No se encontró el correo del pago' });
+
   const sb = getSb();
-  const emailLower = email.trim().toLowerCase();
   const tempPassword = crypto.randomBytes(20).toString('hex');
   let userId;
 
   try {
     const { data: created, error } = await sb.auth.admin.createUser({
-      email: emailLower,
+      email,
       password: tempPassword,
       email_confirm: true,
-      user_metadata: { nombre: (nombre || '').trim() },
+      user_metadata: { nombre },
     });
 
     if (error) {
       const { data: { users } } = await sb.auth.admin.listUsers({ perPage: 1000 });
-      const found = (users || []).find(u => u.email === emailLower);
+      const found = (users || []).find(u => u.email === email);
       if (!found) return res.status(500).json({ error: error.message });
       userId = found.id;
       await sb.auth.admin.updateUserById(userId, { password: tempPassword });
@@ -49,19 +61,13 @@ module.exports = async function handler(req, res) {
   }
 
   await sb.from('perfiles').upsert(
-    {
-      id: userId,
-      nombre: (nombre || '').trim(),
-      es_pro: true,
-      pro_expira_at: null,
-      stripe_subscription_id: subscriptionId || null,
-    },
+    { id: userId, nombre, es_pro: true, pro_expira_at: null },
     { onConflict: 'id' }
   );
 
   await sb.from('leads')
-    .insert({ email: emailLower, tipo: 'academia_pro' })
+    .insert({ email, tipo: 'academia_pro' })
     .catch(() => {});
 
-  return res.json({ ok: true, email: emailLower, tempPassword });
+  return res.json({ ok: true, email, tempPassword });
 };
