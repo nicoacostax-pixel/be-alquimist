@@ -143,8 +143,25 @@ export default function AcademiaCheckoutModal({ onClose, onSuccess }) {
 
           {error && <p style={{ color: '#c0392b', fontSize: 13, margin: 0 }}>{error}</p>}
 
+          {!clientSecret && !loadingCard && (
+            <button
+              onClick={fetchSubscription}
+              disabled={!nombre.trim() || !/\S+@\S+\.\S+/.test(email.trim())}
+              style={{
+                background: 'linear-gradient(135deg, #B08968, #8C6A4F)', color: '#fff',
+                border: 'none', borderRadius: 10, padding: '14px', fontSize: 15, fontWeight: 800,
+                fontFamily: 'Poppins, sans-serif', width: '100%', marginTop: 4,
+                boxShadow: '0 4px 16px rgba(176,137,104,0.35)',
+                cursor: (!nombre.trim() || !/\S+@\S+\.\S+/.test(email.trim())) ? 'not-allowed' : 'pointer',
+                opacity: (!nombre.trim() || !/\S+@\S+\.\S+/.test(email.trim())) ? 0.5 : 1,
+              }}
+            >
+              Continuar al pago →
+            </button>
+          )}
+
           {loadingCard && (
-            <p style={{ fontSize: 13, color: '#999', margin: 0, textAlign: 'center' }}>Preparando formulario de pago…</p>
+            <p style={{ fontSize: 13, color: '#999', margin: '4px 0', textAlign: 'center' }}>Preparando formulario de pago…</p>
           )}
 
           {clientSecret && (
