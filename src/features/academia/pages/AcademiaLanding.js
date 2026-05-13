@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useElementos } from '../../../shared/context/ElementosContext';
-import ElementosModal from '../../../shared/components/ElementosModal';
+import AcademiaCheckoutModal from '../components/AcademiaCheckoutModal';
 import '../../../App.css';
 
 const CURSOS = [
@@ -110,28 +110,26 @@ const NIVEL_COLOR = {
 };
 
 export default function AcademiaLanding() {
-  const { isLoggedIn, esPro } = useElementos();
+  const { esPro } = useElementos();
   const navigate = useNavigate();
   const [openFaq,  setOpenFaq]  = useState(null);
   const [showPago, setShowPago] = useState(false);
 
-  const handleCTA = () => {
-    if (!isLoggedIn) { navigate('/login'); return; }
-    setShowPago(true);
-  };
+  const handleCTA = () => setShowPago(true);
 
   return (
     <div className="ac-page">
-      {showPago && <ElementosModal startWithPro onClose={() => setShowPago(false)} />}
+      {showPago && (
+        <AcademiaCheckoutModal
+          onClose={() => setShowPago(false)}
+          onSuccess={() => navigate('/academia/confirmacion')}
+        />
+      )}
 
       {/* ── NAV ── */}
       <nav className="ac-nav">
         <Link to="/" className="ac-nav-logo">Be Alquimist</Link>
         <div className="ac-nav-right">
-          {isLoggedIn
-            ? <Link to="/cuenta" className="ac-nav-link">Mi cuenta</Link>
-            : <Link to="/login"  className="ac-nav-link">Iniciar sesión</Link>
-          }
           {!esPro && (
             <button className="ac-nav-cta" onClick={handleCTA}>Suscribirme $149</button>
           )}

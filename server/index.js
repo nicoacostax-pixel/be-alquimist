@@ -32,6 +32,8 @@ const API_ROUTES = [
   'leads',
   'recetas',
   'distribuidoras',
+  'academia-checkout',
+  'academia-post-pago',
   'send-welcome-email',
   'carrito-abandonado',
   'recordatorios',
