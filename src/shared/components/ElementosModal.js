@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -57,11 +57,11 @@ function PagoForm({ paquete, onSuccess, onCancel }) {
   );
 }
 
-export default function ElementosModal({ onClose }) {
+export default function ElementosModal({ onClose, startWithPro = false }) {
   const { elementos, esPro, agregar, activarPro } = useElementos();
   const [pkg,          setPkg]          = useState(null);
   const [clientSecret, setClientSecret] = useState('');
-  const [loading,      setLoading]      = useState(false);
+  const [loading,      setLoading]      = useState(startWithPro);
 
   const seleccionar = async (p) => {
     setLoading(true);
@@ -99,6 +99,11 @@ export default function ElementosModal({ onClose }) {
     else if (pkg)          await agregar(pkg.cantidad);
     onClose();
   };
+
+  useEffect(() => {
+    if (startWithPro) seleccionar(PRO_PKG);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="el-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>

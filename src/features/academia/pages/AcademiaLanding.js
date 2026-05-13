@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useElementos } from '../../../shared/context/ElementosContext';
-import { supabase } from '../../../shared/lib/supabaseClient';
+import ElementosModal from '../../../shared/components/ElementosModal';
 import '../../../App.css';
 
 const CURSOS = [
@@ -112,71 +112,17 @@ const NIVEL_COLOR = {
 export default function AcademiaLanding() {
   const { isLoggedIn, esPro } = useElementos();
   const navigate = useNavigate();
-  const [openFaq,    setOpenFaq]    = useState(null);
-  const [showForm,   setShowForm]   = useState(false);
-  const [form,       setForm]       = useState({ nombre: '', correo: '', telefono: '' });
-  const [sending,    setSending]    = useState(false);
-  const [formErr,    setFormErr]    = useState('');
+  const [openFaq,  setOpenFaq]  = useState(null);
+  const [showPago, setShowPago] = useState(false);
 
-  const handleCTA = () => setShowForm(true);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.nombre.trim() || !form.correo.trim()) { setFormErr('Nombre y correo son requeridos.'); return; }
-    setSending(true); setFormErr('');
-    try {
-      const res = await fetch('/api/academia-registro', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre: form.nombre.trim(), correo: form.correo.trim(), telefono: form.telefono }),
-      });
-      const json = await res.json();
-      if (!res.ok) { setFormErr(json.error || 'Ocurrió un error. Intenta de nuevo.'); setSending(false); return; }
-      if (json.email && json.tempPassword) {
-        await supabase.auth.signInWithPassword({ email: json.email, password: json.tempPassword });
-      }
-      if (window.fbq) window.fbq('track', 'Lead', { content_name: 'academia' });
-      navigate('/academia/confirmacion');
-    } catch {
-      setFormErr('Ocurrió un error. Intenta de nuevo.');
-      setSending(false);
-    }
-  };
-
-  const inputSt = {
-    border: '1.5px solid #E0D6CE', borderRadius: 10, padding: '13px 16px',
-    fontSize: 14, fontFamily: 'Poppins, sans-serif', outline: 'none',
-    color: '#1A1A1A', background: '#FAFAFA', width: '100%', boxSizing: 'border-box',
+  const handleCTA = () => {
+    if (!isLoggedIn) { navigate('/login'); return; }
+    setShowPago(true);
   };
 
   return (
     <div className="ac-page">
-      {/* ── CHECKOUT MODAL ── */}
-      {showForm && (
-        <div className="dist-encuesta-overlay" onClick={() => setShowForm(false)}>
-          <div className="dist-encuesta-modal" style={{ maxWidth: 420 }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 22, fontWeight: 900, color: '#2C2318', marginBottom: 4 }}>
-              Únete a la Academia
-            </h3>
-            <p style={{ fontSize: 13, color: '#9A8A7A', marginBottom: 20 }}>Crea tu cuenta y accede al instante.</p>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <input placeholder="Nombre completo *" value={form.nombre} onChange={e => setForm(p => ({ ...p, nombre: e.target.value }))} required style={inputSt} />
-              <input placeholder="Correo electrónico *" type="email" value={form.correo} onChange={e => setForm(p => ({ ...p, correo: e.target.value }))} required style={inputSt} />
-              <div style={{ display: 'flex', border: '1.5px solid #E0D6CE', borderRadius: 10, overflow: 'hidden', background: '#FAFAFA' }}>
-                <span style={{ padding: '13px 10px', fontSize: 13, color: '#7A6A5A', borderRight: '1px solid #E0D6CE', background: '#F3EFE8', whiteSpace: 'nowrap' }}>🇲🇽 +52</span>
-                <input placeholder="Teléfono (opcional)" type="tel" value={form.telefono} onChange={e => setForm(p => ({ ...p, telefono: e.target.value }))} style={{ flex: 1, border: 'none', padding: '13px 12px', fontSize: 14, fontFamily: 'Poppins, sans-serif', outline: 'none', color: '#1A1A1A', background: 'transparent', minWidth: 0 }} />
-              </div>
-              {formErr && <p style={{ color: '#c0392b', fontSize: 13, margin: 0 }}>{formErr}</p>}
-              <button type="submit" disabled={sending} className="dist-enc-siguiente" style={{ marginTop: 4 }}>
-                {sending ? 'Creando tu cuenta…' : 'Ir a mis cursos →'}
-              </button>
-            </form>
-            <p style={{ fontSize: 11, color: '#B0A09A', textAlign: 'center', margin: '12px 0 0', lineHeight: 1.6 }}>
-              Sin cobros automáticos. Cancela cuando quieras.
-            </p>
-          </div>
-        </div>
-      )}
+      {showPago && <ElementosModal startWithPro onClose={() => setShowPago(false)} />}
 
       {/* ── NAV ── */}
       <nav className="ac-nav">
