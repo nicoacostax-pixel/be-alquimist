@@ -190,6 +190,11 @@ export default function AcademiaLanding() {
               );
             })}
           </div>
+          {!esPro && (
+            <div style={{ textAlign: 'center' }}>
+              <button className="ac-section-cta" onClick={handleCTA}>Inscribirme por $149 →</button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -215,6 +220,11 @@ export default function AcademiaLanding() {
               </div>
             ))}
           </div>
+          {!esPro && (
+            <div style={{ textAlign: 'center', marginTop: 32 }}>
+              <button className="ac-section-cta" onClick={handleCTA}>Quiero acceder por $149 →</button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -235,6 +245,11 @@ export default function AcademiaLanding() {
               </div>
             ))}
           </div>
+          {!esPro && (
+            <div style={{ textAlign: 'center' }}>
+              <button className="ac-section-cta" onClick={handleCTA}>Inscribirme y acceder a la biblioteca →</button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -252,6 +267,11 @@ export default function AcademiaLanding() {
               </div>
             ))}
           </div>
+          {!esPro && (
+            <div style={{ textAlign: 'center', marginTop: 32 }}>
+              <button className="ac-section-cta" onClick={handleCTA} style={{ background: '#fff', color: '#8C6A4F' }}>Inscribirme por $149 →</button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -272,7 +292,7 @@ export default function AcademiaLanding() {
               ))}
             </ul>
             {esPro ? (
-              <Link to="/comunidad/cursos" className="ac-pricing-btn" style={{ display:'block', textAlign:'center', textDecoration:'none' }}>
+              <Link to="/comunidad/cursos" className="ac-pricing-btn">
                 Ir a mis cursos →
               </Link>
             ) : (

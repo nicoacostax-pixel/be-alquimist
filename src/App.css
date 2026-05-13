@@ -9017,14 +9017,26 @@ a.post-author-name.post-author-link:hover {
 .ac-pricing-list li:last-child { border-bottom: none; }
 .ac-check { color: #B08968; font-weight: 800; flex-shrink: 0; }
 .ac-pricing-btn {
-  width: 100%;
+  display: block; width: 100%; box-sizing: border-box;
   background: linear-gradient(135deg, #B08968, #8C6A4F);
   color: #fff; border: none; border-radius: 12px;
   padding: 15px; font-size: 16px; font-weight: 800;
   font-family: 'Poppins', sans-serif; cursor: pointer;
   box-shadow: 0 4px 16px rgba(176,137,104,0.35);
   transition: transform .1s, box-shadow .1s;
+  text-align: center; text-decoration: none;
 }
+.ac-section-cta {
+  display: inline-block; margin-top: 32px;
+  background: linear-gradient(135deg, #B08968, #8C6A4F);
+  color: #fff; border: none; border-radius: 12px;
+  padding: 14px 32px; font-size: 15px; font-weight: 800;
+  font-family: 'Poppins', sans-serif; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(176,137,104,0.3);
+  transition: transform .1s, box-shadow .1s; text-decoration: none;
+}
+.ac-section-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(176,137,104,0.45); }
+.ac-ruta-section .ac-section-cta { background: linear-gradient(135deg, #B08968, #8C6A4F); }
 .ac-pricing-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(176,137,104,0.45); }
 
 /* FAQ */
