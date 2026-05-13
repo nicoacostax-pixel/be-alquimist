@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useElementos } from '../../../shared/context/ElementosContext';
+import AcademiaCheckoutModal from '../components/AcademiaCheckoutModal';
 import '../../../App.css';
 
 const CURSOS = [
@@ -109,33 +110,30 @@ const NIVEL_COLOR = {
 
 export default function AcademiaLanding() {
   const { esPro } = useElementos();
+  const navigate = useNavigate();
   const [openFaq,  setOpenFaq]  = useState(null);
-  const [loading,  setLoading]  = useState(false);
+  const [showPago, setShowPago] = useState(false);
 
-  const handleCTA = async () => {
+  const handleCTA = () => {
     if (window.fbq) window.fbq('track', 'InitiateCheckout', { currency: 'MXN', value: 149 });
-    setLoading(true);
-    try {
-      const res = await fetch('/api/academia-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-      const json = await res.json();
-      if (json.url) { window.location.href = json.url; return; }
-    } catch {}
-    setLoading(false);
+    setShowPago(true);
   };
 
   return (
     <div className="ac-page">
+      {showPago && (
+        <AcademiaCheckoutModal
+          onClose={() => setShowPago(false)}
+          onSuccess={() => navigate('/academia/confirmacion')}
+        />
+      )}
 
       {/* ── NAV ── */}
       <nav className="ac-nav">
         <Link to="/" className="ac-nav-logo">Be Alquimist</Link>
         <div className="ac-nav-right">
           {!esPro && (
-            <button className="ac-nav-cta" onClick={handleCTA} disabled={loading}>{loading ? 'Redirigiendo…' : 'Inscribirme $149'}</button>
+            <button className="ac-nav-cta" onClick={handleCTA}>Inscribirme $149</button>
           )}
         </div>
       </nav>
@@ -154,7 +152,7 @@ export default function AcademiaLanding() {
           {esPro ? (
             <Link to="/comunidad/cursos" className="ac-hero-btn">Ir a mis cursos →</Link>
           ) : (
-            <button className="ac-hero-btn" onClick={handleCTA} disabled={loading}>{loading ? 'Redirigiendo…' : 'Inscribirme hoy por $149 →'}</button>
+            <button className="ac-hero-btn" onClick={handleCTA}>Inscribirme hoy por $149 →</button>
           )}
           <p className="ac-hero-fine">Pago único · Sin tarifas adicionales</p>
         </div>
@@ -307,7 +305,7 @@ export default function AcademiaLanding() {
         <section className="ac-final-cta">
           <h2 className="ac-final-title">¿Lista para empezar a formular?</h2>
           <p className="ac-final-sub">Únete hoy y accede a todo al instante.</p>
-          <button className="ac-hero-btn" onClick={handleCTA} disabled={loading}>{loading ? 'Redirigiendo…' : 'Inscribirme por $149 →'}</button>
+          <button className="ac-hero-btn" onClick={handleCTA}>Inscribirme por $149 →</button>
           <p className="ac-hero-fine" style={{ marginTop: 12 }}>Pago único · Sin tarifas adicionales</p>
         </section>
       )}

@@ -13,43 +13,31 @@ function getSb() {
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { sessionId } = req.body || {};
-  if (!sessionId) return res.status(400).json({ error: 'sessionId requerido' });
+  const { nombre, email, paymentIntentId } = req.body || {};
+  if (!email || !paymentIntentId) return res.status(400).json({ error: 'Datos incompletos' });
 
   const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-
-  let session;
-  try {
-    session = await stripe.checkout.sessions.retrieve(sessionId);
-  } catch (e) {
-    return res.status(400).json({ error: 'Sesión inválida' });
-  }
-
-  if (session.payment_status !== 'paid') {
+  const pi = await stripe.paymentIntents.retrieve(paymentIntentId).catch(() => null);
+  if (!pi || pi.status !== 'succeeded') {
     return res.status(400).json({ error: 'El pago no fue completado' });
   }
 
-  const email = (session.customer_details?.email || session.customer_email || '').toLowerCase();
-  const nombre = session.customer_details?.name || '';
-  const subscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
-
-  if (!email) return res.status(400).json({ error: 'No se encontró el correo del pago' });
-
   const sb = getSb();
+  const emailLower = email.trim().toLowerCase();
   const tempPassword = crypto.randomBytes(20).toString('hex');
   let userId;
 
   try {
     const { data: created, error } = await sb.auth.admin.createUser({
-      email,
+      email: emailLower,
       password: tempPassword,
       email_confirm: true,
-      user_metadata: { nombre },
+      user_metadata: { nombre: (nombre || '').trim() },
     });
 
     if (error) {
       const { data: { users } } = await sb.auth.admin.listUsers({ perPage: 1000 });
-      const found = (users || []).find(u => u.email === email);
+      const found = (users || []).find(u => u.email === emailLower);
       if (!found) return res.status(500).json({ error: error.message });
       userId = found.id;
       await sb.auth.admin.updateUserById(userId, { password: tempPassword });
@@ -61,13 +49,36 @@ module.exports = async function handler(req, res) {
   }
 
   await sb.from('perfiles').upsert(
-    { id: userId, nombre, es_pro: true, pro_expira_at: null },
+    { id: userId, nombre: (nombre || '').trim(), es_pro: true, pro_expira_at: null },
     { onConflict: 'id' }
   );
 
-  await sb.from('leads')
-    .insert({ email, tipo: 'academia_pro' })
-    .catch(() => {});
+  await sb.from('leads').insert({ email: emailLower, tipo: 'academia_pro' }).catch(() => {});
 
-  return res.json({ ok: true, email, tempPassword });
+  // Create recurring subscription starting in 30 days (first month already charged via PI)
+  try {
+    const priceId = await getOrCreatePrice(stripe);
+    if (priceId && pi.payment_method) {
+      await stripe.subscriptions.create({
+        customer: pi.customer,
+        items: [{ price: priceId }],
+        default_payment_method: pi.payment_method,
+        trial_end: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60),
+        metadata: { plan: 'academia_pro', userId },
+      });
+    }
+  } catch (_) { /* subscription setup is best-effort */ }
+
+  return res.json({ ok: true, email: emailLower, tempPassword });
 };
+
+async function getOrCreatePrice(stripe) {
+  if (process.env.STRIPE_ACADEMIA_PRICE_ID) return process.env.STRIPE_ACADEMIA_PRICE_ID;
+  const products = await stripe.products.list({ limit: 100 });
+  let product = products.data.find(p => p.name === 'Academia Be Alquimist PRO' && p.active);
+  if (!product) product = await stripe.products.create({ name: 'Academia Be Alquimist PRO' });
+  const prices = await stripe.prices.list({ product: product.id, active: true, limit: 20 });
+  let price = prices.data.find(p => p.currency === 'mxn' && p.unit_amount === 14900 && p.recurring?.interval === 'month');
+  if (!price) price = await stripe.prices.create({ currency: 'mxn', unit_amount: 14900, recurring: { interval: 'month' }, product: product.id });
+  return price.id;
+}
