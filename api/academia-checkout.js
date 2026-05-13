@@ -18,16 +18,22 @@ module.exports = async function handler(req, res) {
       ? existing.data[0]
       : await stripe.customers.create({ email: email.trim().toLowerCase(), name: nombre.trim() });
 
+    // Find or create product + price (avoids inline product_data which requires newer API version)
+    let priceId = process.env.STRIPE_ACADEMIA_PRICE_ID;
+    if (!priceId) {
+      const products = await stripe.products.list({ limit: 100 });
+      let product = products.data.find(p => p.name === 'Academia Be Alquimist PRO' && p.active);
+      if (!product) product = await stripe.products.create({ name: 'Academia Be Alquimist PRO' });
+
+      const prices = await stripe.prices.list({ product: product.id, active: true, limit: 20 });
+      let price = prices.data.find(p => p.currency === 'mxn' && p.unit_amount === 14900 && p.recurring?.interval === 'month');
+      if (!price) price = await stripe.prices.create({ currency: 'mxn', unit_amount: 14900, recurring: { interval: 'month' }, product: product.id });
+      priceId = price.id;
+    }
+
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
-      items: [{
-        price_data: {
-          currency: 'mxn',
-          unit_amount: 14900,
-          recurring: { interval: 'month' },
-          product_data: { name: 'Academia Be Alquimist PRO' },
-        },
-      }],
+      items: [{ price: priceId }],
       payment_behavior: 'default_incomplete',
       payment_settings: { save_default_payment_method: 'on_subscription' },
       expand: ['latest_invoice.payment_intent'],
