@@ -13,7 +13,7 @@ function getSb() {
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { nombre, email, paymentIntentId } = req.body || {};
+  const { nombre, email, paymentIntentId, subscriptionId } = req.body || {};
   if (!email || !paymentIntentId) return res.status(400).json({ error: 'Datos incompletos' });
 
   const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -36,7 +36,6 @@ module.exports = async function handler(req, res) {
     });
 
     if (error) {
-      // Already exists — find and update password for auto-login
       const { data: { users } } = await sb.auth.admin.listUsers({ perPage: 1000 });
       const found = (users || []).find(u => u.email === emailLower);
       if (!found) return res.status(500).json({ error: error.message });
@@ -49,13 +48,17 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Error al crear cuenta: ' + e.message });
   }
 
-  // Activar PRO permanente (pagó)
   await sb.from('perfiles').upsert(
-    { id: userId, nombre: (nombre || '').trim(), es_pro: true, pro_expira_at: null },
+    {
+      id: userId,
+      nombre: (nombre || '').trim(),
+      es_pro: true,
+      pro_expira_at: null,
+      stripe_subscription_id: subscriptionId || null,
+    },
     { onConflict: 'id' }
   );
 
-  // Registrar lead
   await sb.from('leads')
     .insert({ email: emailLower, tipo: 'academia_pro' })
     .catch(() => {});
