@@ -276,8 +276,8 @@ export default function AcademiaLanding() {
                 Ir a mis cursos →
               </Link>
             ) : (
-              <button className="ac-pricing-btn" onClick={handleCTA} disabled={loading}>
-                {loading ? 'Redirigiendo…' : 'Inscribirme ahora'}
+              <button className="ac-pricing-btn" onClick={handleCTA}>
+                Inscribirme ahora
               </button>
             )}
           </div>
