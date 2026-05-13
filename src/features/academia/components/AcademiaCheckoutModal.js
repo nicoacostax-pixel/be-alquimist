@@ -57,7 +57,7 @@ function CheckoutForm({ onSuccess }) {
   return (
     <form onSubmit={handlePay} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div>
-        <p style={{ fontSize: 13, color: '#7A6A5A', margin: '0 0 2px' }}>Suscripción Academia Be Alquimist</p>
+        <p style={{ fontSize: 13, color: '#7A6A5A', margin: '0 0 2px' }}>Inscripción Academia Be Alquimist</p>
         <p style={{ fontSize: 22, fontWeight: 800, color: '#2C2318', margin: 0 }}>$149 MXN</p>
       </div>
       <input
@@ -92,7 +92,7 @@ function CheckoutForm({ onSuccess }) {
         {paying ? 'Procesando…' : 'Pagar $149 y acceder →'}
       </button>
       <p style={{ fontSize: 11, color: '#B0A09A', textAlign: 'center', margin: 0 }}>
-        Pago seguro con Stripe · Cancela cuando quieras
+        Pago seguro con Stripe · Acceso de por vida
       </p>
     </form>
   );

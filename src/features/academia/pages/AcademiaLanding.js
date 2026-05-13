@@ -94,11 +94,10 @@ const BENEFICIOS = [
 ];
 
 const FAQ = [
-  { q: '¿Cuándo empiezo a ver los cursos?', a: 'Al instante. En cuanto confirmes tu suscripción tienes acceso a todos los cursos y la biblioteca.' },
-  { q: '¿Puedo cancelar en cualquier momento?', a: 'Sí, sin penalizaciones. Al cancelar conservas el acceso hasta el final del período ya pagado.' },
-  { q: '¿Se agregan cursos nuevos?', a: 'Sí. Los suscriptores reciben cada curso nuevo de forma automática sin costo adicional.' },
+  { q: '¿Cuándo empiezo a ver los cursos?', a: 'Al instante. En cuanto confirmes tu inscripción tienes acceso a todos los cursos y la biblioteca.' },
   { q: '¿Los envíos gratis aplican para toda la tienda?', a: 'Sí, en todos los pedidos de insumos en bealquimist.com sin monto mínimo.' },
-  { q: '¿En qué moneda y cómo se cobra?', a: 'En pesos mexicanos (MXN). El cobro es mensual automático, puedes pagar con tarjeta.' },
+  { q: '¿Se agregan cursos nuevos?', a: 'Sí. Los inscritos reciben cada curso nuevo de forma automática sin costo adicional.' },
+  { q: '¿En qué moneda y cómo se cobra?', a: 'En pesos mexicanos (MXN). Pago único de acceso, puedes pagar con tarjeta.' },
   { q: '¿El chat IA tiene límite de uso?', a: 'No. Con PRO el chat de formulación es completamente ilimitado.' },
 ];
 
@@ -134,7 +133,7 @@ export default function AcademiaLanding() {
         <Link to="/" className="ac-nav-logo">Be Alquimist</Link>
         <div className="ac-nav-right">
           {!esPro && (
-            <button className="ac-nav-cta" onClick={handleCTA}>Suscribirme $149</button>
+            <button className="ac-nav-cta" onClick={handleCTA}>Inscribirme $149</button>
           )}
         </div>
       </nav>
@@ -142,7 +141,7 @@ export default function AcademiaLanding() {
       {/* ── HERO ── */}
       <section className="ac-hero">
         <div className="ac-hero-inner">
-          <div className="ac-hero-badge">🌿 Acceso completo · Sin contratos</div>
+          <div className="ac-hero-badge">🌿 Acceso completo · Pago único</div>
           <h1 className="ac-hero-title">
             La Academia de<br />
             <span className="ac-hero-accent">Cosmética Natural</span>
@@ -153,9 +152,9 @@ export default function AcademiaLanding() {
           {esPro ? (
             <Link to="/comunidad/cursos" className="ac-hero-btn">Ir a mis cursos →</Link>
           ) : (
-            <button className="ac-hero-btn" onClick={handleCTA}>Comenzar hoy por $149 →</button>
+            <button className="ac-hero-btn" onClick={handleCTA}>Inscribirme hoy por $149 →</button>
           )}
-          <p className="ac-hero-fine">Cancela cuando quieras · Sin tarifa de inscripción</p>
+          <p className="ac-hero-fine">Pago único · Sin tarifas adicionales</p>
         </div>
 
         <div className="ac-stats-row">
@@ -242,7 +241,7 @@ export default function AcademiaLanding() {
       {/* ── BENEFICIOS ── */}
       <section className="ac-beneficios-section">
         <div className="ac-section-inner">
-          <p className="ac-section-tag">✨ Con tu suscripción también obtienes</p>
+          <p className="ac-section-tag">✨ Con tu inscripción también obtienes</p>
           <h2 className="ac-section-title ac-title-light">Mucho más que cursos</h2>
           <div className="ac-beneficios-grid">
             {BENEFICIOS.map((b, i) => (
@@ -266,7 +265,7 @@ export default function AcademiaLanding() {
               <span className="ac-pricing-amount">149</span>
               <span className="ac-pricing-period">MXN</span>
             </div>
-            <p className="ac-pricing-note">Cancela cuando quieras. Sin contratos.</p>
+            <p className="ac-pricing-note">Acceso de por vida. Pago único.</p>
             <ul className="ac-pricing-list">
               {['11 cursos especializados + los que se agreguen','Ruta de la Alquimista (6 módulos)','Biblioteca de +100 ingredientes y 30+ fórmulas','Chat IA de formulación ilimitado','Envíos gratis en todos tus pedidos','Comunidad activa e insignia PRO'].map((item, i) => (
                 <li key={i}><span className="ac-check">✓</span>{item}</li>
@@ -306,8 +305,8 @@ export default function AcademiaLanding() {
         <section className="ac-final-cta">
           <h2 className="ac-final-title">¿Lista para empezar a formular?</h2>
           <p className="ac-final-sub">Únete hoy y accede a todo al instante.</p>
-          <button className="ac-hero-btn" onClick={handleCTA}>Suscribirme por $149 →</button>
-          <p className="ac-hero-fine" style={{ marginTop: 12 }}>Sin tarifa de inscripción · Cancela cuando quieras</p>
+          <button className="ac-hero-btn" onClick={handleCTA}>Inscribirme por $149 →</button>
+          <p className="ac-hero-fine" style={{ marginTop: 12 }}>Pago único · Sin tarifas adicionales</p>
         </section>
       )}
 
