@@ -6,6 +6,10 @@ module.exports = async function handler(req, res) {
   const { nombre, email } = req.body || {};
   if (!email || !nombre) return res.status(400).json({ error: 'Nombre y correo son requeridos' });
 
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return res.status(500).json({ error: 'Stripe no configurado en el servidor' });
+  }
+
   const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
   const existing = await stripe.customers.list({ email: email.trim().toLowerCase(), limit: 1 });

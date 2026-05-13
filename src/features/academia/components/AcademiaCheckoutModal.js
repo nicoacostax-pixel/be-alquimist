@@ -105,8 +105,8 @@ export default function AcademiaCheckoutModal({ onClose, onSuccess }) {
       if (!res.ok) { setError(json.error || 'Error al iniciar el pago'); setLoading(false); return; }
       setClientSecret(json.clientSecret);
       setStep('pago');
-    } catch {
-      setError('Error de conexión. Intenta de nuevo.');
+    } catch (e) {
+      setError('Error de conexión: ' + (e.message || 'Intenta de nuevo.'));
     }
     setLoading(false);
   };
