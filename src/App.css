@@ -8791,3 +8791,283 @@ a.post-author-name.post-author-link:hover {
   background: none; border: none; font-size: 18px;
   cursor: pointer; color: #9A8A7A;
 }
+
+/* ═══════════════════════════════════════════
+   ACADEMIA LANDING
+   ═══════════════════════════════════════════ */
+.ac-page {
+  font-family: 'Poppins', sans-serif;
+  color: #2C2318;
+  overflow-x: hidden;
+  background: #fff;
+}
+
+/* Nav */
+.ac-nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 32px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #EDE0D4;
+}
+.ac-nav-logo {
+  font-family: Georgia, serif; font-size: 20px; font-weight: 900;
+  color: #B08968; text-decoration: none; letter-spacing: -0.5px;
+}
+.ac-nav-right { display: flex; align-items: center; gap: 16px; }
+.ac-nav-link {
+  font-size: 14px; color: #6A5A4A; text-decoration: none; font-weight: 500;
+}
+.ac-nav-cta {
+  background: #B08968; color: #fff; border: none; border-radius: 8px;
+  padding: 9px 18px; font-size: 13px; font-weight: 700;
+  font-family: 'Poppins', sans-serif; cursor: pointer;
+  transition: background .15s;
+}
+.ac-nav-cta:hover { background: #8C6A4E; }
+
+/* Hero */
+.ac-hero {
+  background: linear-gradient(155deg, #F9F5EF 0%, #F0E6D8 60%, #E8D5C0 100%);
+  padding: 80px 24px 0;
+  text-align: center;
+}
+.ac-hero-inner { max-width: 680px; margin: 0 auto; padding-bottom: 48px; }
+.ac-hero-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.85); border: 1px solid #D4C4B0;
+  border-radius: 20px; padding: 6px 16px;
+  font-size: 12px; font-weight: 700; color: #B08968;
+  margin-bottom: 22px;
+}
+.ac-hero-title {
+  font-family: Georgia, serif;
+  font-size: clamp(32px, 6vw, 58px);
+  font-weight: 900; line-height: 1.1;
+  margin: 0 0 16px; letter-spacing: -1.5px;
+  color: #1A1108;
+}
+.ac-hero-accent { color: #B08968; }
+.ac-hero-sub {
+  font-size: clamp(15px, 2vw, 18px); color: #6A5A4A;
+  line-height: 1.7; margin: 0 0 32px; max-width: 540px; margin-left: auto; margin-right: auto;
+}
+.ac-hero-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #B08968, #8C6A4F);
+  color: #fff; border: none; border-radius: 12px;
+  padding: 16px 36px; font-size: 16px; font-weight: 800;
+  font-family: 'Poppins', sans-serif; cursor: pointer;
+  box-shadow: 0 6px 24px rgba(176,137,104,0.4);
+  transition: transform .1s, box-shadow .1s; text-decoration: none;
+}
+.ac-hero-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(176,137,104,0.5); }
+.ac-hero-fine { font-size: 12px; color: #9A8A7A; margin-top: 12px; }
+
+.ac-stats-row {
+  display: flex; justify-content: center;
+  background: #2C2318;
+  padding: 20px 24px;
+  gap: 0;
+  flex-wrap: wrap;
+}
+.ac-stat { flex: 1; min-width: 100px; text-align: center; padding: 8px 16px; }
+.ac-stat-num { display: block; font-size: 24px; font-weight: 800; color: #B08968; }
+.ac-stat-lbl { display: block; font-size: 11px; color: #C9B8A8; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Secciones genéricas */
+.ac-section { padding: 72px 24px; }
+.ac-section-inner { max-width: 1000px; margin: 0 auto; }
+.ac-section-tag {
+  font-size: 12px; font-weight: 700; color: #B08968;
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.ac-tag-light { color: #D4A87A; }
+.ac-section-title {
+  font-family: Georgia, serif;
+  font-size: clamp(24px, 4vw, 38px);
+  font-weight: 900; margin: 0 0 12px;
+  letter-spacing: -0.5px; color: #1A1108;
+}
+.ac-title-light { color: #FAF7F2 !important; }
+.ac-section-sub { font-size: 15px; color: #7A6A5A; line-height: 1.6; margin-bottom: 40px; max-width: 600px; }
+
+/* Cursos grid */
+.ac-cursos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.ac-curso-card {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: #FAF7F2; border: 1px solid #EDE0D4;
+  border-radius: 14px; padding: 18px 16px;
+  transition: box-shadow .15s, transform .1s;
+}
+.ac-curso-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.06); transform: translateY(-2px); }
+.ac-curso-icon { font-size: 28px; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+.ac-curso-body { flex: 1; min-width: 0; }
+.ac-curso-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.ac-curso-nombre { font-size: 15px; font-weight: 700; color: #2C2318; margin: 0; }
+.ac-curso-nivel {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
+}
+.ac-curso-desc { font-size: 13px; color: #7A6A5A; line-height: 1.5; margin: 0; }
+
+/* Ruta de la Alquimista */
+.ac-ruta-section {
+  background: #2C2318;
+  padding: 72px 24px;
+}
+.ac-ruta-header { text-align: center; margin-bottom: 48px; }
+.ac-ruta-title {
+  font-family: Georgia, serif;
+  font-size: clamp(26px, 4vw, 42px);
+  font-weight: 900; color: #FAF7F2;
+  letter-spacing: -0.5px; margin: 0 0 12px;
+}
+.ac-ruta-sub { font-size: 15px; color: #C9B8A8; line-height: 1.7; max-width: 560px; margin: 0 auto; }
+.ac-ruta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  max-width: 1000px; margin: 0 auto;
+}
+.ac-ruta-modulo {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px; padding: 18px 16px;
+}
+.ac-ruta-num {
+  font-size: 11px; font-weight: 800; color: #B08968;
+  background: rgba(176,137,104,0.15); border-radius: 6px;
+  padding: 4px 8px; flex-shrink: 0; letter-spacing: 1px;
+}
+.ac-ruta-mod-nombre { font-size: 14px; font-weight: 700; color: #FAF7F2; margin: 0 0 4px; }
+.ac-ruta-mod-desc { font-size: 12px; color: #A09080; line-height: 1.5; margin: 0; }
+
+/* Biblioteca */
+.ac-bib-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+.ac-bib-card {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: #fff; border: 1px solid #EDE0D4;
+  border-radius: 12px; padding: 16px;
+}
+.ac-bib-icon { font-size: 24px; flex-shrink: 0; }
+.ac-bib-cat { font-size: 14px; font-weight: 700; color: #2C2318; margin: 0 0 4px; }
+.ac-bib-items { font-size: 12px; color: #7A6A5A; line-height: 1.5; margin: 0; }
+
+/* Beneficios */
+.ac-beneficios-section {
+  background: linear-gradient(160deg, #2C2318 0%, #3D3025 100%);
+  padding: 72px 24px;
+}
+.ac-beneficios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 20px;
+}
+.ac-beneficio-card {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(176,137,104,0.2);
+  border-radius: 16px; padding: 24px 20px; text-align: center;
+  transition: background .15s;
+}
+.ac-beneficio-card:hover { background: rgba(255,255,255,0.1); }
+.ac-beneficio-icon { font-size: 32px; display: block; margin-bottom: 12px; }
+.ac-beneficio-titulo { font-size: 15px; font-weight: 700; color: #FAF7F2; margin-bottom: 8px; }
+.ac-beneficio-desc { font-size: 13px; color: #A09080; line-height: 1.55; }
+
+/* Pricing */
+.ac-pricing-wrap { display: flex; justify-content: center; }
+.ac-pricing-card {
+  background: #FAF7F2; border: 2px solid #B08968;
+  border-radius: 20px; padding: 40px 36px;
+  max-width: 400px; width: 100%; text-align: center;
+  box-shadow: 0 16px 48px rgba(176,137,104,0.15);
+}
+.ac-pricing-badge {
+  display: inline-block;
+  background: #B08968; color: #fff;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  padding: 4px 14px; border-radius: 20px; margin-bottom: 20px;
+}
+.ac-pricing-price {
+  display: flex; align-items: baseline; justify-content: center; gap: 4px; margin-bottom: 8px;
+}
+.ac-pricing-currency { font-size: 24px; font-weight: 700; color: #4A3F35; }
+.ac-pricing-amount { font-size: 64px; font-weight: 900; color: #2C2318; line-height: 1; }
+.ac-pricing-period { font-size: 16px; color: #7A6A5A; }
+.ac-pricing-note { font-size: 13px; color: #9A8A7A; margin-bottom: 24px; }
+.ac-pricing-list { list-style: none; padding: 0; margin: 0 0 28px; text-align: left; }
+.ac-pricing-list li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 14px; color: #4A3F35; padding: 8px 0;
+  border-bottom: 1px solid #EDE0D4;
+}
+.ac-pricing-list li:last-child { border-bottom: none; }
+.ac-check { color: #B08968; font-weight: 800; flex-shrink: 0; }
+.ac-pricing-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #B08968, #8C6A4F);
+  color: #fff; border: none; border-radius: 12px;
+  padding: 15px; font-size: 16px; font-weight: 800;
+  font-family: 'Poppins', sans-serif; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(176,137,104,0.35);
+  transition: transform .1s, box-shadow .1s;
+}
+.ac-pricing-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(176,137,104,0.45); }
+
+/* FAQ */
+.ac-faq-section { background: #F9F5EF; }
+.ac-faq-inner { max-width: 640px; margin: 0 auto; }
+.ac-faq-item { border-bottom: 1px solid #EDE0D4; }
+.ac-faq-q {
+  width: 100%; text-align: left; background: none; border: none;
+  padding: 18px 0; font-size: 15px; font-weight: 600; color: #2C2318;
+  font-family: 'Poppins', sans-serif; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+.ac-faq-arrow { font-size: 11px; color: #B08968; flex-shrink: 0; }
+.ac-faq-a { font-size: 14px; color: #6A5A4A; line-height: 1.7; padding-bottom: 16px; margin: 0; }
+
+/* Final CTA */
+.ac-final-cta {
+  background: linear-gradient(135deg, #B08968, #8C6A4F);
+  padding: 72px 24px; text-align: center;
+}
+.ac-final-title {
+  font-family: Georgia, serif; font-size: clamp(24px, 4vw, 38px);
+  font-weight: 900; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px;
+}
+.ac-final-sub { font-size: 16px; color: rgba(255,255,255,0.8); margin-bottom: 28px; }
+
+/* Footer */
+.ac-footer {
+  background: #2C2318; padding: 24px;
+  display: flex; gap: 16px; justify-content: center; align-items: center;
+  font-size: 13px;
+}
+.ac-footer a { color: #9A8A7A; text-decoration: none; }
+.ac-footer a:hover { color: #B08968; }
+.ac-footer span { color: #5A4A3A; }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .ac-nav { padding: 12px 16px; }
+  .ac-nav-cta { display: none; }
+  .ac-hero { padding: 56px 16px 0; }
+  .ac-section { padding: 48px 16px; }
+  .ac-ruta-section, .ac-beneficios-section { padding: 48px 16px; }
+  .ac-pricing-card { padding: 28px 20px; }
+  .ac-stats-row { gap: 0; }
+  .ac-stat { padding: 8px 10px; }
+  .ac-stat-num { font-size: 20px; }
+  .ac-form-wrap { padding: 24px 16px; }
+}
