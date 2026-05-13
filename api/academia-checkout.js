@@ -13,8 +13,7 @@ module.exports = async function handler(req, res) {
     const pi = await stripe.paymentIntents.create({
       amount: 14900,
       currency: 'mxn',
-      automatic_payment_methods: { enabled: true },
-      setup_future_usage: 'off_session',
+      payment_method_types: ['card'],
       metadata: { plan: 'academia_pro' },
     });
     return res.json({ clientSecret: pi.client_secret });
