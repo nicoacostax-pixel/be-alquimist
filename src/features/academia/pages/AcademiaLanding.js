@@ -115,7 +115,10 @@ export default function AcademiaLanding() {
   const [openFaq,  setOpenFaq]  = useState(null);
   const [showPago, setShowPago] = useState(false);
 
-  const handleCTA = () => setShowPago(true);
+  const handleCTA = () => {
+    if (window.fbq) window.fbq('track', 'InitiateCheckout', { currency: 'MXN', value: 149 });
+    setShowPago(true);
+  };
 
   return (
     <div className="ac-page">
@@ -275,7 +278,7 @@ export default function AcademiaLanding() {
               </Link>
             ) : (
               <button className="ac-pricing-btn" onClick={handleCTA}>
-                Suscribirme ahora
+                Inscribirme ahora
               </button>
             )}
           </div>
