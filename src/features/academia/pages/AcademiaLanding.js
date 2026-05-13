@@ -133,7 +133,7 @@ export default function AcademiaLanding() {
             : <Link to="/login"  className="ac-nav-link">Iniciar sesión</Link>
           }
           {!esPro && (
-            <button className="ac-nav-cta" onClick={handleCTA}>Suscribirme $149/mes</button>
+            <button className="ac-nav-cta" onClick={handleCTA}>Suscribirme $149</button>
           )}
         </div>
       </nav>
@@ -147,12 +147,12 @@ export default function AcademiaLanding() {
             <span className="ac-hero-accent">Cosmética Natural</span>
           </h1>
           <p className="ac-hero-sub">
-            11 cursos, biblioteca de ingredientes, chat IA ilimitado y envíos gratis — todo por <strong>$149 MXN al mes</strong>.
+            11 cursos, biblioteca de ingredientes, chat IA ilimitado y envíos gratis — todo por <strong>$149 MXN</strong>.
           </p>
           {esPro ? (
             <Link to="/comunidad/cursos" className="ac-hero-btn">Ir a mis cursos →</Link>
           ) : (
-            <button className="ac-hero-btn" onClick={handleCTA}>Comenzar hoy por $149/mes →</button>
+            <button className="ac-hero-btn" onClick={handleCTA}>Comenzar hoy por $149 →</button>
           )}
           <p className="ac-hero-fine">Cancela cuando quieras · Sin tarifa de inscripción</p>
         </div>
@@ -263,7 +263,7 @@ export default function AcademiaLanding() {
             <div className="ac-pricing-price">
               <span className="ac-pricing-currency">$</span>
               <span className="ac-pricing-amount">149</span>
-              <span className="ac-pricing-period">MXN / mes</span>
+              <span className="ac-pricing-period">MXN</span>
             </div>
             <p className="ac-pricing-note">Cancela cuando quieras. Sin contratos.</p>
             <ul className="ac-pricing-list">
@@ -305,7 +305,7 @@ export default function AcademiaLanding() {
         <section className="ac-final-cta">
           <h2 className="ac-final-title">¿Lista para empezar a formular?</h2>
           <p className="ac-final-sub">Únete hoy y accede a todo al instante.</p>
-          <button className="ac-hero-btn" onClick={handleCTA}>Suscribirme por $149/mes →</button>
+          <button className="ac-hero-btn" onClick={handleCTA}>Suscribirme por $149 →</button>
           <p className="ac-hero-fine" style={{ marginTop: 12 }}>Sin tarifa de inscripción · Cancela cuando quieras</p>
         </section>
       )}
