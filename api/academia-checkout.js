@@ -40,10 +40,21 @@ module.exports = async function handler(req, res) {
       metadata: { plan: 'academia_pro', nombre: nombre.trim(), customerEmail: email.trim().toLowerCase() },
     });
 
-    return res.json({
-      clientSecret: subscription.latest_invoice.payment_intent.client_secret,
-      subscriptionId: subscription.id,
-    });
+    // expand may return the PI as an object or just an ID depending on SDK version
+    let clientSecret = subscription.latest_invoice?.payment_intent?.client_secret;
+
+    if (!clientSecret) {
+      const invoiceId = typeof subscription.latest_invoice === 'string'
+        ? subscription.latest_invoice
+        : subscription.latest_invoice?.id;
+      if (!invoiceId) return res.status(500).json({ error: 'No se pudo obtener la factura de la suscripción' });
+      const invoice = await stripe.invoices.retrieve(invoiceId, { expand: ['payment_intent'] });
+      clientSecret = invoice.payment_intent?.client_secret;
+    }
+
+    if (!clientSecret) return res.status(500).json({ error: 'No se pudo iniciar el pago. Intenta de nuevo.' });
+
+    return res.json({ clientSecret, subscriptionId: subscription.id });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
