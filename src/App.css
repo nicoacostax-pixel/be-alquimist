@@ -8884,7 +8884,7 @@ a.post-author-name.post-author-link:hover {
   text-transform: uppercase; letter-spacing: 1px;
   margin-bottom: 10px;
 }
-.ac-tag-light { color: #D4A87A; }
+.ac-tag-light { color: #B08968; }
 .ac-section-title {
   font-family: Georgia, serif;
   font-size: clamp(24px, 4vw, 38px);
@@ -8919,17 +8919,17 @@ a.post-author-name.post-author-link:hover {
 
 /* Ruta de la Alquimista */
 .ac-ruta-section {
-  background: #2C2318;
+  background: #f2e8db;
   padding: 72px 48px;
 }
 .ac-ruta-header { text-align: center; margin-bottom: 48px; }
 .ac-ruta-title {
   font-family: Georgia, serif;
   font-size: clamp(26px, 4vw, 42px);
-  font-weight: 900; color: #FAF7F2;
+  font-weight: 900; color: #2C2318;
   letter-spacing: -0.5px; margin: 0 0 12px;
 }
-.ac-ruta-sub { font-size: 15px; color: #C9B8A8; line-height: 1.7; max-width: 560px; margin: 0 auto; }
+.ac-ruta-sub { font-size: 15px; color: #6A5A4A; line-height: 1.7; max-width: 560px; margin: 0 auto; }
 .ac-ruta-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -8938,16 +8938,17 @@ a.post-author-name.post-author-link:hover {
 }
 .ac-ruta-modulo {
   display: flex; gap: 14px; align-items: flex-start;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  background: #fff; border: 1px solid #DDD0C4;
   border-radius: 14px; padding: 18px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 .ac-ruta-num {
   font-size: 11px; font-weight: 800; color: #B08968;
-  background: rgba(176,137,104,0.15); border-radius: 6px;
+  background: rgba(176,137,104,0.12); border-radius: 6px;
   padding: 4px 8px; flex-shrink: 0; letter-spacing: 1px;
 }
-.ac-ruta-mod-nombre { font-size: 14px; font-weight: 700; color: #FAF7F2; margin: 0 0 4px; }
-.ac-ruta-mod-desc { font-size: 12px; color: #A09080; line-height: 1.5; margin: 0; }
+.ac-ruta-mod-nombre { font-size: 14px; font-weight: 700; color: #2C2318; margin: 0 0 4px; }
+.ac-ruta-mod-desc { font-size: 12px; color: #7A6A5A; line-height: 1.5; margin: 0; }
 
 /* Biblioteca */
 .ac-bib-grid {
